@@ -357,6 +357,7 @@ public class UserController {
 				
 				result.put("id", user.getId());
 				result.put("phoneno", user.getPhoneNo());
+				result.put("nickname", user.getNickName());
 				result.put("picture", user.getPicture());
 				result.put("signLog", user.getSignLog());
 				result.put("lastLoginIp", user.getLastLoginIp());
