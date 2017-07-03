@@ -14,6 +14,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.dinglian.server.chuqulang.model.User;
+import com.dinglian.server.chuqulang.utils.JsonString;
 import com.dinglian.server.chuqulang.utils.RequestHelper;
 
 import net.sf.json.JSONArray;
@@ -40,19 +41,8 @@ public class LoginInterceptor implements HandlerInterceptor{
 			map.put("message", "用户未登录，请登录");
 			map.put("code", 300);
 			
-			JSONArray array = JSONArray.fromObject(map);
-			String json = array.toString();
-	        if( json.startsWith("[") ) {
-	            json = json.substring(1);
-	        }
-	        if( json.endsWith("]") ) {
-	            json = json.substring(0, json.length()-1);
-	        }
-	        
-//	        JSONObject obj = JSONObject.fromObject(map);
-	        response.setContentType("text/html;charset=utf-8");
-			response.setCharacterEncoding("utf-8");
-			response.getWriter().write(json);
+			response.setContentType("text/html;charset=utf-8");
+			JsonString.writeJsonString(response, map);
 			return false;
 		}
 		return true;

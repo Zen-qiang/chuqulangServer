@@ -43,7 +43,7 @@
 				$.ajax({
 				  url: 'user/getUser',
 				  data: {
-					  userId : '1'
+					  userId : '3'
 				  },
 				  success: function(response,status,xhr){
 					  console.log(response);
@@ -172,7 +172,6 @@ typeName : <input type="text" name="typeName" value="常规标签"/><br>
 
 <h2>获取活动列表</h2>
 <form action="user/getActivityList" method="post">
-	userId：<input type="text" name="userId" value="2"/><br>
 	<button type="submit" >获取活动列表</button>
 </form>
 
@@ -234,8 +233,6 @@ typeName : <input type="text" name="typeName" value="常规标签"/><br>
 
 <h2>获取用户信息：</h2>
 <button type="button" id="getUser">getUser</button>
-
-<a href="user/test">TEST</a>
 
 
 </body>

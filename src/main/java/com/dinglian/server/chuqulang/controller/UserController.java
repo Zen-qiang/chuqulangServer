@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dinglian.server.chuqulang.base.SearchCriteria;
+import com.dinglian.server.chuqulang.comparator.EventUserComparator;
 import com.dinglian.server.chuqulang.comparator.UserInterestComparator;
 import com.dinglian.server.chuqulang.model.ChatRoom;
 import com.dinglian.server.chuqulang.model.Contact;
@@ -488,49 +489,48 @@ public class UserController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/getActivityList", method = RequestMethod.POST)
-	public Map<String, Object> getActivityList(@RequestParam(name = "userId", required = false) String userId) {
+	public Map<String, Object> getActivityList() {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
-			int id = Integer.parseInt(userId);
-			User user = userService.findUserById(id);
-			
+			Subject currentUser = SecurityUtils.getSubject();
+			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			List<Map> resultList = new ArrayList<Map>();
-			Set<Event> events = user.getEventSet();
-			for (Event event : events) {
-				Map<String, Object> result = new HashMap<String, Object>();
-				
-				EventPicture cover = event.getCover();
-				result.put("picture", cover != null ? cover.getUrl() : "");
-				result.put("shortname", event.getShortName());
-				result.put("rstime", event.getRsTime());
-				result.put("publishtime", event.getStartTime());
-				result.put("status", event.getNowStatus());
-				result.put("charge", event.isCharge());
-				result.put("gps", event.getGps());
-				
-				TypeName typeName = event.getTypeName();
-				result.put("typename", typeName.getName());
-				
-				List<Map> tagList = new ArrayList<>();
-				Set<EventTag> eventTags = event.getTags();
-				for (EventTag eventTag : eventTags) {
-					Tag tag = eventTag.getTag();
-					Map<String, Object> tagsMap = new HashMap<String, Object>();
-					tagsMap.put("tagid", tag.getId());
-					tagsMap.put("tagname", tag.getName());
-					tagList.add(tagsMap);
+			if (user != null) {
+				user = userService.findUserById(user.getId());
+				Set<Event> events = user.getEventSet();
+				for (Event event : events) {
+					Map<String, Object> result = new HashMap<String, Object>();
+					
+					EventPicture cover = event.getCover();
+					result.put("picture", cover != null ? cover.getUrl() : "");
+					result.put("shortname", event.getShortName());
+					result.put("rstime", event.getRsTime());
+					result.put("publishtime", event.getStartTime());
+					result.put("status", event.getNowStatus());
+					result.put("charge", event.isCharge());
+					result.put("gps", event.getGps());
+					
+					TypeName typeName = event.getTypeName();
+					result.put("typename", typeName.getName());
+					
+					List<Map> tagList = new ArrayList<>();
+					Set<EventTag> eventTags = event.getTags();
+					for (EventTag eventTag : eventTags) {
+						Tag tag = eventTag.getTag();
+						Map<String, Object> tagsMap = new HashMap<String, Object>();
+						tagsMap.put("tagid", tag.getId());
+						tagsMap.put("tagname", tag.getName());
+						tagList.add(tagsMap);
+					}
+					result.put("tag", tagList);
+					
+					Map<String, Object> numbersMap = new HashMap<String, Object>();
+					numbersMap.put("num", event.getUserCount());
+					numbersMap.put("enteringNum", event.getEventUsers().size());
+					result.put("numbers", numbersMap);
+					
+					resultList.add(result);
 				}
-				result.put("tag", tagList);
-				
-				Set<EventUser> eventUsers = event.getEventUsers();
-				Map<String, Object> numbersMap = new HashMap<String, Object>();
-				numbersMap.put("num", event.getUserCount());
-				numbersMap.put("enteringNum", eventUsers.size());
-				result.put("numbers", numbersMap);
-				
-				logger.debug(result.toString());
-				
-				resultList.add(result);
 			}
 			
 			responseMap.put("result", resultList);
@@ -581,10 +581,24 @@ public class UserController {
 					tagList.add(tagsMap);
 				}
 			}
-			
 			result.put("tag", tagList);
 			
-			Set<EventUser> eventUsers = event.getEventUsers();
+			// 参与活动人员
+			List<EventUser> eventUsers = new ArrayList<EventUser>(event.getEventUsers());
+			Collections.sort(eventUsers, new EventUserComparator());
+			
+			List<Map> eventUserList = new ArrayList<>();
+			for (EventUser eventUser : eventUsers) {
+				if (eventUser.getUser() != null) {
+					Map<String, Object> userMap = new HashMap<String, Object>();
+					userMap.put("userId", eventUser.getUser().getId());
+					userMap.put("nickName", eventUser.getUser().getNickName());
+					userMap.put("picture", eventUser.getUser().getPicture());
+					eventUserList.add(userMap);
+				}
+			}
+			result.put("eventUserList", eventUserList);
+			
 			Map<String, Object> numbersMap = new HashMap<String, Object>();
 			numbersMap.put("num", event.getUserCount());
 			numbersMap.put("enteringNum", eventUsers.size());
@@ -593,6 +607,15 @@ public class UserController {
 			result.put("charge", event.isCharge());
 			result.put("gps", event.getGps());
 			result.put("description", event.getDescription());
+			
+			User organizer = event.getCreator();
+			if (organizer != null) {
+				Map<String, Object> organizerMap = new HashMap<String, Object>();
+				organizerMap.put("organizerId", organizer.getId());
+				organizerMap.put("organizerNickName", organizer.getNickName());
+				organizerMap.put("organizerPicture", organizer.getPicture());
+				result.put("organizer", organizerMap);
+			}
 			
 			resultMap.put("result", result);
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
