@@ -362,8 +362,8 @@ public class UserController {
 				result.put("lastLoginPhone", user.getLastLoginPhone());
 				result.put("typename", user.getTypeName());
 				resultMap.put("result", result);
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
 			}
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
 			logger.info("=====> Get user information end <=====");
 		} catch (Exception e) {
 			e.printStackTrace();
