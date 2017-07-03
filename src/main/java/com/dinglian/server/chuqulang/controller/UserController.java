@@ -340,19 +340,15 @@ public class UserController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/getUser", method = RequestMethod.GET)
-	public Map<String, Object> getUser(@RequestParam(name = "userId") String userId) {
+	public Map<String, Object> getUser() {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
-			logger.info("Start to get user information.");
-			int id = 0;
-			if (StringUtils.isNotBlank(userId)) {
-				id = Integer.parseInt(userId);
-			}
-			
-			User user = userService.findUserById(id);
-			if (user == null) {
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "找不到这个用户");
-			} else {
+			logger.info("=====> Start to get user information <=====");
+			Subject currentUser = SecurityUtils.getSubject();
+			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			if (user != null) {
+				user = userService.findUserById(user.getId());
+				
 				Map<String, Object> result = new HashMap<String, Object>();
 				
 				result.put("id", user.getId());
@@ -368,6 +364,7 @@ public class UserController {
 				resultMap.put("result", result);
 				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
 			}
+			logger.info("=====> Get user information end <=====");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
