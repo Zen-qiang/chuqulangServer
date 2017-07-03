@@ -285,6 +285,7 @@ public class UserController {
 			try{
 				currentUser.login(token);
 				user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+				logger.info("用户ID：" + user.getId() + "，用户昵称：" +  user.getNickName() + "，登录成功.");
 				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "登录成功");
 			} catch (IncorrectCredentialsException e) {
 				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "用户名或密码错误");
