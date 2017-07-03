@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- 配置自动扫描的包 -->
+	<context:component-scan base-package="com.dinglian.server.chuqulang" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+	</context:component-scan>
+	
+    <!-- 配置视图解析器 -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	        <property name="prefix" value="/WEB-INF/app/view/"/>
+	        <property name="suffix" value=".jsp"/>
+	</bean>
+	
+	<!-- <mvc:default-servlet-handler/> -->
+    <mvc:annotation-driven />
+	
+    <mvc:resources mapping="/js/**" location="/WEB-INF/app/js/"/>
+	<mvc:resources mapping="/static/**" location="/WEB-INF/app/static/"/>
+    <mvc:resources mapping="/resources/**" location="/WEB-INF/app/resources/"/>
+    
+	<!-- 文件上传 -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="40960000"/>   
+		<property name="resolveLazily" value="true"/>
+	</bean>
+	
+	<!-- 拦截器 多个拦截器，顺序执行 -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>
+			<bean class="com.dinglian.server.chuqulang.interceptor.RequestInterceptor"></bean>
+		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/user/**"/>
+			<mvc:mapping path="/activity/**"/>
+			<mvc:mapping path="/discover/**"/>
+			<mvc:exclude-mapping path="/user/login"/>
+			<mvc:exclude-mapping path="/user/register"/>
+			<mvc:exclude-mapping path="/user/resetPassword"/>
+			<mvc:exclude-mapping path="/user/sendCode"/>
+			<bean class="com.dinglian.server.chuqulang.interceptor.LoginInterceptor"></bean>
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+</beans>
