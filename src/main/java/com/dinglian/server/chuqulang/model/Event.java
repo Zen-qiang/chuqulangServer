@@ -60,7 +60,7 @@ public class Event implements Serializable {
 
 	private String nowStatus; // 活动状态
 
-	private boolean charge; // 费用类型
+	private String charge; // 费用类型
 	
 	private double cost; //活动费用
 
@@ -304,14 +304,14 @@ public class Event implements Serializable {
 	 * eventLogs; }
 	 */
 
-	public boolean isCharge() {
+	public String getCharge() {
 		return charge;
 	}
-	
-	public void setCharge(boolean charge) {
+
+	public void setCharge(String charge) {
 		this.charge = charge;
 	}
-	
+
 	public double getCost() {
 		return cost;
 	}

@@ -72,6 +72,7 @@ public class UserController {
 	@RequestMapping(value = "/sendCode", method = RequestMethod.GET)
 	public Map<String, Object> sendCode(@RequestParam(name = "phoneno") String phoneNo, @RequestParam(name = "dataType") String dataType) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
+		logger.info("=====> Start to send verify no <=====");
 		
 		// 添加手机号格式验证，等前台格式
 		
@@ -132,12 +133,12 @@ public class UserController {
 			logger.info(sendhRes);
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", null);
 			
-			logger.info("Send verify no finished.");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
 		
+		logger.info("=====> Send verify no end <=====");
 		return resultMap;
 	}
 	
@@ -161,7 +162,7 @@ public class UserController {
 		}
 		
 		try {
-			logger.info("Start to phone no duplicate.");
+			logger.info("=====> Start to check phoneno duplicate <=====");
 			// 检查手机号码是否注册
 			SearchCriteria searchCriteria = new SearchCriteria();
 			searchCriteria.setPhoneNo(phoneNo);
@@ -171,7 +172,7 @@ public class UserController {
 				return resultMap;
 			}
 			
-			logger.info("Start to register user.");
+			logger.info("=====> Start to register user <=====");
 			// 检查验证码是否过期，是否正确
 			VerifyNo existVerifyNo = userService.getVerifyNo(phoneNo, VerifyNo.VERIFY_NO_TYPE_REGISTER);
 			if (existVerifyNo != null) {
@@ -197,11 +198,11 @@ public class UserController {
 				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "验证码无效，请重新获取。");
 				return resultMap;
 			}
-			logger.info("Register user finished.");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
+		logger.info("=====> User register end <=====");
 		return resultMap;
 	}
 	
@@ -212,7 +213,7 @@ public class UserController {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
 		try {
-			logger.info("Start to reset password.");
+			logger.info("=====> Start to reset password <=====");
 			
 			SearchCriteria searchCriteria = new SearchCriteria();
 			searchCriteria.setPhoneNo(phoneNo);
@@ -233,11 +234,11 @@ public class UserController {
 				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "验证码无效，请重新获取。");
 				return resultMap;
 			}
-			logger.info("Reset password finished.");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
+		logger.info("=====> Reset password end <=====");
 		return resultMap;
 	}
 	
@@ -257,6 +258,8 @@ public class UserController {
 			@RequestParam(name = "verifyno", required = false) String verifyNo, 
 			@RequestParam(name = "type") String type) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		logger.info("=====> Start to user login <=====");
 		
 		User user = null;
 		Subject currentUser = SecurityUtils.getSubject();
@@ -329,7 +332,7 @@ public class UserController {
 			user.setLastLoginDate(new Date());
 			userService.saveOrUpdateUser(user);
 		}
-		
+		logger.info("=====> User login end <=====");
 		return resultMap;
 	}
 	
@@ -365,46 +368,37 @@ public class UserController {
 				resultMap.put("result", result);
 			}
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
-			logger.info("=====> Get user information end <=====");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
-		logger.info("Get user information finished.");
+		logger.info("=====> Get user information end <=====");
 		return resultMap;
 	}
 	
 	/**
 	 * 修改用户签名
-	 * @param userId
 	 * @return
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/changeSignLog", method = RequestMethod.POST)
-	public Map<String, Object> changeSignLog(@RequestParam(name = "userId") String userId, @RequestParam(name = "signLog") String signLog) {
+	public Map<String, Object> changeSignLog(@RequestParam(name = "signLog") String signLog) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
-			logger.info("Start to change user signlog.");
-			int id = 0;
-			if (StringUtils.isNotBlank(userId)) {
-				id = Integer.parseInt(userId);
-			}
-			User user = userService.findUserById(id);
+			logger.info("=====> Start to change signlog <=====");
+			Subject currentUser = SecurityUtils.getSubject();
+			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			if (user != null) {
+				user = userService.findUserById(user.getId());
 				user.setSignLog(signLog);
 				userService.saveOrUpdateUser(user);
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
-
-				Map<String, Object> result = new HashMap<String, Object>();
-				resultMap.put("result", result);
-			} else {
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "用户不存在");
 			}
-			logger.info("Change user signlog finished.");
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
+		logger.info("=====> Change signlog end <=====");
 		return resultMap;
 	}
 	
@@ -416,32 +410,24 @@ public class UserController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/updatePicture", method = RequestMethod.POST)
-	public Map<String, Object> updatePicture(@RequestParam(name = "userId") String userId, @RequestParam(name = "url") String url) {
+	public Map<String, Object> updatePicture(@RequestParam(name = "url") String url) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
-			logger.info("Start to update user picture.");
-			int id = 0;
-			if (StringUtils.isNotBlank(userId)) {
-				id = Integer.parseInt(userId);
-			}
-			User user = userService.findUserById(id);
+			logger.info("=====> Start to change user picture <=====");
+			Subject currentUser = SecurityUtils.getSubject();
+			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			if (user != null) {
-				// 图片文件需要保存到本地
-				
+				user = userService.findUserById(user.getId());
 				user.setPicture(url);
+				// 图片文件需要保存到本地
 				userService.saveOrUpdateUser(user);
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
-
-				Map<String, Object> result = new HashMap<String, Object>();
-				resultMap.put("result", result);
-			} else {
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "用户不存在");
 			}
-			logger.info("Update user picture finished.");
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
+		logger.info("=====> Change user picture end <=====");
 		return resultMap;
 	}
 	
@@ -453,32 +439,24 @@ public class UserController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/changePassword", method = RequestMethod.POST)
-	public Map<String, Object> changePassword(@RequestParam(name = "userId") String userId, @RequestParam(name = "newPassword") String newPassword) {
+	public Map<String, Object> changePassword(@RequestParam(name = "newPassword") String newPassword) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
-			logger.info("Start to change user password.");
-			int id = 0;
-			if (StringUtils.isNotBlank(userId)) {
-				id = Integer.parseInt(userId);
-			}
-			User user = userService.findUserById(id);
+			logger.info("=====> Start to change user password <=====");
+			Subject currentUser = SecurityUtils.getSubject();
+			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			if (user != null) {
+				user = userService.findUserById(user.getId());
 				// 密码MD5加密
 				user.setPassword(EncryptHelper.encryptByMD5(user.getPhoneNo(), newPassword));
-				
 				userService.saveOrUpdateUser(user);
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
-
-				Map<String, Object> result = new HashMap<String, Object>();
-				resultMap.put("result", result);
-			} else {
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "用户不存在");
 			}
-			logger.info("Change user password finished.");
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
+		logger.info("=====> Change user password end <=====");
 		return resultMap;
 	}
 
@@ -507,11 +485,11 @@ public class UserController {
 					result.put("rstime", event.getRsTime());
 					result.put("publishtime", event.getStartTime());
 					result.put("status", event.getNowStatus());
-					result.put("charge", event.isCharge());
+					result.put("charge", event.getCharge());
 					result.put("gps", event.getGps());
 					
 					TypeName typeName = event.getTypeName();
-					result.put("typename", typeName.getName());
+					result.put("typename", typeName != null ? typeName.getName() : "");
 					
 					List<Map> tagList = new ArrayList<>();
 					Set<EventTag> eventTags = event.getTags();
@@ -604,7 +582,7 @@ public class UserController {
 			numbersMap.put("enteringNum", eventUsers.size());
 			result.put("numbers", numbersMap);
 			
-			result.put("charge", event.isCharge());
+			result.put("charge", event.getCharge());
 			result.put("gps", event.getGps());
 			result.put("description", event.getDescription());
 			
@@ -635,10 +613,10 @@ public class UserController {
 		try {
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			List<Map> resultList = new ArrayList<Map>();
 			if (user != null) {
 				user = userService.findUserById(user.getId());
 //				List<Contact> contacts = new ArrayList<>(user.getContacts());
-				List<Map> resultList = new ArrayList<Map>();
 				Map<String, Object> map = null;
 				for (Contact contact : user.getContacts()) {
 					if (contact.getContactUser() != null) {
@@ -651,9 +629,8 @@ public class UserController {
 						resultList.add(map);
 					}
 				}
-				
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 			}
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
@@ -670,13 +647,13 @@ public class UserController {
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			
+			List<Map> resultList = new ArrayList<Map>();
 			if (user != null) {
 				user = userService.findUserById(user.getId());
 				
 				List<UserInterest> interests = new ArrayList<UserInterest>(user.getInterests());
 				Collections.sort(interests, new UserInterestComparator());
 				
-				List<Map> resultList = new ArrayList<Map>();
 				Map<String, Object> map = null;
 				for (UserInterest interest : interests) {
 					map = new HashMap<String, Object>();
@@ -688,8 +665,8 @@ public class UserController {
 					}
 					resultList.add(map);
 				}
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 			}
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
@@ -705,10 +682,10 @@ public class UserController {
 		try {
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			List<Map> resultList = new ArrayList<Map>();
 			if (user != null) {
 				user = userService.findUserById(user.getId());
 				
-				List<Map> resultList = new ArrayList<Map>();
 				Map<String, Object> map = null;
 				Set<UserAttention> attentions = user.getAttentions();
 				for (UserAttention userAttention : attentions) {
@@ -720,8 +697,8 @@ public class UserController {
 						resultList.add(map);
 					}
 				}
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 			}
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
@@ -737,10 +714,10 @@ public class UserController {
 		try {
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			List<Map> resultList = new ArrayList<Map>();
 			if (user != null) {
 				user = userService.findUserById(user.getId());
 				
-				List<Map> resultList = new ArrayList<Map>();
 				Map<String, Object> map = null;
 				Set<UserAttention> followers = user.getFollowers();
 				for (UserAttention userAttention : followers) {
@@ -752,8 +729,8 @@ public class UserController {
 						resultList.add(map);
 					}
 				}
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 			}
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());

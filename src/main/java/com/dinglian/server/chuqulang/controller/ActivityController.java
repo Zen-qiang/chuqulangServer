@@ -122,7 +122,7 @@ public class ActivityController {
             , @RequestParam("shortname") String shortName
             , @RequestParam(name = "retime", required = false) Date retime
             , @RequestParam("number") int userCount
-            , @RequestParam("charge") boolean charge
+            , @RequestParam("charge") String charge
             , @RequestParam(name = "cost") double cost
             , @RequestParam("gps") String gps
             , @RequestParam(name = "description", required = false) String description
@@ -152,10 +152,10 @@ public class ActivityController {
                 event.setShortName(shortName);
                 event.setReTime(retime);
                 event.setUserCount(userCount);
+                
                 event.setCharge(charge);
-//              if (charge) {
 				event.setCost(cost);
-//				}
+				
                 event.setGps(gps);
                 event.setDescription(description);
                 event.setLimiter(limiter);
@@ -249,7 +249,7 @@ public class ActivityController {
 				result.put("rstime", event.getRsTime());
 				result.put("publishtime", event.getStartTime());
 				result.put("status", event.getNowStatus());
-				result.put("charge", event.isCharge());
+				result.put("charge", event.getCharge());
 				result.put("gps", event.getGps());
 				
 				TypeName typeName = event.getTypeName();
@@ -313,4 +313,5 @@ public class ActivityController {
 		}
 		return resultMap;
 	}
+
 }

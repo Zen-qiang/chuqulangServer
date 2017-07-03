@@ -65,19 +65,19 @@
                     url: 'activity/launchActivity',
 					type : 'POST',
                     data: {
-                        typename : '室内活动',
+                    	typename : '室内活动',
                         isOpen : true,
                         tags : [2,5],
                         shortname : '浦东三国杀',
                     	retime : new Date(),
                         number : 10,
-                        charge : true,
+                        charge : 'free',
                         cost : 100,
                         gps : 'gps',
                         description : '室内三国杀',
                         limiter : '限男性',
                         pictures : 'picture',
-                        friends : friends,
+                        //friends : friends,
                         phoneNo : '18270790997'
                     },
                     success: function(response,status,xhr){
@@ -194,7 +194,6 @@ typeName : <input type="text" name="typeName" value="常规标签"/><br>
 
 <h2>更改签名：</h2>
 <form action="user/changeSignLog" method="post">
-	<input type="hidden" name="userId" value="1"/>
 	新签名：<input type="text" name="signLog"/><br>
 	<button type="submit" >更改签名</button>
 </form>
