@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +36,8 @@ import com.dinglian.server.chuqulang.utils.ResponseHelper;
 @Controller
 @RequestMapping("/activity")
 public class ActivityController {
+	
+	private static final Logger logger = LoggerFactory.getLogger(ActivityController.class);
 
     @Autowired
     private ActivityService activityService;
@@ -46,51 +50,53 @@ public class ActivityController {
 
     /**
      * 活动报名
-     *
-     * @param eventIdStr
-     * @param userIdStr
+     * @param eventIdStr	活动ID
      * @return
      */
     @ResponseBody
     @RequestMapping(value = "/signUp", method = RequestMethod.POST)
-    public Map<String, Object> signUp(@RequestParam(name = "eventId") String eventIdStr, @RequestParam(name = "userId") String userIdStr) {
+    public Map<String, Object> signUp(@RequestParam(name = "eventId") String eventIdStr) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         try {
-        	int eventId = Integer.parseInt(eventIdStr);
-        	int userId = Integer.parseInt(userIdStr);
-//            Subject currentUser = SecurityUtils.getSubject();
-//            User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+        	logger.info("=====> Start to event signup <=====");
+        	
+            Subject currentUser = SecurityUtils.getSubject();
+            User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+            int userId = user.getId();
+            int eventId = Integer.parseInt(eventIdStr);
+
+            user = userService.findUserById(userId);
+            if (user == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+			}
             Event event = activityService.getEventById(eventId);
-            User user = userService.findUserById(userId);
-
-            if (/*currentUser.isAuthenticated() && */user != null && event != null) {
-            	// 检查满员
-            	Set<EventUser> eventUsers = event.getEventUsers();
-            	if (eventUsers.size() == event.getUserCount()) {
-            		ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "活动成员已满");
-                    return resultMap;
-				}
-            	// 检查重复报名
-            	boolean haveSignUp = event.haveSignUp(userId);
-                if (haveSignUp){
-                    ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "您已经报名");
-                    return resultMap;
-                }
-
-                int maxOrderNo = event.getEventUserMaxOrderNo();
-                EventUser eventUser = new EventUser(event, user, maxOrderNo + 1);
-                activityService.saveEventUser(eventUser);
-
-                Map<String, Object> result = new HashMap<String, Object>();
-                result.put("userid", user.getId());
-                result.put("nickname", user.getNickName());
-                result.put("picture", user.getPicture());
-                resultMap.put("result", result);
-                
-                ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
-            } else {
-            	ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "用户或活动不存在。");
+            if (event == null) {
+            	throw new NullPointerException("活动ID：" + eventId + " , 活动不存在。");
+			}
+            // 检查满员
+        	Set<EventUser> eventUsers = event.getEventUsers();
+        	if (eventUsers.size() == event.getUserCount()) {
+        		ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "活动成员已满");
+                return resultMap;
+			}
+        	// 检查重复报名
+        	boolean haveSignUp = event.haveSignUp(user.getId());
+            if (haveSignUp){
+                ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "您已经报名");
+                return resultMap;
             }
+
+            int maxOrderNo = event.getEventUserMaxOrderNo();
+            EventUser eventUser = new EventUser(event, user, maxOrderNo + 1);
+            activityService.saveEventUser(eventUser);
+
+            Map<String, Object> result = new HashMap<String, Object>();
+            result.put("userid", user.getId());
+            result.put("nickname", user.getNickName());
+            result.put("picture", user.getPicture());
+            
+            logger.info("=====> Event signup end <=====");
+            ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
         } catch (Exception e) {
             e.printStackTrace();
             ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
@@ -108,10 +114,13 @@ public class ActivityController {
      * @param retime		活动开始时间
      * @param userCount		活动人数	
      * @param charge		费用类型
+     * @param cost			费用费用
      * @param gps			活动位置
      * @param description	活动介绍
      * @param limiter		限定条件
      * @param pictures		活动封面
+     * @param friends		邀请好友
+     * @param phoneNo		联系方式
      * @return
      */
     @ResponseBody
@@ -120,7 +129,7 @@ public class ActivityController {
             , @RequestParam("isOpen") boolean isOpen
             , @RequestParam("tags") int[] tags
             , @RequestParam("shortname") String shortName
-            , @RequestParam(name = "retime", required = false) Date retime
+            , @RequestParam(name = "retime") long retime
             , @RequestParam("number") int userCount
             , @RequestParam("charge") String charge
             , @RequestParam(name = "cost") double cost
@@ -131,56 +140,64 @@ public class ActivityController {
             , @RequestParam(name = "friends[]", required = false) int[] friends
             , @RequestParam(name = "phoneNo", required = false) String phoneNo) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        Subject currentUser = SecurityUtils.getSubject();
-        User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
         try {
-        	if (user != null) {
-        		user = userService.findUserById(user.getId());
-                Event event = new Event();
-                TypeName typeName = activityService.getTypeNameByName(typeNameStr);
-                event.setTypeName(typeName);
-                event.setOpen(isOpen);
-                
-                for (int tagId : tags) {
-                	Tag tag = activityService.findTagById(tagId);
-                	if (tag != null) {
-						EventTag eventTag = new EventTag(event, tag, 0, 0);
-						event.getTags().add(eventTag);
-					}
+        	logger.info("=====> Start to launch activity <=====");
+        	
+        	Subject currentUser = SecurityUtils.getSubject();
+        	User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+        	
+        	int userId = user.getId();
+			user = userService.findUserById(userId);
+			if (user == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+			}
+        	
+            Event event = new Event();
+            TypeName typeName = activityService.getTypeNameByName(typeNameStr);
+            event.setTypeName(typeName);
+            event.setOpen(isOpen);
+            
+            for (int tagId : tags) {
+            	Tag tag = activityService.findTagById(tagId);
+            	if (tag != null) {
+					EventTag eventTag = new EventTag(event, tag, 0, 0);
+					event.getTags().add(eventTag);
 				}
-                
-                event.setShortName(shortName);
-                event.setReTime(retime);
-                event.setUserCount(userCount);
-                
-                event.setCharge(charge);
-				event.setCost(cost);
-				
-                event.setGps(gps);
-                event.setDescription(description);
-                event.setLimiter(limiter);
-                event.setCreator(user);
+			}
+            
+            event.setShortName(shortName);
+            
+            Date startTime = new Date(retime);
+            event.setReTime(startTime);
+            event.setUserCount(userCount);
+            
+            event.setCharge(charge);
+			event.setCost(cost);
+			
+            event.setGps(gps);
+            event.setDescription(description);
+            event.setLimiter(limiter);
+            event.setCreator(user);
 
-                EventPicture eventPicture = new EventPicture(event, picture, 1, user);
-                event.getEventPictures().add(eventPicture);
-                
-                event.getEventUsers().add(new EventUser(event, user, 1));
-                if (friends != null) {
-                	int orderNo = 2;
-                	for (int id : friends) {
-                		User friend = userService.findUserById(id);
-                		if (friend != null) {
-                			event.getEventUsers().add(new EventUser(event, friend, orderNo));
-                			orderNo++;
-                		}
-					}
+            EventPicture eventPicture = new EventPicture(event, picture, 1, user);
+            event.getEventPictures().add(eventPicture);
+            
+            event.getEventUsers().add(new EventUser(event, user, 1));
+            if (friends != null) {
+            	int orderNo = 2;
+            	for (int id : friends) {
+            		User friend = userService.findUserById(id);
+            		if (friend != null) {
+            			event.getEventUsers().add(new EventUser(event, friend, orderNo));
+            			orderNo++;
+            		}
 				}
-                
-                activityService.saveEvent(event);
-
-                resultMap.put("result", new HashMap<>());
-                ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
-            }
+			}
+            
+            activityService.saveEvent(event);
+            
+            logger.info("=====> Launch activity end <=====");
+            ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
         } catch (Exception e) {
             e.printStackTrace();
             ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
@@ -197,23 +214,34 @@ public class ActivityController {
      */
     @ResponseBody
 	@RequestMapping(value = "/changeFavStatus", method = RequestMethod.POST)
-	public Map<String, Object> changeFavStatus(@RequestParam("eventId")String eventIdStr, @RequestParam("userId")String userIdStr, @RequestParam("isFav")String isFavStr) {
+	public Map<String, Object> changeCollectStatus(@RequestParam("eventId")String eventIdStr, @RequestParam("isFav")String isFavStr) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try{
+			logger.info("=====> Start to change collect status <=====");
+			
+			Subject currentUser = SecurityUtils.getSubject();
+        	User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+        	
+			int userId = user.getId();
+			user = userService.findUserById(userId);
+			if (user == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+			}
+			
 			int eventId = Integer.parseInt(eventIdStr);
-			int userId = Integer.parseInt(userIdStr);
-			boolean isFav = Boolean.parseBoolean(isFavStr);
+			Event event = activityService.findEventById(eventId);
+			if (event == null) {
+            	throw new NullPointerException("活动ID：" + eventId + " , 活动不存在。");
+			}
+			
+			boolean needCollect = Boolean.parseBoolean(isFavStr);
 			
 			UserCollect userCollect = activityService.getUserCollectByEventAndUser(eventId, userId);
-			if (isFav) {
-				if (userCollect != null) {
-					ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "您已经收藏");
-					return resultMap;
-				}
-				
-				Event event = activityService.findEventById(eventId);
-				User user = userService.findUserById(userId);
-				
+			if (needCollect && userCollect != null) {
+				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "您已经收藏");
+				return resultMap;
+			}
+			if (needCollect) {
 				int orderNo = user.getUserCollectMaxOrderNo();
 				userCollect = new UserCollect(event, orderNo + 1, user);
 				
@@ -223,7 +251,7 @@ public class ActivityController {
 					activityService.deleteUserCollect(userCollect);
 				}
 			}
-			
+			logger.info("=====> Change collect status end <=====");
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -232,12 +260,17 @@ public class ActivityController {
 		return resultMap;
 	}
 
-    /*获取所有活动*/
+    /**
+     * 获取所有活动
+     * @return
+     */
     @ResponseBody
 	@RequestMapping(value = "/getAllActivity")
 	public Map<String, Object> getAllActivity() {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try{
+			logger.info("=====> Start to get all activity <=====");
+			
 			List<Event> events = activityService.getAllActivity();
 			List<Map> resultList = new ArrayList<Map>();
 			for (Event event : events) {
@@ -275,6 +308,8 @@ public class ActivityController {
 				resultList.add(result);
 			}
 			
+			logger.info("=====> Get all activity end <=====");
+			
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -293,6 +328,8 @@ public class ActivityController {
 	public Map<String, Object> getTagList(@RequestParam("typeName")String typeName) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try{
+			logger.info("=====> Start to get tag list <=====");
+			
 			List<Tag> tags = activityService.getTagListByTypeName(typeName);
 			List<Map> resultList = new ArrayList<Map>();
 			Map<String, Object> map = null;
@@ -305,6 +342,8 @@ public class ActivityController {
 					resultList.add(map);
 				}
 			}
+			
+			logger.info("=====> Get tag list end <=====");
 			
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 		} catch (Exception e) {

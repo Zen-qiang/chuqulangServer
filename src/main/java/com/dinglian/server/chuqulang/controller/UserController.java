@@ -68,6 +68,12 @@ public class UserController {
 	@Autowired
 	private HttpServletRequest request;
 
+	/**
+	 * 发送验证码
+	 * @param phoneNo	手机号
+	 * @param dataType	验证码类型
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/sendCode", method = RequestMethod.GET)
 	public Map<String, Object> sendCode(@RequestParam(name = "phoneno") String phoneNo, @RequestParam(name = "dataType") String dataType) {
@@ -144,10 +150,9 @@ public class UserController {
 	
 	/**
 	 * 注册用户
-	 * @param userName
-	 * @param password
-	 * @param phoneNo
-	 * @param verifyNo
+	 * @param password	密码
+	 * @param phoneNo	手机号码
+	 * @param verifyNo	验证码
 	 * @return
 	 */
 	@ResponseBody
@@ -206,6 +211,13 @@ public class UserController {
 		return resultMap;
 	}
 	
+	/**
+	 * 重置密码
+	 * @param phoneNo		手机号码
+	 * @param verifyNo		验证码
+	 * @param newPassword	新密码
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
 	public Map<String, Object> resetPassword(@RequestParam(name = "phoneno") String phoneNo, 
@@ -244,11 +256,10 @@ public class UserController {
 	
 	/**
 	 * 用户登录
-	 * @param userName
-	 * @param password
-	 * @param phoneNo
-	 * @param verifyNo
-	 * @param type
+	 * @param phoneNo	手机号码
+	 * @param password	密码
+	 * @param verifyNo	验证码
+	 * @param type		登录方式
 	 * @return
 	 */
 	@ResponseBody
@@ -339,7 +350,6 @@ public class UserController {
 	
 	/**
 	 * 获取我的页面的用户信息
-	 * @param userId
 	 * @return
 	 */
 	@ResponseBody
@@ -350,23 +360,26 @@ public class UserController {
 			logger.info("=====> Start to get user information <=====");
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-			if (user != null) {
-				user = userService.findUserById(user.getId());
-				
-				Map<String, Object> result = new HashMap<String, Object>();
-				
-				result.put("id", user.getId());
-				result.put("phoneno", user.getPhoneNo());
-				result.put("nickname", user.getNickName());
-				result.put("picture", user.getPicture());
-				result.put("signLog", user.getSignLog());
-				result.put("lastLoginIp", user.getLastLoginIp());
-				result.put("lastLoginCity", user.getLastLoginCity());
-				result.put("lastLoginDate", user.getLastLoginDate());
-				result.put("lastLoginPhone", user.getLastLoginPhone());
-				result.put("typename", user.getTypeName());
-				resultMap.put("result", result);
+			
+			int userId = user.getId();
+			user = userService.findUserById(userId);
+			if (user == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
 			}
+				
+			Map<String, Object> result = new HashMap<String, Object>();
+			result.put("id", user.getId());
+			result.put("phoneno", user.getPhoneNo());
+			result.put("nickname", user.getNickName());
+			result.put("picture", user.getPicture());
+			result.put("signLog", user.getSignLog());
+			result.put("lastLoginIp", user.getLastLoginIp());
+			result.put("lastLoginCity", user.getLastLoginCity());
+			result.put("lastLoginDate", user.getLastLoginDate());
+			result.put("lastLoginPhone", user.getLastLoginPhone());
+			result.put("typename", user.getTypeName());
+			resultMap.put("result", result);
+			
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -378,6 +391,7 @@ public class UserController {
 	
 	/**
 	 * 修改用户签名
+	 * @param signLog	签名内容
 	 * @return
 	 */
 	@ResponseBody
@@ -388,11 +402,16 @@ public class UserController {
 			logger.info("=====> Start to change signlog <=====");
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-			if (user != null) {
-				user = userService.findUserById(user.getId());
-				user.setSignLog(signLog);
-				userService.saveOrUpdateUser(user);
+
+			int userId = user.getId();
+			user = userService.findUserById(userId);
+			if (user == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
 			}
+			
+			user.setSignLog(signLog);
+			userService.saveOrUpdateUser(user);
+			
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", null);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -404,8 +423,7 @@ public class UserController {
 	
 	/**
 	 * 修改用户头像
-	 * @param userId
-	 * @param url
+	 * @param url	路径
 	 * @return
 	 */
 	@ResponseBody
@@ -416,13 +434,18 @@ public class UserController {
 			logger.info("=====> Start to change user picture <=====");
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-			if (user != null) {
-				user = userService.findUserById(user.getId());
-				user.setPicture(url);
-				// 图片文件需要保存到本地
-				userService.saveOrUpdateUser(user);
+			
+			int userId = user.getId();
+			user = userService.findUserById(userId);
+			if (user == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
 			}
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", null);
+			
+			user.setPicture(url);
+			// 图片文件需要保存到本地
+			userService.saveOrUpdateUser(user);
+			
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
@@ -433,8 +456,7 @@ public class UserController {
 	
 	/**
 	 * 修改密码
-	 * @param userId
-	 * @param newPassword
+	 * @param newPassword	新密码
 	 * @return
 	 */
 	@ResponseBody
@@ -445,13 +467,18 @@ public class UserController {
 			logger.info("=====> Start to change user password <=====");
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-			if (user != null) {
-				user = userService.findUserById(user.getId());
-				// 密码MD5加密
-				user.setPassword(EncryptHelper.encryptByMD5(user.getPhoneNo(), newPassword));
-				userService.saveOrUpdateUser(user);
+			
+			int userId = user.getId();
+			user = userService.findUserById(userId);
+			if (user == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
 			}
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", null);
+			
+			// 密码MD5加密
+			user.setPassword(EncryptHelper.encryptByMD5(user.getPhoneNo(), newPassword));
+			userService.saveOrUpdateUser(user);
+			
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
@@ -462,7 +489,6 @@ public class UserController {
 
 	/**
 	 * 获取活动列表
-	 * @param userId
 	 * @return
 	 */
 	@ResponseBody
@@ -470,49 +496,56 @@ public class UserController {
 	public Map<String, Object> getActivityList() {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
+			logger.info("=====> Start to get activity list <=====");
+			
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-			List<Map> resultList = new ArrayList<Map>();
-			if (user != null) {
-				user = userService.findUserById(user.getId());
-				Set<Event> events = user.getEventSet();
-				for (Event event : events) {
-					Map<String, Object> result = new HashMap<String, Object>();
-					
-					EventPicture cover = event.getCover();
-					result.put("picture", cover != null ? cover.getUrl() : "");
-					result.put("shortname", event.getShortName());
-					result.put("rstime", event.getRsTime());
-					result.put("publishtime", event.getStartTime());
-					result.put("status", event.getNowStatus());
-					result.put("charge", event.getCharge());
-					result.put("gps", event.getGps());
-					
-					TypeName typeName = event.getTypeName();
-					result.put("typename", typeName != null ? typeName.getName() : "");
-					
-					List<Map> tagList = new ArrayList<>();
-					Set<EventTag> eventTags = event.getTags();
-					for (EventTag eventTag : eventTags) {
-						Tag tag = eventTag.getTag();
-						Map<String, Object> tagsMap = new HashMap<String, Object>();
-						tagsMap.put("tagid", tag.getId());
-						tagsMap.put("tagname", tag.getName());
-						tagList.add(tagsMap);
-					}
-					result.put("tag", tagList);
-					
-					Map<String, Object> numbersMap = new HashMap<String, Object>();
-					numbersMap.put("num", event.getUserCount());
-					numbersMap.put("enteringNum", event.getEventUsers().size());
-					result.put("numbers", numbersMap);
-					
-					resultList.add(result);
-				}
+			
+			int userId = user.getId();
+			user = userService.findUserById(userId);
+			if (user == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
 			}
 			
-			responseMap.put("result", resultList);
-			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "");
+			List<Map> resultList = new ArrayList<Map>();
+			Set<Event> events = user.getEventSet();
+			for (Event event : events) {
+				Map<String, Object> result = new HashMap<String, Object>();
+				
+				EventPicture cover = event.getCover();
+				result.put("picture", cover != null ? cover.getUrl() : "");
+				result.put("eventId", event.getId());
+				result.put("shortname", event.getShortName());
+				result.put("rstime", event.getRsTime());
+				result.put("publishtime", event.getStartTime());
+				result.put("status", event.getNowStatus());
+				result.put("charge", event.getCharge());
+				result.put("gps", event.getGps());
+				
+				TypeName typeName = event.getTypeName();
+				result.put("typename", typeName != null ? typeName.getName() : "");
+				
+				List<Map> tagList = new ArrayList<>();
+				Set<EventTag> eventTags = event.getTags();
+				for (EventTag eventTag : eventTags) {
+					Tag tag = eventTag.getTag();
+					Map<String, Object> tagsMap = new HashMap<String, Object>();
+					tagsMap.put("tagid", tag.getId());
+					tagsMap.put("tagname", tag.getName());
+					tagList.add(tagsMap);
+				}
+				result.put("tag", tagList);
+				
+				Map<String, Object> numbersMap = new HashMap<String, Object>();
+				numbersMap.put("num", event.getUserCount());
+				numbersMap.put("enteringNum", event.getEventUsers().size());
+				result.put("numbers", numbersMap);
+				
+				resultList.add(result);
+			}
+			logger.info("=====> Get activity list end <=====");
+			
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
@@ -523,7 +556,7 @@ public class UserController {
 	
 	/**
 	 * 获取活动详情
-	 * @param eventId
+	 * @param eventId	活动ID
 	 * @return
 	 */
 	@ResponseBody
@@ -531,6 +564,8 @@ public class UserController {
 	public Map<String, Object> getActivityInfo(@RequestParam(name = "eventId") String eventId) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
+			logger.info("=====> Start to get activity info <=====");
+			
 			int id = Integer.parseInt(eventId);
 			Event event = activityService.findEventById(id);
 			Map<String, Object> result = new HashMap<String, Object>();
@@ -595,8 +630,9 @@ public class UserController {
 				result.put("organizer", organizerMap);
 			}
 			
-			resultMap.put("result", result);
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
+			logger.info("=====> Get activity info end <=====");
+			
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
@@ -605,67 +641,41 @@ public class UserController {
 		return resultMap;
 	}
 	
-	/*获取联系人列表*/
+	/**
+	 * 获取联系人
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/getContacts", method = RequestMethod.POST)
 	public Map<String, Object> getContacts() {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
-			Subject currentUser = SecurityUtils.getSubject();
-			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-			List<Map> resultList = new ArrayList<Map>();
-			if (user != null) {
-				user = userService.findUserById(user.getId());
-//				List<Contact> contacts = new ArrayList<>(user.getContacts());
-				Map<String, Object> map = null;
-				for (Contact contact : user.getContacts()) {
-					if (contact.getContactUser() != null) {
-						map = new HashMap<String, Object>();
-						map.put("contactId", contact.getContactUser().getId());
-						map.put("contactName", contact.getContactUser().getNickName());
-						map.put("contactPicture", contact.getContactUser().getPicture());
-						map.put("contactDegree", contact.getDegree());
-						map.put("contactDescription", contact.getDescription());
-						resultList.add(map);
-					}
-				}
-			}
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
-		} catch (Exception e) {
-			e.printStackTrace();
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
-		}
-		return resultMap;
-	}
-	
-	/*获取用户兴趣*/
-	@ResponseBody
-	@RequestMapping(value = "/getTags", method = RequestMethod.POST)
-	public Map<String, Object> getUserInterest() {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		try {
+			logger.info("=====> Start to get contacts <=====");
+			
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			
+			int userId = user.getId();
+			user = userService.findUserById(userId);
+			if (user == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+			}
+			
 			List<Map> resultList = new ArrayList<Map>();
-			if (user != null) {
-				user = userService.findUserById(user.getId());
-				
-				List<UserInterest> interests = new ArrayList<UserInterest>(user.getInterests());
-				Collections.sort(interests, new UserInterestComparator());
-				
-				Map<String, Object> map = null;
-				for (UserInterest interest : interests) {
+			Map<String, Object> map = null;
+			for (Contact contact : user.getContacts()) {
+				if (contact.getContactUser() != null) {
 					map = new HashMap<String, Object>();
-					Tag tag = interest.getTag();
-					if (tag != null) {
-						map.put("id", tag.getId());
-						map.put("name", tag.getName());
-						map.put("typename", tag.getTypeName() != null ? tag.getTypeName().getName() : "");
-					}
+					map.put("contactId", contact.getContactUser().getId());
+					map.put("contactName", contact.getContactUser().getNickName());
+					map.put("contactPicture", contact.getContactUser().getPicture());
+					map.put("contactDegree", contact.getDegree());
+					map.put("contactDescription", contact.getDescription());
 					resultList.add(map);
 				}
 			}
+			logger.info("=====> Get contacts end <=====");
+			
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -674,30 +684,85 @@ public class UserController {
 		return resultMap;
 	}
 	
-	/*获取用户关注*/
+	/**
+	 * 获取我的兴趣标签
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/getInterestTags", method = RequestMethod.POST)
+	public Map<String, Object> getInterestTags() {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			logger.info("=====> Start to get tags <=====");
+			
+			Subject currentUser = SecurityUtils.getSubject();
+			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			
+			int userId = user.getId();
+			user = userService.findUserById(userId);
+			if (user == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+			}
+			
+			List<Map> resultList = new ArrayList<Map>();
+			List<UserInterest> interests = new ArrayList<UserInterest>(user.getInterests());
+			Collections.sort(interests, new UserInterestComparator());
+			
+			Map<String, Object> map = null;
+			for (UserInterest interest : interests) {
+				map = new HashMap<String, Object>();
+				Tag tag = interest.getTag();
+				if (tag != null) {
+					map.put("id", tag.getId());
+					map.put("name", tag.getName());
+					map.put("typename", tag.getTypeName() != null ? tag.getTypeName().getName() : "");
+				}
+				resultList.add(map);
+			}
+			logger.info("=====> Get tags end <=====");
+			
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+		}
+		return resultMap;
+	}
+	
+	/**
+	 * 获取用户关注
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/getUserAttention", method = RequestMethod.POST)
 	public Map<String, Object> getUserAttention() {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
+			logger.info("=====> Start to get user attention <=====");
+			
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			
+			int userId = user.getId();
+			user = userService.findUserById(userId);
+			if (user == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+			}
+			
 			List<Map> resultList = new ArrayList<Map>();
-			if (user != null) {
-				user = userService.findUserById(user.getId());
-				
-				Map<String, Object> map = null;
-				Set<UserAttention> attentions = user.getAttentions();
-				for (UserAttention userAttention : attentions) {
-					if (userAttention.getAttentionUser() != null) {
-						map = new HashMap<String, Object>();
-						map.put("attentionUserId", userAttention.getAttentionUser().getId());
-						map.put("attentionUserName", userAttention.getAttentionUser().getNickName());
-						map.put("attentionUserPicture", userAttention.getAttentionUser().getPicture());
-						resultList.add(map);
-					}
+			Map<String, Object> map = null;
+			Set<UserAttention> attentions = user.getAttentions();
+			for (UserAttention userAttention : attentions) {
+				if (userAttention.getAttentionUser() != null) {
+					map = new HashMap<String, Object>();
+					map.put("attentionUserId", userAttention.getAttentionUser().getId());
+					map.put("attentionUserName", userAttention.getAttentionUser().getNickName());
+					map.put("attentionUserPicture", userAttention.getAttentionUser().getPicture());
+					resultList.add(map);
 				}
 			}
+			logger.info("=====> Get user attention end <=====");
+			
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -706,30 +771,40 @@ public class UserController {
 		return resultMap;
 	}
 	
-	/*获取用户粉丝*/
+	/**
+	 * 获取用户粉丝
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/getUserFollow", method = RequestMethod.POST)
 	public Map<String, Object> getUserFollow() {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
+			logger.info("=====> Start to get user follow <=====");
+			
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			
+			int userId = user.getId();
+			user = userService.findUserById(userId);
+			if (user == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+			}
+			
 			List<Map> resultList = new ArrayList<Map>();
-			if (user != null) {
-				user = userService.findUserById(user.getId());
-				
-				Map<String, Object> map = null;
-				Set<UserAttention> followers = user.getFollowers();
-				for (UserAttention userAttention : followers) {
-					if (userAttention.getUser() != null) {
-						map = new HashMap<String, Object>();
-						map.put("followUserId", userAttention.getUser().getId());
-						map.put("followUserName", userAttention.getUser().getNickName());
-						map.put("followUserPicture", userAttention.getUser().getPicture());
-						resultList.add(map);
-					}
+			Map<String, Object> map = null;
+			Set<UserAttention> followers = user.getFollowers();
+			for (UserAttention userAttention : followers) {
+				if (userAttention.getUser() != null) {
+					map = new HashMap<String, Object>();
+					map.put("followUserId", userAttention.getUser().getId());
+					map.put("followUserName", userAttention.getUser().getNickName());
+					map.put("followUserPicture", userAttention.getUser().getPicture());
+					resultList.add(map);
 				}
 			}
+			logger.info("=====> Get user follow end <=====");
+			
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 		} catch (Exception e) {
 			e.printStackTrace();

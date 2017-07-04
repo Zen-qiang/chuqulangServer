@@ -11,6 +11,8 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +32,7 @@ import com.dinglian.server.chuqulang.model.TopicPicture;
 import com.dinglian.server.chuqulang.model.TopicPraise;
 import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.service.DiscoverService;
+import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.utils.DateUtils;
 import com.dinglian.server.chuqulang.utils.RequestHelper;
 import com.dinglian.server.chuqulang.utils.ResponseHelper;
@@ -37,15 +40,19 @@ import com.dinglian.server.chuqulang.utils.ResponseHelper;
 @Controller
 @RequestMapping("/discover")
 public class DiscoverController {
+	
+	private static final Logger logger = LoggerFactory.getLogger(DiscoverController.class);
 
 	@Autowired
 	private DiscoverService discoverService;
+	
+	@Autowired
+    private UserService userService;
 
 	/**
 	 * 获取圈子列表
-	 * 
-	 * @param tagId 标签ID
-	 * @param type 排序类型
+	 * @param tagId	标签ID
+	 * @param type	排序类型
 	 * @return
 	 */
 	@ResponseBody
@@ -54,10 +61,9 @@ public class DiscoverController {
 			@RequestParam("type") String type) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
-			int tagId = 0;
-			if (StringUtils.isNotBlank(tagIdStr)) {
-				tagId = Integer.parseInt(tagIdStr);
-			}
+			logger.info("=====> Start to get coterie list <=====");
+			
+			int tagId = Integer.parseInt(tagIdStr);
 			List<Coterie> coterieList = discoverService.getCoterieList(tagId, type);
 
 			List<Map> resultList = new ArrayList<Map>();
@@ -74,6 +80,8 @@ public class DiscoverController {
 				result.put("fllowers", coterieGuys.size());
 				resultList.add(result);
 			}
+			logger.info("=====> Get coterie list end <=====");
+			
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -85,7 +93,6 @@ public class DiscoverController {
 
 	/**
 	 * 获取话题列表
-	 * 
 	 * @param coterieIdStr 圈子ID
 	 * @return
 	 */
@@ -94,6 +101,8 @@ public class DiscoverController {
 	public Map<String, Object> getTopicList(@RequestParam(name = "ringId", required = false) String coterieIdStr) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
+			logger.info("=====> Start to get topic list <=====");
+			
 			int coterieId = 0;
 			if (StringUtils.isNotBlank(coterieIdStr)) {
 				coterieId = Integer.parseInt(coterieIdStr);
@@ -171,6 +180,8 @@ public class DiscoverController {
 				resultList.add(result);
 
 			}
+			logger.info("=====> Get topic list end <=====");
+			
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -182,9 +193,9 @@ public class DiscoverController {
 
 	/**
 	 * 发布话题
-	 * @param coterieIdStr 圈子ID
-	 * @param img 图片路径
-	 * @param description 话题描述
+	 * @param coterieIdStr	圈子ID
+	 * @param img 			图片路径
+	 * @param description	话题描述
 	 * @return
 	 */
 	@ResponseBody
@@ -194,8 +205,16 @@ public class DiscoverController {
 			@RequestParam(name = "description", required = false) String description) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
+			logger.info("=====> Start to release topic <=====");
+			
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			
+			int userId = user.getId();
+			user = userService.findUserById(userId);
+			if (user == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+			}
 
 			// 当前话题属于哪个圈子
 			int coterieId = Integer.parseInt(coterieIdStr);
@@ -205,17 +224,16 @@ public class DiscoverController {
 			
 			// 话题应该可以上传多个图片, 后期需要修改图片传参类型及保存本地图片
 			TopicPicture topicPicture = new TopicPicture(topic, user, img, 1);
-
 			topic.getPictures().add(topicPicture);
 			
 			discoverService.saveTopic(topic);
 
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", new HashMap());
+			logger.info("=====> Release topic end <=====");
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
-
 		return resultMap;
 	}
 	
@@ -229,23 +247,33 @@ public class DiscoverController {
 	@ResponseBody
 	@RequestMapping(value = "/commentDiscover", method = RequestMethod.POST)
 	public Map<String, Object> commentTopic(@RequestParam(name = "discoverid") String topicIdStr,
-			/*@RequestParam(name = "userid") String userIdStr,*/
 			@RequestParam(name = "comment") String content) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
+			logger.info("=====> Start to comment topic <=====");
+			
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-
+			
+			int userId = user.getId();
+			user = userService.findUserById(userId);
+			if (user == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+			}
+			
 			// 当前话题属于哪个圈子
 			int topicId = Integer.parseInt(topicIdStr);
 			Topic topic = discoverService.findTopicById(topicId);
-			if (topic != null) {
-				TopicComment topicComment = new TopicComment(topic, user, content);
-				topic.getComments().add(topicComment);
-				discoverService.saveTopic(topic);
+			if (topic == null) {
+				throw new NullPointerException("话题ID：" + topicId + " , 话题不存在。");
 			}
+			
+			TopicComment topicComment = new TopicComment(topic, user, content);
+			topic.getComments().add(topicComment);
+			discoverService.saveTopic(topic);
 
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", new HashMap());
+			logger.info("=====> Comment topic end <=====");
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
@@ -254,79 +282,86 @@ public class DiscoverController {
 		return resultMap;
 	}
 
+	/**
+	 * 获取话题评论
+	 * @param topicIdStr	话题ID
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/getDiscoverComments", method = RequestMethod.POST)
 	public Map<String, Object> getTopicComments(@RequestParam(name = "discoverid") String topicIdStr) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
-			Subject currentUser = SecurityUtils.getSubject();
-			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-
+			logger.info("=====> Start to get topic comments <=====");
+			
 			int topicId = Integer.parseInt(topicIdStr);
 			Topic topic = discoverService.findTopicById(topicId);
-			Map<String, Object> result = new HashMap<String, Object>();
-			if (topic != null) {
-				Map<String, Object> discover = new HashMap<String, Object>();
-				discover.put("discoverId", topic.getId());
-				discover.put("description", topic.getDescription());
-				discover.put("publishTime", DateUtils.format(topic.getCreationDate(), DateUtils.yMdHms));
-				discover.put("commentNum", topic.getComments().size());
-				discover.put("getFavNum", topic.getPraises().size());
-				
-				// 图片
-				List<TopicPicture> topicPictures = new ArrayList<TopicPicture>(topic.getPictures());
-				Collections.sort(topicPictures, new TopicPictureComparator());
-				
-				List<String> pictures = new ArrayList<String>();
-				for (TopicPicture topicPicture : topicPictures) {
-					pictures.add(topicPicture.getUrl());
-				}
-				discover.put("pictures", pictures);
-				
-				// 评论
-				List<TopicComment> topicComments = new ArrayList<TopicComment>(topic.getComments());
-				Collections.sort(topicComments, new TopicCommentComparator());
-				
-				List<Map> comments = new ArrayList<Map>();
-				Map<String, Object> comment = null;
-				for (TopicComment topicComment : topicComments) {
-					comment = new HashMap<String, Object>();
-					User commentUser = topicComment.getUser();
-					Map<String, Object> userMap = new HashMap<String, Object>();
-					if (commentUser != null) {
-						userMap.put("userid", commentUser.getId());
-						userMap.put("nickname", commentUser.getNickName());
-						userMap.put("picture", commentUser.getPicture());
-					}
-					comment.put("user", userMap);
-					comment.put("comment", topicComment.getContent());
-					comment.put("publishTime", DateUtils.format(topicComment.getCreationDate(), DateUtils.yMdHms));
-					comments.add(comment);
-				}
-				
-				// 点赞
-				List<TopicPraise> topicPraises = new ArrayList<TopicPraise>(topic.getPraises());
-				Collections.sort(topicPraises, new TopicPraiseComparator());
-				List<Map> praises = new ArrayList<Map>();
-				Map<String, Object> praise = null;
-				for (TopicPraise topicPraise : topicPraises) {
-					praise = new HashMap<String, Object>();
-					User praiseUser = topicPraise.getUser();
-					Map<String, Object> userMap = new HashMap<String, Object>();
-					if (praiseUser != null) {
-						userMap.put("userid", praiseUser.getId());
-						userMap.put("nickname", praiseUser.getNickName());
-						userMap.put("picture", praiseUser.getPicture());
-					}
-					praise.put("user", userMap);
-					praises.add(praise);
-				}
-				
-				result.put("discover", discover);
-				result.put("comments", comments);
-				result.put("favs", praises);
+			if (topic == null) {
+				throw new NullPointerException("话题ID：" + topicId + " , 话题不存在。");
 			}
-
+			
+			Map<String, Object> result = new HashMap<String, Object>();
+			Map<String, Object> discover = new HashMap<String, Object>();
+			discover.put("discoverId", topic.getId());
+			discover.put("description", topic.getDescription());
+			discover.put("publishTime", DateUtils.format(topic.getCreationDate(), DateUtils.yMdHms));
+			discover.put("commentNum", topic.getComments().size());
+			discover.put("getFavNum", topic.getPraises().size());
+			
+			// 图片
+			List<TopicPicture> topicPictures = new ArrayList<TopicPicture>(topic.getPictures());
+			Collections.sort(topicPictures, new TopicPictureComparator());
+			
+			List<String> pictures = new ArrayList<String>();
+			for (TopicPicture topicPicture : topicPictures) {
+				pictures.add(topicPicture.getUrl());
+			}
+			discover.put("pictures", pictures);
+			
+			// 评论
+			List<TopicComment> topicComments = new ArrayList<TopicComment>(topic.getComments());
+			Collections.sort(topicComments, new TopicCommentComparator());
+			
+			List<Map> comments = new ArrayList<Map>();
+			Map<String, Object> comment = null;
+			for (TopicComment topicComment : topicComments) {
+				comment = new HashMap<String, Object>();
+				User commentUser = topicComment.getUser();
+				Map<String, Object> userMap = new HashMap<String, Object>();
+				if (commentUser != null) {
+					userMap.put("userid", commentUser.getId());
+					userMap.put("nickname", commentUser.getNickName());
+					userMap.put("picture", commentUser.getPicture());
+				}
+				comment.put("user", userMap);
+				comment.put("comment", topicComment.getContent());
+				comment.put("publishTime", DateUtils.format(topicComment.getCreationDate(), DateUtils.yMdHms));
+				comments.add(comment);
+			}
+			
+			// 点赞
+			List<TopicPraise> topicPraises = new ArrayList<TopicPraise>(topic.getPraises());
+			Collections.sort(topicPraises, new TopicPraiseComparator());
+			List<Map> praises = new ArrayList<Map>();
+			Map<String, Object> praise = null;
+			for (TopicPraise topicPraise : topicPraises) {
+				praise = new HashMap<String, Object>();
+				User praiseUser = topicPraise.getUser();
+				Map<String, Object> userMap = new HashMap<String, Object>();
+				if (praiseUser != null) {
+					userMap.put("userid", praiseUser.getId());
+					userMap.put("nickname", praiseUser.getNickName());
+					userMap.put("picture", praiseUser.getPicture());
+				}
+				praise.put("user", userMap);
+				praises.add(praise);
+			}
+			
+			result.put("discover", discover);
+			result.put("comments", comments);
+			result.put("favs", praises);
+				
+			logger.info("=====> Get topic comments end <=====");
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
 		} catch (Exception e) {
 			e.printStackTrace();
