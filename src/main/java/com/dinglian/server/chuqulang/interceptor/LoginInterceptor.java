@@ -27,7 +27,7 @@ public class LoginInterceptor implements HandlerInterceptor{
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-		logger.info("=======> LoginInterceptor <======= ");
+//		logger.info("=======> LoginInterceptor <======= ");
 		
 		Subject currentUser = SecurityUtils.getSubject();
 		User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);

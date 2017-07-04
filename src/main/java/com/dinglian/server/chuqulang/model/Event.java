@@ -24,9 +24,13 @@ import javax.persistence.Transient;
 @Entity
 public class Event implements Serializable {
 
+	public static final String STATUS_SIGNUP = "正在报名";
+	public static final String STATUS_PROGRESS = "进行中";
+	public static final String STATUS_OVER = "已结束";
+	
 	private int id;
 
-	private String no; // 活动编号
+//	private String no; // 活动编号
 
 	private String name; // 活动名称
 
@@ -44,21 +48,23 @@ public class Event implements Serializable {
 
 	private boolean open; // 是否公开
 
-	private boolean friendOnly; // 仅限好友
+//	private boolean friendOnly; // 仅限好友
 
-	private String password; // 活动密密麻麻
+	private String password; // 活动密码
 
 	private User creator; // 创建人
 
-	private Date startTime; // 报名开始时间
+//	private Date rsTime; // 报名开始时间
 
-	private Date endTime; // 报名结束时间
+//	private Date reTime; // 报名结束时间
 
-	private Date rsTime; // 活动开始时间
+	private Date startTime; // 活动开始时间
 
-	private Date reTime; // 活动结束时间
+	private Date endTime; // 活动结束时间
+	
+	private Date creationDate; // 发布时间
 
-	private String nowStatus; // 活动状态
+	private String status; // 活动状态
 
 	private String charge; // 费用类型
 	
@@ -66,18 +72,16 @@ public class Event implements Serializable {
 
 	private String limiter; // 限定条件
 
-	// private EventPicture coverPicture; // 活动图片（第一张封面）
-
 	private ChatRoom chatRoom; // 活动聊天室
 
 	private Set<EventTag> tags = new HashSet<EventTag>(); // 活动标签
-	//
+
 	private Set<EventUser> eventUsers = new HashSet<EventUser>();
-	//
+
 	// private Set<EventVideo> eventVideos = new HashSet<EventVideo>();
-	//
+
 	private Set<EventPicture> eventPictures = new HashSet<EventPicture>();// 活动图片（第一张封面）
-	//
+
 	// private Set<EventLog> eventLogs = new HashSet<EventLog>();
 
 	@GeneratedValue
@@ -88,14 +92,6 @@ public class Event implements Serializable {
 
 	public void setId(int id) {
 		this.id = id;
-	}
-
-	public String getNo() {
-		return no;
-	}
-
-	public void setNo(String no) {
-		this.no = no;
 	}
 
 	public String getName() {
@@ -148,14 +144,6 @@ public class Event implements Serializable {
 		this.description = description;
 	}
 
-	/*
-	 * @JoinColumn(name = "fk_tag_id")
-	 * 
-	 * @ManyToOne(fetch = FetchType.LAZY) public Tag getTag() { return tag; }
-	 * 
-	 * public void setTag(Tag tag) { this.tag = tag; }
-	 */
-
 	@JoinColumn(name = "fk_type_name_id")
 	@ManyToOne(fetch = FetchType.LAZY)
 	public TypeName getTypeName() {
@@ -172,15 +160,6 @@ public class Event implements Serializable {
 
 	public void setOpen(boolean open) {
 		this.open = open;
-	}
-
-	@Column(name = "is_friend_only")
-	public boolean isFriendOnly() {
-		return friendOnly;
-	}
-
-	public void setFriendOnly(boolean friendOnly) {
-		this.friendOnly = friendOnly;
 	}
 
 	public String getPassword() {
@@ -220,46 +199,25 @@ public class Event implements Serializable {
 	public void setEndTime(Date endTime) {
 		this.endTime = endTime;
 	}
-
+	
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "rs_time")
-	public Date getRsTime() {
-		return rsTime;
+	@Column(name = "creation_date")
+	public Date getCreationDate() {
+		return creationDate;
 	}
 
-	public void setRsTime(Date rsTime) {
-		this.rsTime = rsTime;
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
 	}
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "re_time")
-	public Date getReTime() {
-		return reTime;
+	@Column(name = "status")
+	public String getStatus() {
+		return status;
 	}
 
-	public void setReTime(Date reTime) {
-		this.reTime = reTime;
+	public void setStatus(String status) {
+		this.status = status;
 	}
-
-	@Column(name = "now_status")
-	public String getNowStatus() {
-		return nowStatus;
-	}
-
-	public void setNowStatus(String nowStatus) {
-		this.nowStatus = nowStatus;
-	}
-
-	/*
-	 * @JoinTable(name = "event_tag_map", joinColumns = {
-	 * 
-	 * @JoinColumn(name = "fk_event_id", referencedColumnName = "id") },
-	 * inverseJoinColumns = {
-	 * 
-	 * @JoinColumn(name = "fk_tag_id", referencedColumnName = "id") })
-	 * 
-	 * @ManyToMany(fetch = FetchType.LAZY)
-	 */
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "event")
 	public Set<EventTag> getTags() {
@@ -287,22 +245,6 @@ public class Event implements Serializable {
 	public void setEventPictures(Set<EventPicture> eventPictures) {
 		this.eventPictures = eventPictures;
 	}
-
-	/*
-	 * @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE },
-	 * mappedBy = "event") public Set<EventVideo> getEventVideos() { return
-	 * eventVideos; }
-	 * 
-	 * public void setEventVideos(Set<EventVideo> eventVideos) {
-	 * this.eventVideos = eventVideos; }
-	 * 
-	 * @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE },
-	 * mappedBy = "event") public Set<EventLog> getEventLogs() { return
-	 * eventLogs; }
-	 * 
-	 * public void setEventLogs(Set<EventLog> eventLogs) { this.eventLogs =
-	 * eventLogs; }
-	 */
 
 	public String getCharge() {
 		return charge;

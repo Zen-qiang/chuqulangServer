@@ -65,19 +65,20 @@
                     url: 'activity/launchActivity',
 					type : 'POST',
                     data: {
-                    	typename : '室内活动',
-                        isOpen : true,
-                        tags : [2,5],
-                        shortname : '浦东三国杀',
-                    	retime : new Date(),
-                        number : 10,
-                        charge : 'free',
+                    	typename : '个人组织',
+                        isOpen : false,
+                        password : 'admin',
+                        tags : [2,1],
+                        name : '金桥广场舞',
+                        startTime : 1499124171120,
+                    	userCount : 10,
+                        charge : 'dutch',
                         cost : 100,
                         gps : 'gps',
+                        address: 'address',
                         description : '室内三国杀',
                         limiter : '限男性',
                         pictures : 'picture',
-                        //friends : friends,
                         phoneNo : '18270790997'
                     },
                     success: function(response,status,xhr){
@@ -159,7 +160,6 @@ typeName : <input type="text" name="typeName" value="常规标签"/><br>
 <h2>收藏|取消收藏活动</h2>
 <form action="activity/changeFavStatus" method="post">
 	eventId：<input type="text" name="eventId" value="2"/><br>
-	userId：<input type="text" name="userId" value="2"/><br>
 	isFav：<input type="text" name="isFav" value="true"/><br>
 	<button type="submit" >收藏|取消收藏活动</button>
 </form>
@@ -170,15 +170,14 @@ typeName : <input type="text" name="typeName" value="常规标签"/><br>
 	<button type="submit" >获取活动详情</button>
 </form>
 
-<h2>获取活动列表</h2>
-<form action="user/getActivityList" method="post">
+<h2>获取我的活动列表</h2>
+<form action="user/getMyActivityList" method="post">
 	<button type="submit" >获取活动列表</button>
 </form>
 
 <h2>活动报名</h2>
 <form action="activity/signUp" method="post">
 	eventId：<input type="text" name="eventId"/><br>
-	userId : <input type="text" name="userId"/><br>
 	<button type="submit" >活动报名</button>
 </form>
 
@@ -217,7 +216,7 @@ typeName : <input type="text" name="typeName" value="常规标签"/><br>
 <h2>账号登录：</h2>
 <form action="user/login" method="post">
 	<input type="hidden" value="username" name="type">
-	用户名：<input type="text" name="phoneno" value="18270791343"/><br>
+	用户名：<input type="text" name="phoneno" value="18270790997"/><br>
 	密码：<input type="text" name="password" value="admin"/><br>
 	<button type="submit" >登录</button>
 </form>

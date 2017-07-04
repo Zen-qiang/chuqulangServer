@@ -127,13 +127,15 @@ public class ActivityController {
     @RequestMapping(value = "/launchActivity", method = RequestMethod.POST)
     public Map<String, Object> launchActivity(@RequestParam("typename") String typeNameStr
             , @RequestParam("isOpen") boolean isOpen
-            , @RequestParam("tags") int[] tags
-            , @RequestParam("shortname") String shortName
-            , @RequestParam(name = "retime") long retime
-            , @RequestParam("number") int userCount
+            , @RequestParam(name = "password",required = false) String password
+            , @RequestParam("tags[]") int[] tags
+            , @RequestParam("name") String name
+            , @RequestParam(name = "startTime") long retime
+            , @RequestParam("userCount") int userCount
             , @RequestParam("charge") String charge
             , @RequestParam(name = "cost") double cost
             , @RequestParam("gps") String gps
+            , @RequestParam("address") String address
             , @RequestParam(name = "description", required = false) String description
             , @RequestParam(name = "limiter", required = false) String limiter
             , @RequestParam(name = "pictures", required = false) String picture
@@ -156,28 +158,34 @@ public class ActivityController {
             TypeName typeName = activityService.getTypeNameByName(typeNameStr);
             event.setTypeName(typeName);
             event.setOpen(isOpen);
+            if (isOpen) {
+				event.setPassword(password);
+			}
             
+            int i = 1;
             for (int tagId : tags) {
             	Tag tag = activityService.findTagById(tagId);
             	if (tag != null) {
-					EventTag eventTag = new EventTag(event, tag, 0, 0);
+					EventTag eventTag = new EventTag(event, tag, 1, i);
 					event.getTags().add(eventTag);
 				}
+            	i++;
 			}
             
-            event.setShortName(shortName);
+            event.setName(name);
             
             Date startTime = new Date(retime);
-            event.setReTime(startTime);
+            event.setStartTime(startTime);
             event.setUserCount(userCount);
-            
             event.setCharge(charge);
 			event.setCost(cost);
-			
             event.setGps(gps);
+            event.setAddress(address);
             event.setDescription(description);
             event.setLimiter(limiter);
             event.setCreator(user);
+            event.setCreationDate(new Date());
+            event.setStatus(Event.STATUS_SIGNUP);
 
             EventPicture eventPicture = new EventPicture(event, picture, 1, user);
             event.getEventPictures().add(eventPicture);
@@ -196,8 +204,39 @@ public class ActivityController {
             
             activityService.saveEvent(event);
             
+            Map<String, Object> result = new HashMap<String, Object>();
+            EventPicture cover = event.getCover();
+			result.put("eventId", event.getId());
+			result.put("picture", cover != null ? cover.getUrl() : "");
+			result.put("name", event.getName());
+			result.put("releaseTime", event.getCreationDate());
+			result.put("startTime", event.getStartTime());
+			result.put("status", event.getStatus());
+			result.put("charge", event.getCharge());
+			result.put("cost", event.getCost());
+			result.put("gps", event.getGps());
+			result.put("address", event.getAddress());
+			result.put("isOpen", event.isOpen());
+			result.put("typename", typeName != null ? typeName.getName() : "");
+			
+			List<Map> tagList = new ArrayList<>();
+			Set<EventTag> eventTags = event.getTags();
+			for (EventTag eventTag : eventTags) {
+				Tag tag = eventTag.getTag();
+				Map<String, Object> tagsMap = new HashMap<String, Object>();
+				tagsMap.put("tagId", tag.getId());
+				tagsMap.put("tagName", tag.getName());
+				tagList.add(tagsMap);
+			}
+			result.put("tags", tagList);
+			
+			Map<String, Object> numbersMap = new HashMap<String, Object>();
+			numbersMap.put("num", event.getUserCount());
+			numbersMap.put("enteringNum", event.getEventUsers().size());
+			result.put("numbers", numbersMap);
+            
             logger.info("=====> Launch activity end <=====");
-            ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
+            ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
         } catch (Exception e) {
             e.printStackTrace();
             ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
@@ -262,11 +301,16 @@ public class ActivityController {
 
     /**
      * 获取所有活动
+     * @param orderBy	排序方式
+     * @param category	活动分类
+     * @param status	活动状态
      * @return
      */
     @ResponseBody
 	@RequestMapping(value = "/getAllActivity")
-	public Map<String, Object> getAllActivity() {
+	public Map<String, Object> getAllActivity(@RequestParam(name = "orderBy", required = false) String orderBy, 
+			@RequestParam(name = "category", required = false) String category, 
+			@RequestParam(name = "status", required = false) String status) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try{
 			logger.info("=====> Start to get all activity <=====");
@@ -277,27 +321,32 @@ public class ActivityController {
 				Map<String, Object> result = new HashMap<String, Object>();
 				
 				EventPicture cover = event.getCover();
+				result.put("eventId", event.getId());
 				result.put("picture", cover != null ? cover.getUrl() : "");
-				result.put("shortname", event.getShortName());
-				result.put("rstime", event.getRsTime());
-				result.put("publishtime", event.getStartTime());
-				result.put("status", event.getNowStatus());
+				result.put("name", event.getName());
+				result.put("releaseTime", event.getCreationDate());
+				result.put("startTime", event.getStartTime());
+				result.put("status", event.getStatus());
 				result.put("charge", event.getCharge());
+				result.put("cost", event.getCost());
 				result.put("gps", event.getGps());
+				result.put("isOpen", event.isOpen());
+				result.put("address", event.getAddress());
 				
+				// 个人/官方组织
 				TypeName typeName = event.getTypeName();
-				result.put("typename", typeName.getName());
+				result.put("typeName", typeName != null ? typeName.getName() : "");
 				
 				List<Map> tagList = new ArrayList<>();
 				Set<EventTag> eventTags = event.getTags();
 				for (EventTag eventTag : eventTags) {
 					Tag tag = eventTag.getTag();
 					Map<String, Object> tagsMap = new HashMap<String, Object>();
-					tagsMap.put("tagid", tag.getId());
-					tagsMap.put("tagname", tag.getName());
+					tagsMap.put("tagId", tag.getId());
+					tagsMap.put("tagName", tag.getName());
 					tagList.add(tagsMap);
 				}
-				result.put("tag", tagList);
+				result.put("tags", tagList);
 				
 				Set<EventUser> eventUsers = event.getEventUsers();
 				Map<String, Object> numbersMap = new HashMap<String, Object>();
