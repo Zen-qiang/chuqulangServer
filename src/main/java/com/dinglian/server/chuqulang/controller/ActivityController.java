@@ -128,7 +128,7 @@ public class ActivityController {
     public Map<String, Object> launchActivity(@RequestParam("typename") String typeNameStr
             , @RequestParam("isOpen") boolean isOpen
             , @RequestParam(name = "password",required = false) String password
-            , @RequestParam("tags[]") int[] tags
+            , @RequestParam("tags") int[] tags
             , @RequestParam("name") String name
             , @RequestParam(name = "startTime") long retime
             , @RequestParam("userCount") int userCount
