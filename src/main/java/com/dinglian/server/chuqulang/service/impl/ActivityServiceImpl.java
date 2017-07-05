@@ -1,14 +1,24 @@
 package com.dinglian.server.chuqulang.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dinglian.server.chuqulang.dao.*;
-import com.dinglian.server.chuqulang.model.*;
+import com.dinglian.server.chuqulang.dao.EventDao;
+import com.dinglian.server.chuqulang.dao.EventPictureDao;
+import com.dinglian.server.chuqulang.dao.EventTagDao;
+import com.dinglian.server.chuqulang.dao.EventUserDao;
+import com.dinglian.server.chuqulang.dao.TagDao;
+import com.dinglian.server.chuqulang.dao.TypeNameDao;
+import com.dinglian.server.chuqulang.dao.UserCollectDao;
+import com.dinglian.server.chuqulang.model.Event;
+import com.dinglian.server.chuqulang.model.EventPicture;
+import com.dinglian.server.chuqulang.model.EventUser;
+import com.dinglian.server.chuqulang.model.Tag;
+import com.dinglian.server.chuqulang.model.TypeName;
+import com.dinglian.server.chuqulang.model.UserCollect;
 import com.dinglian.server.chuqulang.service.ActivityService;
-
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class ActivityServiceImpl implements ActivityService {
@@ -89,9 +99,23 @@ public class ActivityServiceImpl implements ActivityService {
 		return eventDao.getAllActivity();
 	}
 
-	@Override
+	/*@Override
 	public List<Tag> getTagListByTypeName(String typeName) {
 		return tagDao.getTagListByTypeName(typeName);
+	}*/
+
+	@Override
+	public List<TypeName> getActivityTypes(String type) {
+		return typeNameDao.getActivityTypes(type);
+	}
+
+	@Override
+	public List<Tag> getTagListByTypeNameId(Integer typeNameId) {
+		if (typeNameId == null) {
+			return tagDao.getAllTags();
+		} else {
+			return tagDao.getTagsByTypeNameId(typeNameId);
+		}
 	}
 	
 }

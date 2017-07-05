@@ -97,8 +97,14 @@
 
 <h2>获取标签列表</h2>
 <form action="activity/getTagList" method="get">
-typeName : <input type="text" name="typeName" value="常规标签"/><br>
+typeNameId : <input type="text" name="typeNameId" value=""/><br>
 	<button type="submit" >获取标签列表</button>
+</form>
+
+<h2>获取活动类型,根据description字段获取所有typeName</h2>
+<form action="activity/getActivityType" method="get">
+type : <input type="text" name="type" value="活动类型"/><br>
+	<button type="submit" >>获取活动类型</button>
 </form>
 
 <h2>获取用户关注</h2>

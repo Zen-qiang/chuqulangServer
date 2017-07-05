@@ -33,5 +33,9 @@ public interface ActivityService {
 
 	List<Event> getAllActivity();
 
-	List<Tag> getTagListByTypeName(String typeName);
+//	List<Tag> getTagListByTypeName(String typeName);
+
+	List<TypeName> getActivityTypes(String type);
+
+	List<Tag> getTagListByTypeNameId(Integer typeNameId);
 }

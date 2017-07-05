@@ -374,12 +374,12 @@ public class ActivityController {
      */
     @ResponseBody
 	@RequestMapping(value = "/getTagList")
-	public Map<String, Object> getTagList(@RequestParam("typeName")String typeName) {
+	public Map<String, Object> getTagList(@RequestParam(name = "typeNameId", required = false) Integer typeNameId) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try{
 			logger.info("=====> Start to get tag list <=====");
 			
-			List<Tag> tags = activityService.getTagListByTypeName(typeName);
+			List<Tag> tags = activityService.getTagListByTypeNameId(typeNameId);
 			List<Map> resultList = new ArrayList<Map>();
 			Map<String, Object> map = null;
 			if (tags != null) {
@@ -393,6 +393,41 @@ public class ActivityController {
 			}
 			
 			logger.info("=====> Get tag list end <=====");
+			
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+		}
+		return resultMap;
+	}
+    
+    /**
+     * 获取活动类型,根据description字段获取所有typeName
+     * @param type	description
+     * @return
+     */
+    @ResponseBody
+	@RequestMapping(value = "/getActivityType")
+	public Map<String, Object> getActivityType(@RequestParam("type")String type) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		try{
+			logger.info("=====> Start to get activity type <=====");
+			
+			List<TypeName> activityTypes = activityService.getActivityTypes(type);
+			List<Map> resultList = new ArrayList<Map>();
+			Map<String, Object> map = null;
+			if (activityTypes != null) {
+				for (TypeName typeName : activityTypes) {
+					map = new HashMap<String, Object>();
+					map.put("typeNameId", typeName.getId());
+					map.put("typeName", typeName.getName());
+					map.put("typeNameDescription", typeName.getDescription());
+					resultList.add(map);
+				}
+			}
+			
+			logger.info("=====> Get activity type end <=====");
 			
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 		} catch (Exception e) {

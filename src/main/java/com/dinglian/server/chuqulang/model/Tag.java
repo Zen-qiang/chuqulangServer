@@ -24,6 +24,8 @@ public class Tag implements Serializable{
 	
 	private TypeName typeName;
 	
+	private int orderNo;
+	
 	private int times; //使用次数
 	
 	private User creator;
@@ -85,6 +87,14 @@ public class Tag implements Serializable{
 	public void setTimes(int times) {
 		this.times = times;
 	}
-	
+
+	@Column(name = "order_no")
+	public int getOrderNo() {
+		return orderNo;
+	}
+
+	public void setOrderNo(int orderNo) {
+		this.orderNo = orderNo;
+	}
 	
 }

@@ -1,5 +1,7 @@
 package com.dinglian.server.chuqulang.dao.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
 
 import com.dinglian.server.chuqulang.dao.TypeNameDao;
@@ -20,5 +22,11 @@ public class TypeNameDaoImpl extends AbstractHibernateDao<TypeName> implements T
 	public TypeName getTypeNameByName(String typeNameStr) {
 		String hql = "FROM TypeName WHERE name = :name ";
 		return (TypeName) getCurrentSession().createQuery(hql).setString("name", typeNameStr).uniqueResult();
+	}
+
+	@Override
+	public List<TypeName> getActivityTypes(String type) {
+		String hql = "FROM TypeName WHERE description = :type ORDER BY orderNo ";
+		return getCurrentSession().createQuery(hql).setString("type", type).list();
 	}
 }

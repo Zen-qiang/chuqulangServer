@@ -5,7 +5,11 @@ import java.util.List;
 import com.dinglian.server.chuqulang.model.Tag;
 
 public interface TagDao extends GenericDao<Tag> {
+
+	List<Tag> getAllTags();
+
+	List<Tag> getTagsByTypeNameId(Integer typeNameId);
 	
-	List<Tag> getTagListByTypeName(String typeName);
+//	List<Tag> getTagListByTypeName(String typeName);
 
 }

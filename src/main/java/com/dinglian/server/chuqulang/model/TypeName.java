@@ -28,7 +28,7 @@ public class TypeName implements Serializable{
         this.id = id;
     }
 
-    @Column(name = "name", unique = true)
+    @Column(name = "name")
     public String getName() {
         return name;
     }
