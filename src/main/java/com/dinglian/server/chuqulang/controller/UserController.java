@@ -272,7 +272,6 @@ public class UserController {
 		
 		logger.info("=====> Start to user login <=====");
 		
-		User user = null;
 		Subject currentUser = SecurityUtils.getSubject();
 		
 		if (!currentUser.isAuthenticated()) {
@@ -299,9 +298,33 @@ public class UserController {
 			token.setRememberMe(true);
 			try{
 				currentUser.login(token);
-				user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+				User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 				logger.info("用户ID：" + user.getId() + "，用户昵称：" +  user.getNickName() + "，登录成功.");
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "登录成功");
+				
+				// IP不同提示登录地点
+				String ip = request.getRemoteAddr();
+				String address = "";
+				try {
+					address = AddressUtils.getAddresses(ip);
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+				String content = "";
+				if (!ip.equalsIgnoreCase(user.getLastLoginIp()) && StringUtils.isNotBlank(user.getLastLoginCity())) {
+					content = "最近一次登录地点：%s ,登录时间：%s ,IP地址：%s ";
+					content = String.format(content, user.getLastLoginCity(), DateUtils.format(user.getLastLoginDate(), DateUtils.yMdHms), user.getLastLoginIp());
+				}
+				Map<String, Object> result = new HashMap<String, Object>();
+				result.put("userid", user.getId());
+				result.put("info", content);
+				
+				// 保存当前登录地点
+				user.setLastLoginCity(address);
+				user.setLastLoginIp(ip);
+				user.setLastLoginDate(new Date());
+				userService.saveOrUpdateUser(user);
+				
+				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "登录成功", result);
 			} catch (IncorrectCredentialsException e) {
 				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "用户名或密码错误");
 				return resultMap;
@@ -313,36 +336,10 @@ public class UserController {
 				return resultMap;
 			}
 		} else {
-			user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "请勿重复登录。");
 			return resultMap;
 		}
 		
-		if (user != null) {
-			// IP不同提示登录地点
-			String ip = request.getRemoteAddr();
-			String address = "";
-			try {
-				address = AddressUtils.getAddresses(ip);
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-			String content = "";
-			if (!ip.equalsIgnoreCase(user.getLastLoginIp()) && StringUtils.isNotBlank(user.getLastLoginCity())) {
-				content = "最近一次登录地点：%s ,登录时间：%s ,IP地址：%s ";
-				content = String.format(content, user.getLastLoginCity(), DateUtils.format(user.getLastLoginDate(), DateUtils.yMdHms), user.getLastLoginIp());
-			}
-			Map<String, Object> result = new HashMap<String, Object>();
-			result.put("userid", user.getId());
-			result.put("info", content);
-			resultMap.put("result", result);
-			
-			// 保存当前登录地点
-			user.setLastLoginCity(address);
-			user.setLastLoginIp(ip);
-			user.setLastLoginDate(new Date());
-			userService.saveOrUpdateUser(user);
-		}
 		logger.info("=====> User login end <=====");
 		return resultMap;
 	}
@@ -378,9 +375,8 @@ public class UserController {
 			result.put("lastLoginDate", user.getLastLoginDate());
 			result.put("lastLoginPhone", user.getLastLoginPhone());
 			result.put("typename", user.getTypeName());
-			resultMap.put("result", result);
 			
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
