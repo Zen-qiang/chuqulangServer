@@ -9,13 +9,11 @@ public class FilterChainDefinitionMapBuilder {
 		map.put("/user/logout", "logout");
 		
 		map.put("/login.jsp", "anon");
-//		map.put("/shiro/login", "anon");
-//		map.put("/shiro/logout", "logout");
 //		map.put("/user.jsp", "authc,roles[user]");
 //		map.put("/admin.jsp", "authc,roles[admin]");
 		map.put("/user.jsp", "authc");
 		map.put("/admin.jsp", "authc");
-		map.put("/list.jsp", "user");
+		map.put("/list.jsp", "authc");
 		return map;
 	}
 

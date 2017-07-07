@@ -13,6 +13,6 @@
 	
 	<a href="user.jsp">user.jsp</a>
 	
-	<a href="shiro/logout">Logout</a>
+	<a href="user/logout">Logout</a>
 </body>
 </html>

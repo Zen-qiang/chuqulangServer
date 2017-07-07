@@ -14,6 +14,6 @@ public class EncryptHelper {
 	}
 	
 	public static void main(String[] args) {
-//		System.out.println(encryptByMD5("fyunxu", "123456"));
+		System.out.println(encryptByMD5("admin", "admin"));
 	}
 }
