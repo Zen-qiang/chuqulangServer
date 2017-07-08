@@ -16,7 +16,7 @@ public class RequestInterceptor implements HandlerInterceptor{
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-		logger.info("=======> Access-Control-Allow-Origin <======= ");
+//		logger.info("=======> Access-Control-Allow-Origin <======= ");
 		response.setHeader("Access-Control-Allow-Origin", "*");
 //		response.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1:8080");
 		response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");

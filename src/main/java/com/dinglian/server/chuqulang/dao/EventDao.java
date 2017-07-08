@@ -6,6 +6,6 @@ import com.dinglian.server.chuqulang.model.Event;
 
 public interface EventDao extends GenericDao<Event> {
 
-	List<Event> getAllActivity();
+	List<Event> getAllActivity(String keyword);
 
 }

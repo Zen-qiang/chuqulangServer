@@ -86,17 +86,17 @@
 		
 		<property name="initialPoolSize" value="${jdbc.initPoolSize}"></property>
 		<property name="maxPoolSize" value="${jdbc.maxPoolSize}"></property>
-		
-		<property name="minPoolSize" value="1"></property>
-		<property name="acquireIncrement" value="1"></property>
-		<property name="maxIdleTime" value="25000"></property>
-		
-		<property name="preferredTestQuery" value="SELECT 1"></property>
-		<property name="testConnectionOnCheckout" value="true"></property>
-		<property name="idleConnectionTestPeriod" value="18000"></property>
-		
-		<property name="acquireRetryAttempts" value="30"></property>
-		<property name="acquireRetryDelay" value="1000"></property>
+
+		<property name="minPoolSize" value="${jdbc.minPoolSize}"></property>
+		<property name="acquireIncrement" value="${jdbc.acquireIncrement}"></property>
+		<property name="maxIdleTime" value="${jdbc.maxIdleTime}"></property>
+
+		<property name="preferredTestQuery" value="${jdbc.preferredTestQuery}"></property>
+		<property name="testConnectionOnCheckout" value="${jdbc.testConnectionOnCheckout}"></property>
+		<property name="idleConnectionTestPeriod" value="${jdbc.idleConnectionTestPeriod}"></property>
+
+		<property name="acquireRetryAttempts" value="${jdbc.acquireRetryAttempts}"></property>
+		<property name="acquireRetryDelay" value="${jdbc.acquireRetryDelay}"></property>
 	</bean>
 	
 	<!-- 配置 SessionFactory -->

@@ -310,12 +310,13 @@ public class ActivityController {
 	@RequestMapping(value = "/getAllActivity")
 	public Map<String, Object> getAllActivity(@RequestParam(name = "orderBy", required = false) String orderBy, 
 			@RequestParam(name = "category", required = false) String category, 
-			@RequestParam(name = "status", required = false) String status) {
+			@RequestParam(name = "status", required = false) String status,
+			@RequestParam(name = "keyword", required = false) String keyword) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try{
 			logger.info("=====> Start to get all activity <=====");
 			
-			List<Event> events = activityService.getAllActivity();
+			List<Event> events = activityService.getAllActivity(keyword);
 			List<Map> resultList = new ArrayList<Map>();
 			for (Event event : events) {
 				Map<String, Object> result = new HashMap<String, Object>();

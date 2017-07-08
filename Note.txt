@@ -1,2 +1,7 @@
-55555555
-11
+#set CLASSPATH=下添加
+set JAVA_OPTS=-server -Xms1024m -Xmx2048m -XX: PermSize=1024m -XX:MaxPermSize=2048m
+
+<Connector port="8081" protocol="org.apache.coyote.http11.Http11NioProtocol" maxHttpHeaderSize="8192" maxThreads="1000" minSpareThreads="100" maxSpareThreads="1000"
+		minProcessors="100" maxProcessors="1000" enableLookups="false" compression="on" compressionMinSize="2048"
+		compressableMimeType="text/html,text/xml,text/javascript,text/css,text/plain" connectionTimeout="20000" useBodyEncodingForURI="true" 
+		URIEncoding="utf-8" acceptCount="1000" redirectPort="8443" disableUploadTimeout="true"/>

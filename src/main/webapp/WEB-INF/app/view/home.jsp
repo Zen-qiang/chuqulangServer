@@ -161,7 +161,13 @@ type : <input type="text" name="type" value="活动类型"/><br>
 </form>
 
 <h2>获取所有活动</h2>
-<a href="activity/getAllActivity">获取所有活动</a>
+<form action="activity/getAllActivity" method="get">
+	orderBy：	<input type="text" name="orderBy"/><br>
+	category：	<input type="text" name="category"/><br>
+	status：		<input type="text" name="status"/><br>
+	keyword：	<input type="text" name="keyword"/><br>
+	<button type="submit" >获取所有活动</button>
+</form>
 
 <h2>收藏|取消收藏活动</h2>
 <form action="activity/changeFavStatus" method="post">

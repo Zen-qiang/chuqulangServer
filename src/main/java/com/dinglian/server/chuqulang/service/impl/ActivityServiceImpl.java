@@ -95,8 +95,8 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	@Override
-	public List<Event> getAllActivity() {
-		return eventDao.getAllActivity();
+	public List<Event> getAllActivity(String keyword) {
+		return eventDao.getAllActivity(keyword);
 	}
 
 	/*@Override

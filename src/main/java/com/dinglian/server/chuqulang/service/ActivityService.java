@@ -31,7 +31,7 @@ public interface ActivityService {
 
 	void deleteUserCollect(UserCollect userCollect) throws Exception;
 
-	List<Event> getAllActivity();
+	List<Event> getAllActivity(String keyword);
 
 //	List<Tag> getTagListByTypeName(String typeName);
 
