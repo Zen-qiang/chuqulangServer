@@ -274,7 +274,7 @@ public class UserController {
 		
 		Subject currentUser = SecurityUtils.getSubject();
 		
-		if (!currentUser.isAuthenticated()) {
+//		if (!currentUser.isAuthenticated()) {
 			CustomizedToken token = null;
 			String errorMsg = "";
 			if (type.equalsIgnoreCase(User.LOGIN_TYPE_USERNAME)) {
@@ -335,10 +335,10 @@ public class UserController {
 				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, errorMsg);
 				return resultMap;
 			}
-		} else {
+		/*} else {
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "请勿重复登录。");
 			return resultMap;
-		}
+		}*/
 		
 		logger.info("=====> User login end <=====");
 		return resultMap;
