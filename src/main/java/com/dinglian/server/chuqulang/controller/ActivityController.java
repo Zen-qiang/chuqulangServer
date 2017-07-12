@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
@@ -364,6 +365,7 @@ public class ActivityController {
 			searchCriteria.setStartRow(startRow);
 			searchCriteria.setPageSize(pageSize);
 			searchCriteria.setOwnList(isOwnList);
+			searchCriteria.setKeyword(keyword);
 			if (isOwnList) {
 				searchCriteria.setUserId(userId);
 			}
@@ -420,7 +422,7 @@ public class ActivityController {
 				}
 			}
 			
-			if (status.equals(Event.STATUS_FRIENDS)) {
+			if (StringUtils.isNotBlank(status) && status.equals(Event.STATUS_FRIENDS)) {
 				List<Map> finalList = new ArrayList<Map>();
 				for (int i = 0; i < resultList.size(); i++) {
 					Map result = resultList.get(i);
