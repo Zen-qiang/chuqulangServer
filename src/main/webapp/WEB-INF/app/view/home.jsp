@@ -177,13 +177,19 @@ type : <input type="text" name="type" value="活动类型"/><br>
 </form>
 
 <h2>获取活动详情</h2>
-<form action="user/getActivityInfo" method="post">
+<form action="activity/getActivityInfo" method="post">
 	eventId：<input type="text" name="eventId" value="2"/><br>
 	<button type="submit" >获取活动详情</button>
 </form>
 
 <h2>获取我的活动列表</h2>
-<form action="user/getMyActivityList" method="post">
+<form action="activity/getActivityList" method="post">
+category：<input type="text" name="category" value=""/><br>
+status：<input type="text" name="status" value=""/><br>
+orderby：<input type="text" name="orderby" value=""/><br>
+start：<input type="text" name="start" value="0"/><br>
+pagesize：<input type="text" name="pagesize" value="20"/><br>
+isOwnList：<input type="text" name="isOwnList" value="false"/><br>
 	<button type="submit" >获取活动列表</button>
 </form>
 

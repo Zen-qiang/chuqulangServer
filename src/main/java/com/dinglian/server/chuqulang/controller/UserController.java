@@ -483,11 +483,7 @@ public class UserController {
 		return resultMap;
 	}
 
-	/**
-	 * 获取我的活动列表
-	 * @return
-	 */
-	@ResponseBody
+	/*@ResponseBody
 	@RequestMapping(value = "/getMyActivityList", method = RequestMethod.POST)
 	public Map<String, Object> getMyActivityList() {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -551,96 +547,7 @@ public class UserController {
 		}
 
 		return responseMap;
-	}
-	
-	/**
-	 * 获取活动详情
-	 * @param eventId	活动ID
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/getActivityInfo", method = RequestMethod.POST)
-	public Map<String, Object> getActivityInfo(@RequestParam(name = "eventId") String eventId) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		try {
-			logger.info("=====> Start to get activity info <=====");
-			
-			int id = Integer.parseInt(eventId);
-			Event event = activityService.findEventById(id);
-			Map<String, Object> result = new HashMap<String, Object>();
-			
-			EventPicture cover = event.getCover();
-			result.put("picture", cover != null ? cover.getUrl() : "");
-			result.put("name", event.getName());
-			
-			ChatRoom chatRoom = event.getChatRoom();
-			result.put("chatroomId", chatRoom != null ? chatRoom.getId() : "");
-
-			result.put("status", event.getStatus());
-			
-			User organizer = event.getCreator();
-			if (organizer != null) {
-				Map<String, Object> organizerMap = new HashMap<String, Object>();
-				organizerMap.put("organizerId", organizer.getId());
-				organizerMap.put("organizerNickName", organizer.getNickName());
-				organizerMap.put("organizerPicture", organizer.getPicture());
-				result.put("organizer", organizerMap);
-			}
-			
-			TypeName typeName = event.getTypeName();
-			result.put("typename", typeName!= null ? typeName.getName() : "");
-			
-			result.put("startTime", event.getStartTime());
-			result.put("gps", event.getGps());
-			result.put("address", event.getAddress());
-			result.put("isOpen", event.isOpen());
-			result.put("charge", event.getCharge());
-			result.put("cost", event.getCost());
-			result.put("description", event.getDescription());
-			
-			List<Map> tagList = new ArrayList<>();
-			Set<EventTag> eventTags = event.getTags();
-			for (EventTag eventTag : eventTags) {
-				Tag tag = eventTag.getTag();
-				if (tag != null) {
-					Map<String, Object> tagsMap = new HashMap<String, Object>();
-					tagsMap.put("tagId", tag.getId());
-					tagsMap.put("tagName", tag.getName());
-					tagList.add(tagsMap);
-				}
-			}
-			result.put("tags", tagList);
-			
-			// 参与活动人员
-			List<EventUser> eventUsers = new ArrayList<EventUser>(event.getEventUsers());
-			Collections.sort(eventUsers, new EventUserComparator());
-			
-			List<Map> eventUserList = new ArrayList<>();
-			for (EventUser eventUser : eventUsers) {
-				if (eventUser.getUser() != null) {
-					Map<String, Object> userMap = new HashMap<String, Object>();
-					userMap.put("userId", eventUser.getUser().getId());
-					userMap.put("nickName", eventUser.getUser().getNickName());
-					userMap.put("picture", eventUser.getUser().getPicture());
-					eventUserList.add(userMap);
-				}
-			}
-			result.put("eventUserList", eventUserList);
-			
-			Map<String, Object> numbersMap = new HashMap<String, Object>();
-			numbersMap.put("num", event.getUserCount());
-			numbersMap.put("enteringNum", eventUsers.size());
-			result.put("numbers", numbersMap);
-			
-			logger.info("=====> Get activity info end <=====");
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
-		}
-
-		return resultMap;
-	}
+	}*/
 	
 	/**
 	 * 获取联系人
@@ -690,7 +597,7 @@ public class UserController {
 	 * @return
 	 */
 	@ResponseBody
-	@RequestMapping(value = "/getInterestTags", method = RequestMethod.POST)
+	@RequestMapping(value = "/getTags", method = RequestMethod.POST)
 	public Map<String, Object> getInterestTags() {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {

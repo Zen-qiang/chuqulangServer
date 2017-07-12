@@ -1,6 +1,7 @@
 package com.dinglian.server.chuqulang.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.dinglian.server.chuqulang.base.ApplicationConfig;
+import com.dinglian.server.chuqulang.base.SearchCriteria;
+import com.dinglian.server.chuqulang.comparator.EventUserComparator;
+import com.dinglian.server.chuqulang.model.ChatRoom;
 import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.EventPicture;
 import com.dinglian.server.chuqulang.model.EventTag;
@@ -89,14 +94,22 @@ public class ActivityController {
             int maxOrderNo = event.getEventUserMaxOrderNo();
             EventUser eventUser = new EventUser(event, user, maxOrderNo + 1);
             activityService.saveEventUser(eventUser);
-
-            Map<String, Object> result = new HashMap<String, Object>();
-            result.put("userid", user.getId());
-            result.put("nickname", user.getNickName());
-            result.put("picture", user.getPicture());
+            
+            activityService.refresh(event);
+            
+            List<Map> resultList = new ArrayList<Map>();
+            for (EventUser eu : event.getEventUsers()) {
+            	if (eu.getUser() != null) {
+            		Map<String, Object> result = new HashMap<String, Object>();
+            		result.put("userid", eu.getUser().getId());
+            		result.put("nickname", eu.getUser().getNickName());
+            		result.put("picture", eu.getUser().getPicture());
+            		resultList.add(result);
+				}
+			}
             
             logger.info("=====> Event signup end <=====");
-            ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
+            ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
         } catch (Exception e) {
             e.printStackTrace();
             ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
@@ -139,7 +152,7 @@ public class ActivityController {
             , @RequestParam(name = "description", required = false) String description
             , @RequestParam(name = "limiter", required = false) String limiter
             , @RequestParam(name = "pictures", required = false) String picture
-            , @RequestParam(name = "friends[]", required = false) int[] friends
+            , @RequestParam(name = "friends", required = false) int[] friends
             , @RequestParam(name = "phoneNo", required = false) String phoneNo) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         try {
@@ -298,15 +311,230 @@ public class ActivityController {
 		}
 		return resultMap;
 	}
-
+    
     /**
-     * 获取所有活动
-     * @param orderBy	排序方式
-     * @param category	活动分类
-     * @param status	活动状态
+     * 获取我的活动列表 (category、status不传值获取全部，暂未加入距离排序)
+     * @param orderBy	排序
+     * @param category	分类
+     * @param status	状态
+     * @param keyword	关键字
+     * @param startRow	开始行
+     * @param pageSize	每页记录
+     * @param isOwnList	是否个人列表
      * @return
      */
-    @ResponseBody
+	@ResponseBody
+	@RequestMapping(value = "/getActivityList", method = RequestMethod.POST)
+	public Map<String, Object> getActivityList(
+			@RequestParam(name = "orderby", required = false) String orderBy, 
+			@RequestParam(name = "category", required = false) Integer category, 
+			@RequestParam(name = "status", required = false) String status,
+			@RequestParam(name = "keyword", required = false) String keyword,
+			@RequestParam(name = "start", required = false) Integer startRow,
+			@RequestParam(name = "pagesize", required = false) Integer pageSize,
+			@RequestParam(name = "isOwnList", required = false) Boolean isOwnList) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			logger.info("=====> Start to get activity list <=====");
+			
+			Subject currentUser = SecurityUtils.getSubject();
+			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			
+			int userId = user.getId();
+			user = userService.findUserById(userId);
+			if (user == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+			}
+			
+			// default value
+			if (startRow == null) {
+				startRow = 0;
+			}
+			if (pageSize == null) {
+				pageSize = ApplicationConfig.getInstance().getDefaultPageSize();
+			}
+			if (isOwnList == null) {
+				isOwnList = false;
+			}
+			
+			SearchCriteria searchCriteria = new SearchCriteria();
+			searchCriteria.setOrderBy(orderBy);
+			searchCriteria.setCategory(category);
+			searchCriteria.setStatus(status);
+			searchCriteria.setStartRow(startRow);
+			searchCriteria.setPageSize(pageSize);
+			searchCriteria.setOwnList(isOwnList);
+			if (isOwnList) {
+				searchCriteria.setUserId(userId);
+			}
+			Map<String, Object> eventListMap = activityService.getActivityList(searchCriteria);
+			List<Event> events = (List<Event>) eventListMap.get("resultList");
+			int total = (int) eventListMap.get("totalCount");
+			Map<String, Object> resultMap = new HashMap<String, Object>();
+			resultMap.put("total", total);
+			resultMap.put("start", startRow);
+			
+			List<Map> resultList = new ArrayList<Map>();
+			if (events != null) {
+				for (Event event : events) {
+//					System.out.println(event.getId());
+					Map<String, Object> result = new HashMap<String, Object>();
+					
+					EventPicture cover = event.getCover();
+					result.put("eventId", event.getId());
+					result.put("picture", cover != null ? cover.getUrl() : "");
+					result.put("name", event.getName());
+					result.put("releaseTime", event.getCreationDate());
+					result.put("startTime", event.getStartTime());
+					
+					// 判断好友参与
+					boolean friendJoin = activityService.checkFriendJoin(event.getId(), userId);
+					result.put("status", friendJoin ? Event.STATUS_FRIENDS : event.getStatus());
+					
+					result.put("charge", event.getCharge());
+					result.put("cost", event.getCost());
+					result.put("gps", event.getGps());
+					result.put("address", event.getAddress());
+					result.put("isOpen", event.isOpen());
+					
+					TypeName typeName = event.getTypeName();
+					result.put("typename", typeName != null ? typeName.getName() : "");
+					
+					List<Map> tagList = new ArrayList<>();
+					Set<EventTag> eventTags = event.getTags();
+					for (EventTag eventTag : eventTags) {
+						Tag tag = eventTag.getTag();
+						Map<String, Object> tagsMap = new HashMap<String, Object>();
+						tagsMap.put("tagId", tag.getId());
+						tagsMap.put("tagName", tag.getName());
+						tagList.add(tagsMap);
+					}
+					result.put("tags", tagList);
+					
+					Map<String, Object> numbersMap = new HashMap<String, Object>();
+					numbersMap.put("num", event.getUserCount());
+					numbersMap.put("enteringNum", event.getEventUsers().size());
+					result.put("numbers", numbersMap);
+					
+					resultList.add(result);
+				}
+			}
+			
+			if (status.equals(Event.STATUS_FRIENDS)) {
+				List<Map> finalList = new ArrayList<Map>();
+				for (int i = 0; i < resultList.size(); i++) {
+					Map result = resultList.get(i);
+					if (result.get("status").equals(Event.STATUS_FRIENDS)) {
+						finalList.add(result);
+					}
+				}
+				resultList = finalList;
+			}
+			
+			resultMap.put("cnt", resultList.size());
+			resultMap.put("lists", resultList);
+			
+			logger.info("=====> Get my activity list end <=====");
+			
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "", resultMap);
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+		}
+
+		return responseMap;
+	}
+	
+	/**
+	 * 获取活动详情
+	 * @param eventId	活动ID
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/getActivityInfo", method = RequestMethod.POST)
+	public Map<String, Object> getActivityInfo(@RequestParam(name = "eventId") String eventId) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			logger.info("=====> Start to get activity info <=====");
+			
+			int id = Integer.parseInt(eventId);
+			Event event = activityService.findEventById(id);
+			Map<String, Object> result = new HashMap<String, Object>();
+			
+			EventPicture cover = event.getCover();
+			result.put("picture", cover != null ? cover.getUrl() : "");
+			result.put("name", event.getName());
+			
+			ChatRoom chatRoom = event.getChatRoom();
+			result.put("chatroomId", chatRoom != null ? chatRoom.getId() : "");
+
+			result.put("status", event.getStatus());
+			
+			User organizer = event.getCreator();
+			if (organizer != null) {
+				Map<String, Object> organizerMap = new HashMap<String, Object>();
+				organizerMap.put("organizerId", organizer.getId());
+				organizerMap.put("organizerNickName", organizer.getNickName());
+				organizerMap.put("organizerPicture", organizer.getPicture());
+				result.put("organizer", organizerMap);
+			}
+			
+			TypeName typeName = event.getTypeName();
+			result.put("typename", typeName!= null ? typeName.getName() : "");
+			
+			result.put("startTime", event.getStartTime());
+			result.put("gps", event.getGps());
+			result.put("address", event.getAddress());
+			result.put("isOpen", event.isOpen());
+			result.put("charge", event.getCharge());
+			result.put("cost", event.getCost());
+			result.put("description", event.getDescription());
+			
+			List<Map> tagList = new ArrayList<>();
+			Set<EventTag> eventTags = event.getTags();
+			for (EventTag eventTag : eventTags) {
+				Tag tag = eventTag.getTag();
+				if (tag != null) {
+					Map<String, Object> tagsMap = new HashMap<String, Object>();
+					tagsMap.put("tagId", tag.getId());
+					tagsMap.put("tagName", tag.getName());
+					tagList.add(tagsMap);
+				}
+			}
+			result.put("tags", tagList);
+			
+			// 参与活动人员
+			List<EventUser> eventUsers = new ArrayList<EventUser>(event.getEventUsers());
+			Collections.sort(eventUsers, new EventUserComparator());
+			
+			List<Map> eventUserList = new ArrayList<>();
+			for (EventUser eventUser : eventUsers) {
+				if (eventUser.getUser() != null) {
+					Map<String, Object> userMap = new HashMap<String, Object>();
+					userMap.put("userId", eventUser.getUser().getId());
+					userMap.put("nickName", eventUser.getUser().getNickName());
+					userMap.put("picture", eventUser.getUser().getPicture());
+					eventUserList.add(userMap);
+				}
+			}
+			result.put("eventUserList", eventUserList);
+			
+			Map<String, Object> numbersMap = new HashMap<String, Object>();
+			numbersMap.put("num", event.getUserCount());
+			numbersMap.put("enteringNum", eventUsers.size());
+			result.put("numbers", numbersMap);
+			
+			logger.info("=====> Get activity info end <=====");
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+		}
+
+		return resultMap;
+	}
+
+    /*@ResponseBody
 	@RequestMapping(value = "/getAllActivity")
 	public Map<String, Object> getAllActivity(@RequestParam(name = "orderBy", required = false) String orderBy, 
 			@RequestParam(name = "category", required = false) String category, 
@@ -366,7 +594,7 @@ public class ActivityController {
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
 		return resultMap;
-	}
+	}*/
     
     /**
      * 获取标签列表

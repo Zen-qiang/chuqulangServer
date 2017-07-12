@@ -1,7 +1,9 @@
 package com.dinglian.server.chuqulang.service;
 
 import java.util.List;
+import java.util.Map;
 
+import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.EventPicture;
 import com.dinglian.server.chuqulang.model.EventUser;
@@ -38,4 +40,11 @@ public interface ActivityService {
 	List<TypeName> getActivityTypes(String type);
 
 	List<Tag> getTagListByTypeNameId(Integer typeNameId);
+
+	void refresh(Event event);
+
+	Map<String, Object> getActivityList(SearchCriteria searchCriteria);
+
+	boolean checkFriendJoin(int id, int userId);
+
 }

@@ -32,5 +32,10 @@ public class ApplicationConfig {
     	String value = System.getProperty("netease.im.nonce", "chuqulang");
     	return value;
     }
+    
+    public int getDefaultPageSize () {
+    	String value = System.getProperty("default.pagesize", "20");
+    	return Integer.parseInt(value);
+    }
 
 }

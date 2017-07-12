@@ -24,9 +24,25 @@ import javax.persistence.Transient;
 @Entity
 public class Event implements Serializable {
 
-	public static final String STATUS_SIGNUP = "正在报名";
-	public static final String STATUS_PROGRESS = "进行中";
-	public static final String STATUS_OVER = "已结束";
+	// 已关闭
+	public static final String STATUS_OVER = "0";
+	// 进行中
+	public static final String STATUS_PROGRESS = "1";
+	// 正在报名
+	public static final String STATUS_SIGNUP = "2";
+	// 好友参与
+	public static final String STATUS_FRIENDS = "3";
+	
+	// 默认排序
+	public static final String ORDERBY_DEFAULT = "0";
+	// 距离最近
+	public static final String ORDERBY_CLOSEST = "1";
+	// 最新发布
+	public static final String ORDERBY_LATEST = "2";
+	// 价格由低到高
+	public static final String ORDERBY_COST_ASC = "3";
+	// 价格由高到低
+	public static final String ORDERBY_COST_DESC = "4";
 	
 	private int id;
 
@@ -210,7 +226,7 @@ public class Event implements Serializable {
 		this.creationDate = creationDate;
 	}
 
-	@Column(name = "status")
+	@Column(name = "status", length = 1)
 	public String getStatus() {
 		return status;
 	}
