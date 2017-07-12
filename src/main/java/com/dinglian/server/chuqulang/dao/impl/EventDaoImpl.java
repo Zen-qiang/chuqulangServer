@@ -53,24 +53,27 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 		if (searchCriteria.getCategory() != null) {
 			sb.append("AND tags.tag.id = :category ");
 		}
-		
-		if (searchCriteria.getStatus().equals(Event.STATUS_OVER)) {
-			sb.append("AND e.status = '" + Event.STATUS_OVER + "' ");
-		} else if (searchCriteria.getStatus().equals(Event.STATUS_PROGRESS)) {
-			sb.append("AND e.status = '" + Event.STATUS_PROGRESS + "' ");
-		} else if (searchCriteria.getStatus().equals(Event.STATUS_SIGNUP)) {
-			sb.append("AND e.status = '" + Event.STATUS_SIGNUP + "' ");
+		if (StringUtils.isNotBlank(searchCriteria.getStatus())) {
+			if (searchCriteria.getStatus().equals(Event.STATUS_OVER)) {
+				sb.append("AND e.status = '" + Event.STATUS_OVER + "' ");
+			} else if (searchCriteria.getStatus().equals(Event.STATUS_PROGRESS)) {
+				sb.append("AND e.status = '" + Event.STATUS_PROGRESS + "' ");
+			} else if (searchCriteria.getStatus().equals(Event.STATUS_SIGNUP)) {
+				sb.append("AND e.status = '" + Event.STATUS_SIGNUP + "' ");
+			}
 		}
 		
 		String orderBy = "ORDER BY e.creationDate DESC ";
-		if (Event.ORDERBY_DEFAULT.equals(searchCriteria.getOrderBy())) {
-			orderBy = "ORDER BY e.creationDate DESC,e.cost ";
-		} else if (Event.ORDERBY_CLOSEST.equals(searchCriteria.getOrderBy())) {
-			orderBy = "";
-		} else if (Event.ORDERBY_COST_ASC.equals(searchCriteria.getOrderBy())) {
-			orderBy = "ORDER BY e.cost ";
-		} else if (Event.ORDERBY_COST_DESC.equals(searchCriteria.getOrderBy())) {
-			orderBy = "ORDER BY e.cost DESC ";
+		if (StringUtils.isNotBlank(searchCriteria.getOrderBy())) {
+			if (Event.ORDERBY_DEFAULT.equals(searchCriteria.getOrderBy())) {
+				orderBy = "ORDER BY e.creationDate DESC,e.cost ";
+			} else if (Event.ORDERBY_CLOSEST.equals(searchCriteria.getOrderBy())) {
+				orderBy = "";
+			} else if (Event.ORDERBY_COST_ASC.equals(searchCriteria.getOrderBy())) {
+				orderBy = "ORDER BY e.cost ";
+			} else if (Event.ORDERBY_COST_DESC.equals(searchCriteria.getOrderBy())) {
+				orderBy = "ORDER BY e.cost DESC ";
+			}
 		}
 		sb.append(orderBy);
 		
