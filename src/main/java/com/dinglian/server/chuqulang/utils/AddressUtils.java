@@ -240,6 +240,7 @@ public class AddressUtils {
 		if (!info.equalsIgnoreCase("err:无效ip") && StringUtils.isNotBlank(info)) {
 //			String[] infos = info.split("	");
 //			return infos[1];
+			info = info.replace("	", " ");
 			return info;
 		}
 		return "";
