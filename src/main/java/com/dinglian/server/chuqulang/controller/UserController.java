@@ -29,16 +29,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dinglian.server.chuqulang.base.SearchCriteria;
-import com.dinglian.server.chuqulang.comparator.EventUserComparator;
 import com.dinglian.server.chuqulang.comparator.UserInterestComparator;
-import com.dinglian.server.chuqulang.model.ChatRoom;
 import com.dinglian.server.chuqulang.model.Contact;
-import com.dinglian.server.chuqulang.model.Event;
-import com.dinglian.server.chuqulang.model.EventPicture;
-import com.dinglian.server.chuqulang.model.EventTag;
-import com.dinglian.server.chuqulang.model.EventUser;
 import com.dinglian.server.chuqulang.model.Tag;
-import com.dinglian.server.chuqulang.model.TypeName;
 import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.model.UserAttention;
 import com.dinglian.server.chuqulang.model.UserInterest;
@@ -303,12 +296,7 @@ public class UserController {
 				
 				// IP不同提示登录地点
 				String ip = request.getRemoteAddr();
-				String address = "";
-				try {
-					address = AddressUtils.getAddresses(ip);
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				}
+				String address = AddressUtils.getLoginAddresses(ip);
 				String content = "";
 				if (!ip.equalsIgnoreCase(user.getLastLoginIp()) && StringUtils.isNotBlank(user.getLastLoginCity())) {
 					content = "最近一次登录地点：%s ,登录时间：%s ,IP地址：%s ";
@@ -554,7 +542,7 @@ public class UserController {
 	 * @return
 	 */
 	@ResponseBody
-	@RequestMapping(value = "/getContacts", method = RequestMethod.POST)
+	@RequestMapping(value = "/getContacts", method = RequestMethod.GET)
 	public Map<String, Object> getContacts() {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
@@ -574,11 +562,11 @@ public class UserController {
 			for (Contact contact : user.getContacts()) {
 				if (contact.getContactUser() != null) {
 					map = new HashMap<String, Object>();
-					map.put("contactId", contact.getContactUser().getId());
-					map.put("contactName", contact.getContactUser().getNickName());
-					map.put("contactPicture", contact.getContactUser().getPicture());
-					map.put("contactDegree", contact.getDegree());
-					map.put("contactDescription", contact.getDescription());
+					map.put("userId", contact.getContactUser().getId());
+					map.put("nickName", contact.getContactUser().getNickName());
+					map.put("picture", contact.getContactUser().getPicture());
+					map.put("degree", contact.getDegree());
+					map.put("description", contact.getDescription());
 					resultList.add(map);
 				}
 			}
@@ -601,7 +589,7 @@ public class UserController {
 	public Map<String, Object> getInterestTags() {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
-			logger.info("=====> Start to get tags <=====");
+			logger.info("=====> Start to get user interest tags <=====");
 			
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
@@ -618,16 +606,16 @@ public class UserController {
 			
 			Map<String, Object> map = null;
 			for (UserInterest interest : interests) {
-				map = new HashMap<String, Object>();
 				Tag tag = interest.getTag();
 				if (tag != null) {
+					map = new HashMap<String, Object>();
 					map.put("id", tag.getId());
 					map.put("name", tag.getName());
 					map.put("typename", tag.getTypeName() != null ? tag.getTypeName().getName() : "");
+					resultList.add(map);
 				}
-				resultList.add(map);
 			}
-			logger.info("=====> Get tags end <=====");
+			logger.info("=====> Get user interest tags end <=====");
 			
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
 		} catch (Exception e) {

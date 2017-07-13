@@ -1,29 +1,33 @@
 package com.dinglian.server.chuqulang.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.dao.CoterieDao;
 import com.dinglian.server.chuqulang.dao.TopicDao;
 import com.dinglian.server.chuqulang.model.Coterie;
+import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.Topic;
 import com.dinglian.server.chuqulang.service.DiscoverService;
 
 @Service
 public class DiscoverServiceImpl implements DiscoverService {
 
-    @Autowired
-    private CoterieDao coterieDao;
-    
-    @Autowired
-    private TopicDao topicDao;
-	
-	@Override
-	public List<Coterie> getCoterieList(int tagId, String type) throws Exception {
-		return coterieDao.getCoterieList(tagId, type);
-	}
+	@Autowired
+	private CoterieDao coterieDao;
+
+	@Autowired
+	private TopicDao topicDao;
+
+	/*
+	 * @Override public List<Coterie> getCoterieList(int tagId, String type)
+	 * throws Exception { return coterieDao.getCoterieList(tagId, type); }
+	 */
 
 	@Override
 	public Coterie findCoterieById(int id) throws Exception {
@@ -40,6 +44,24 @@ public class DiscoverServiceImpl implements DiscoverService {
 		return topicDao.findById(id);
 	}
 
+	@Override
+	public Map<String, Object> getCoterieList(SearchCriteria searchCriteria) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		int totalCount = coterieDao.getCoterieTotalCount();
+		List<Coterie> coteries = coterieDao.getCoterieList(searchCriteria);
+		map.put("totalCount", totalCount);
+		map.put("resultList", coteries);
+		return map;
+	}
 
-    
+	@Override
+	public Map<String, Object> getTopicList(SearchCriteria searchCriteria) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		int totalCount = coterieDao.getTopicTotalCount(searchCriteria.getCoterieId());
+		List<Topic> topics = coterieDao.getTopicList(searchCriteria);
+		map.put("totalCount", totalCount);
+		map.put("resultList", topics);
+		return map;
+	}
+
 }

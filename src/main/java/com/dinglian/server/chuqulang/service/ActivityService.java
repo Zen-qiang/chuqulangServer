@@ -33,7 +33,7 @@ public interface ActivityService {
 
 	void deleteUserCollect(UserCollect userCollect) throws Exception;
 
-	List<Event> getAllActivity(String keyword);
+//	List<Event> getAllActivity(String keyword);
 
 //	List<Tag> getTagListByTypeName(String typeName);
 

@@ -117,7 +117,7 @@ type : <input type="text" name="type" value="活动类型"/><br>
 </form>
 
 <h2>获取联系人</h2>
-<form action="user/getContacts" method="post">
+<form action="user/getContacts" method="get">
 	<button type="submit" >获取联系人</button>
 </form>
 
@@ -148,15 +148,21 @@ type : <input type="text" name="type" value="活动类型"/><br>
 </form>
 
 <h2>获取话题列表</h2>
-<form action="discover/getDiscoverList" method="post">
-	ringId：<input type="text" name="ringId"/><br>
+<form action="discover/getTopicList" method="post">
+	coterieId：<input type="text" name="coterieId" value="0"/><br>
+	start：<input type="text" name="start" value="0"/><br>
+	pagesize：<input type="text" name="pagesize" value="20"/><br>
+	orderby：<input type="text" name="orderby"/><br>
 	<button type="submit" >获取话题列表</button>
 </form>
 
 <h2>获取圈子列表</h2>
-<form action="discover/getRingList" method="post">
-	tagId：<input type="text" name="tagid"/><br>
-	type：<input type="text" name="type" value="new"/><br>
+<form action="discover/getCoterieList" method="post">
+	typename：<input type="text" name="typename"/><br>
+	tagid：<input type="text" name="tagid"/><br>
+	start：<input type="text" name="start" value="0"/><br>
+	pagesize：<input type="text" name="pagesize" value="20"/><br>
+	orderby：<input type="text" name="orderby" value=""/><br>
 	<button type="submit" >获取圈子列表</button>
 </form>
 

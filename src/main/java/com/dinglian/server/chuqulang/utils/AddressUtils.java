@@ -8,15 +8,21 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * 根据IP地址获取详细的地域信息
  */
 public class AddressUtils {
-	
+
 	private static final String URL = "http://ip.taobao.com/service/getIpInfo.php";
-	
+
 	private static final String ENCODING = "utf-8";
-	
+
+	private static String DATATYPE = "text";
+	private static String SERVICE_URL = "http://api.ip138.com/query/?ip=%s&datatype=%s";
+	private static String TOKEN = "c933ac70edf73ddd34166323c76dced1";
+
 	/**
 	 *
 	 * @param content
@@ -29,7 +35,7 @@ public class AddressUtils {
 	public static String getAddresses(String ip) throws UnsupportedEncodingException {
 		String content = "ip=" + ip;
 		// 这里调用pconline的接口
-		
+
 		String returnStr = getResult(URL, content, ENCODING);
 		if (returnStr != null) {
 			// 处理返回的省市区信息
@@ -76,7 +82,7 @@ public class AddressUtils {
 				}
 			}
 
-			String ipInfo = country +" " + region + " " + city + " " + isp;
+			String ipInfo = country + " " + region + " " + city + " " + isp;
 			return ipInfo;
 		}
 		return null;
@@ -198,10 +204,49 @@ public class AddressUtils {
 		}
 		return outBuffer.toString();
 	}
+
+	// =================== IP138 ====================
+	private static String query(String ip) {
+		try {
+			String urlStr = String.format(SERVICE_URL, ip, DATATYPE);
+			URL url = new URL(urlStr);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setConnectTimeout(5 * 1000);
+			conn.setReadTimeout(5 * 1000);
+			conn.setDoInput(true);
+			conn.setDoOutput(true);
+			conn.setUseCaches(false);
+			conn.setInstanceFollowRedirects(false);
+			conn.setRequestMethod("GET");
+			conn.setRequestProperty("token", TOKEN);
+			int responseCode = conn.getResponseCode();
+			if (responseCode == 200) {
+				StringBuilder builder = new StringBuilder();
+				BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+				for (String s = br.readLine(); s != null; s = br.readLine()) {
+					builder.append(s);
+				}
+				br.close();
+				return builder.toString();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
+	public static String getLoginAddresses(String ip) {
+		String info = query(ip);
+		if (!info.equalsIgnoreCase("err:无效ip") && StringUtils.isNotBlank(info)) {
+			String[] infos = info.split("	");
+			return infos[1];
+		}
+		return "";
+	}
+
 	// 测试
 	public static void main(String[] args) {
-		AddressUtils addressUtils = new AddressUtils();
+		/*AddressUtils addressUtils = new AddressUtils();
 		String ip = "222.186.18.170";
 		String address = "";
 		try {
@@ -210,7 +255,13 @@ public class AddressUtils {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println(address);*/
+		// 中国 江苏省 镇江市 电信
+		String address = query("222.186.18.170");
 		System.out.println(address);
-//		中国 江苏省 镇江市 电信
+		String[] strs = address.split("	");
+		for (String s : strs) {
+			System.out.println(s);
+		}
 	}
 }

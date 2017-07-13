@@ -101,10 +101,10 @@ public class ActivityServiceImpl implements ActivityService {
 		userCollectDao.delete(userCollect);
 	}
 
-	@Override
+	/*@Override
 	public List<Event> getAllActivity(String keyword) {
 		return eventDao.getAllActivity(keyword);
-	}
+	}*/
 
 	/*@Override
 	public List<Tag> getTagListByTypeName(String typeName) {

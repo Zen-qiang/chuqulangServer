@@ -20,12 +20,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.dinglian.server.chuqulang.base.ApplicationConfig;
+import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.comparator.TopicCommentComparator;
 import com.dinglian.server.chuqulang.comparator.TopicPictureComparator;
 import com.dinglian.server.chuqulang.comparator.TopicPraiseComparator;
 import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.CoteriePicture;
+import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.Topic;
 import com.dinglian.server.chuqulang.model.TopicComment;
 import com.dinglian.server.chuqulang.model.TopicPicture;
@@ -51,115 +54,137 @@ public class DiscoverController {
 
 	/**
 	 * 获取圈子列表
-	 * @param tagId	标签ID
-	 * @param type	排序类型
+	 * @param typeName	圈子类型
+	 * @param tagId		标签ID
+	 * @param startRow	开始行
+     * @param pageSize	每页记录
+     * @param orderBy	排序
 	 * @return
 	 */
 	@ResponseBody
-	@RequestMapping(value = "/getRingList", method = RequestMethod.POST)
-	public Map<String, Object> getCoterieList(@RequestParam(name = "tagid", required = false) String tagIdStr,
-			@RequestParam("type") String type) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+	@RequestMapping(value = "/getCoterieList", method = RequestMethod.POST)
+	public Map<String, Object> getCoterieList(
+			@RequestParam(name = "typename", required = false) String typeName, 
+			@RequestParam(name = "tagid", required = false) Integer tagId,
+			@RequestParam(name = "pagesize", required = false) Integer pageSize,
+			@RequestParam(name = "start", required = false) Integer startRow,
+			@RequestParam(name = "orderby", required = false) String orderBy) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
 			logger.info("=====> Start to get coterie list <=====");
-			
-			int tagId = Integer.parseInt(tagIdStr);
-			List<Coterie> coterieList = discoverService.getCoterieList(tagId, type);
-
-			List<Map> resultList = new ArrayList<Map>();
-			Map<String, Object> result = null;
-			for (Coterie coterie : coterieList) {
-				result = new HashMap<String, Object>();
-				CoteriePicture coteriePicture = coterie.getCoteriePicture();
-				Set<CoterieGuy> coterieGuys = coterie.getCoterieGuys();
-
-				result.put("ringId", coterie.getId());
-				result.put("picture", coteriePicture != null ? coteriePicture.getUrl() : "");
-				result.put("shortname", coterie.getName());
-				result.put("description", coterie.getDescription());
-				result.put("fllowers", coterieGuys.size());
-				resultList.add(result);
+			if (startRow == null) {
+				startRow = 0;
 			}
+			if (pageSize == null) {
+				pageSize = ApplicationConfig.getInstance().getDefaultPageSize();
+			}
+			SearchCriteria searchCriteria = new SearchCriteria();
+			searchCriteria.setTypeName(typeName);
+			searchCriteria.setTagId(tagId);
+			searchCriteria.setStartRow(startRow);
+			searchCriteria.setPageSize(pageSize);
+			searchCriteria.setOrderBy(orderBy);
+			
+			Map<String, Object> coterieMap = discoverService.getCoterieList(searchCriteria);
+			List<Coterie> coteries = (List<Coterie>) coterieMap.get("resultList");
+			int total = (int) coterieMap.get("totalCount");
+
+			Map<String, Object> resultMap = new HashMap<String, Object>();
+			resultMap.put("total", total);
+			resultMap.put("start", startRow);
+			List<Map> resultList = new ArrayList<Map>();
+			if (coteries != null) {
+				for (Coterie coterie : coteries) {
+					Map<String, Object> result = new HashMap<String, Object>();
+					CoteriePicture coteriePicture = coterie.getCoteriePicture();
+					Set<CoterieGuy> coterieGuys = coterie.getCoterieGuys();
+					
+					result.put("coterieId", coterie.getId());
+					result.put("picture", coteriePicture != null ? coteriePicture.getUrl() : "");
+					result.put("name", coterie.getName());
+					result.put("description", coterie.getDescription());
+					result.put("fllowers", coterieGuys.size());
+					resultList.add(result);
+				}
+			}
+			resultMap.put("cnt", resultList.size());
+			resultMap.put("lists", resultList);
 			logger.info("=====> Get coterie list end <=====");
 			
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "", resultMap);
 		} catch (Exception e) {
 			e.printStackTrace();
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
 
-		return resultMap;
+		return responseMap;
 	}
 
 	/**
 	 * 获取话题列表
-	 * @param coterieIdStr 圈子ID
+	 * @param coterieId	圈子ID
+	 * @param pageSize	
+	 * @param startRow
+	 * @param orderBy
 	 * @return
 	 */
 	@ResponseBody
-	@RequestMapping(value = "/getDiscoverList", method = RequestMethod.POST)
-	public Map<String, Object> getTopicList(@RequestParam(name = "ringId", required = false) String coterieIdStr) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+	@RequestMapping(value = "/getTopicList", method = RequestMethod.POST)
+	public Map<String, Object> getTopicList(@RequestParam("coterieId") int coterieId,
+			@RequestParam(name = "pagesize", required = false) Integer pageSize,
+			@RequestParam(name = "start", required = false) Integer startRow,
+			@RequestParam(name = "orderby", required = false) String orderBy) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
 			logger.info("=====> Start to get topic list <=====");
 			
-			int coterieId = 0;
-			if (StringUtils.isNotBlank(coterieIdStr)) {
-				coterieId = Integer.parseInt(coterieIdStr);
+			if (startRow == null) {
+				startRow = 0;
 			}
-
-			List<Coterie> coterieList = new ArrayList<Coterie>();
-			if (coterieId == 0) {
-				// 获取所有圈子里的话题
-				coterieList = discoverService.getCoterieList(0, Coterie.TYPE_HOT);
-			} else {
-				// 获取指定圈子里的话题
-				Coterie coterie = discoverService.findCoterieById(coterieId);
-				if (coterie != null) {
-					coterieList.add(coterie);
-				}
+			if (pageSize == null) {
+				pageSize = ApplicationConfig.getInstance().getDefaultPageSize();
 			}
+			SearchCriteria searchCriteria = new SearchCriteria();
+			searchCriteria.setCoterieId(coterieId);
+			searchCriteria.setStartRow(startRow);
+			searchCriteria.setPageSize(pageSize);
+			searchCriteria.setOrderBy(orderBy);
+			
+			Map<String, Object> topicResultMap = discoverService.getTopicList(searchCriteria);
+			List<Topic> topics = (List<Topic>) topicResultMap.get("resultList");
+			int total = (int) topicResultMap.get("totalCount");
+			
+			Coterie coterie = discoverService.findCoterieById(coterieId);
+			Map<String, Object> resultMap = new HashMap<String, Object>();
+			resultMap.put("total", total);
+			resultMap.put("start", startRow);
+			
+			// 圈子信息
+			resultMap.put("coterieName", coterie.getName());
+			resultMap.put("pictures", coterie.getCoteriePicture() != null ? coterie.getCoteriePicture().getUrl() : "");
+			resultMap.put("description", coterie.getDescription());
+			resultMap.put("fllowers", coterie.getCoterieGuys().size());
+			
 
 			List<Map> resultList = new ArrayList<Map>();
-			Map<String, Object> result = null;
-			for (Coterie coterie : coterieList) {
-				result = new HashMap<String, Object>();
-				CoteriePicture coteriePicture = coterie.getCoteriePicture();
-				Set<CoterieGuy> coterieGuys = coterie.getCoterieGuys();
-
-				result.put("picture", coteriePicture != null ? coteriePicture.getUrl() : "");
-				result.put("shortname", coterie.getName());
-				result.put("description", coterie.getDescription());
-				result.put("fllowers", coterieGuys.size());
-
-				Set<Topic> topics = coterie.getTopics();
-				List<Map> discovers = new ArrayList<Map>();
-
-				Map<String, Object> discoverMap = null;
-				Map<String, Object> userMap = null;
-				Map<String, Object> topicMap = null;
+			if (topics != null) {
 				for (Topic topic : topics) {
-					discoverMap = new HashMap<String, Object>();
-
+					Map<String, Object> result = new HashMap<String, Object>();
+					
+					Map<String, Object> userMap = new HashMap<String, Object>();
 					User creator = topic.getCreator();
-					userMap = new HashMap<String, Object>();
 					if (creator != null) {
 						userMap.put("nickname", creator.getNickName());
 						userMap.put("picture", creator.getPicture());
 					}
-					System.out.println(creator);
-
-					topicMap = new HashMap<String, Object>();
-					topicMap.put("discoverId", topic.getId());
+					result.put("user", userMap);
+					
+					Map<String, Object> topicMap = new HashMap<String, Object>();
+					topicMap.put("topicId", topic.getId());
 					topicMap.put("description", topic.getDescription());
 
 					List<TopicPicture> topicPictures = new ArrayList<TopicPicture>(topic.getPictures());
-					Collections.sort(topicPictures, new Comparator<TopicPicture>() {
-						@Override
-						public int compare(TopicPicture o1, TopicPicture o2) {
-							return o1.getOrderNo() - o2.getOrderNo();
-						}
-					});
+					Collections.sort(topicPictures, new TopicPictureComparator());
 
 					List<String> pictures = new ArrayList<String>();
 					for (TopicPicture topicPicture : topicPictures) {
@@ -167,28 +192,29 @@ public class DiscoverController {
 					}
 
 					topicMap.put("pictures", pictures);
-					topicMap.put("publishTime", DateUtils.format(topic.getCreationDate(), DateUtils.yMdHms));
-
-					discoverMap.put("user", userMap);
-					discoverMap.put("discover", topicMap);
-					discoverMap.put("commentNum", topic.getComments().size());
-					discoverMap.put("getFavNum", topic.getPraises().size());
-					discovers.add(discoverMap);
+					topicMap.put("releaseTime", DateUtils.format(topic.getCreationDate(), DateUtils.yMdHms));
+					
+					topicMap.put("commentsCount", topic.getComments().size());
+					topicMap.put("praisesCount", topic.getPraises().size());
+					
+					result.put("topics", topicMap);
+					
+					resultList.add(result);
 				}
-				result.put("discovers", discovers);
-
-				resultList.add(result);
-
 			}
+			
+			resultMap.put("cnt", resultList.size());
+			resultMap.put("lists", resultList);
+			
 			logger.info("=====> Get topic list end <=====");
 			
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "", resultMap);
 		} catch (Exception e) {
 			e.printStackTrace();
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
 
-		return resultMap;
+		return responseMap;
 	}
 
 	/**

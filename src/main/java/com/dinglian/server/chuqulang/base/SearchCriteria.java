@@ -15,6 +15,11 @@ public class SearchCriteria {
 	private int pageSize;
 	private boolean isOwnList;
 
+	private String typeName;
+	private Integer tagId;
+
+	private int coterieId;
+
 	public int getUserId() {
 		return userId;
 	}
@@ -85,6 +90,30 @@ public class SearchCriteria {
 
 	public void setOwnList(boolean isOwnList) {
 		this.isOwnList = isOwnList;
+	}
+
+	public String getTypeName() {
+		return typeName;
+	}
+
+	public void setTypeName(String typeName) {
+		this.typeName = typeName;
+	}
+
+	public Integer getTagId() {
+		return tagId;
+	}
+
+	public void setTagId(Integer tagId) {
+		this.tagId = tagId;
+	}
+
+	public int getCoterieId() {
+		return coterieId;
+	}
+
+	public void setCoterieId(int coterieId) {
+		this.coterieId = coterieId;
 	}
 
 }

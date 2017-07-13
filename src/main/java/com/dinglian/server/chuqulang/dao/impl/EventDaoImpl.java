@@ -1,8 +1,6 @@
 package com.dinglian.server.chuqulang.dao.impl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Query;
@@ -23,7 +21,7 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 		super(entityClass);
 	}
 
-	@Override
+	/*@Override
 	public List<Event> getAllActivity(String keyword) {
 		String hql = "FROM Event WHERE 1=1 ";
 		if (StringUtils.isNotBlank(keyword)) {
@@ -34,7 +32,7 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 			query.setString("keyword", "%" + keyword + "%");
 		}
 		return query.list();
-	}
+	}*/
 
 	@Override
 	public List<Event> getActivityList(SearchCriteria searchCriteria) {

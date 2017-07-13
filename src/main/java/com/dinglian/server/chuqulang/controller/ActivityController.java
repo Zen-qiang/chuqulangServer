@@ -144,10 +144,10 @@ public class ActivityController {
             , @RequestParam(name = "password",required = false) String password
             , @RequestParam("tags") int[] tags
             , @RequestParam("name") String name
-            , @RequestParam(name = "startTime") long retime
+            , @RequestParam("startTime") long retime
             , @RequestParam("userCount") int userCount
             , @RequestParam("charge") String charge
-            , @RequestParam(name = "cost") double cost
+            , @RequestParam("cost") double cost
             , @RequestParam("gps") String gps
             , @RequestParam("address") String address
             , @RequestParam(name = "description", required = false) String description
