@@ -238,8 +238,9 @@ public class AddressUtils {
 	public static String getLoginAddresses(String ip) {
 		String info = query(ip);
 		if (!info.equalsIgnoreCase("err:无效ip") && StringUtils.isNotBlank(info)) {
-			String[] infos = info.split("	");
-			return infos[1];
+//			String[] infos = info.split("	");
+//			return infos[1];
+			return info;
 		}
 		return "";
 	}
