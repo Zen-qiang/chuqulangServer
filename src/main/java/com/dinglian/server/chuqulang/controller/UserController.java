@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -59,6 +61,13 @@ public class UserController {
 
 	@Autowired
 	private HttpServletRequest request;
+	
+	private static boolean isMobile(String phoneNo){
+		String regex = ApplicationConfig.getInstance().getPhoneNoRegex();
+		Pattern p = Pattern.compile(regex);  
+		Matcher m = p.matcher(phoneNo);  
+		return m.matches();
+	}
 
 	/**
 	 * 发送验证码
@@ -72,9 +81,12 @@ public class UserController {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		logger.info("=====> Start to send verify no <=====");
 		
-		// 添加手机号格式验证，等前台格式
-		
 		try {
+			// 添加手机号格式验证
+			if (!isMobile(phoneNo)) {
+				throw new RuntimeException("请输入正确的手机号码");
+			}
+
 			// 读取短信接口配置文件
 			Properties prop =  new Properties();
 			logger.info("loading sms.properties...");
@@ -160,6 +172,12 @@ public class UserController {
 		
 		try {
 			logger.info("=====> Start to check phoneno duplicate <=====");
+			
+			// 添加手机号格式验证
+			if (!isMobile(phoneNo)) {
+				throw new RuntimeException("请输入正确的手机号码");
+			}
+						
 			// 检查手机号码是否注册
 			SearchCriteria searchCriteria = new SearchCriteria();
 			searchCriteria.setPhoneNo(phoneNo);
@@ -218,7 +236,10 @@ public class UserController {
 		
 		try {
 			logger.info("=====> Start to reset password <=====");
-			
+			if (!isMobile(phoneNo)) {
+				throw new RuntimeException("请输入正确的手机号码");
+			}
+						
 			SearchCriteria searchCriteria = new SearchCriteria();
 			searchCriteria.setPhoneNo(phoneNo);
 			User user = userService.getUser(searchCriteria);

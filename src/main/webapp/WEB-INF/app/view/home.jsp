@@ -19,6 +19,9 @@
 					  dataType : 'register'
 				  },
 				  success: function(response,status,xhr){
+					  if (response.message) {
+						alert(response.message);
+					  }
 					  console.log(response);
 				  },
 				  dataType: 'json'
