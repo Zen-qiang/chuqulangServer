@@ -26,6 +26,7 @@ import com.dinglian.server.chuqulang.comparator.TopicPraiseComparator;
 import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.CoteriePicture;
+import com.dinglian.server.chuqulang.model.Tag;
 import com.dinglian.server.chuqulang.model.Topic;
 import com.dinglian.server.chuqulang.model.TopicComment;
 import com.dinglian.server.chuqulang.model.TopicPicture;
@@ -392,6 +393,62 @@ public class DiscoverController {
 		}
 
 		return resultMap;
+	}
+	
+	/**
+	 * 搜索圈子/话题
+	 * @param keyword	关键字
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/searchActivityOrTopic")
+	public Map<String, Object> searchActivityOrTopic(@RequestParam("keyword")String keyword) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try{
+			logger.info("=====> Start to search activity or topic <=====");
+			
+			Map<String, Object> resultMap = discoverService.searchActivityOrTopic(keyword);
+			List<Coterie> coteries = (List<Coterie>) resultMap.get("coterieList");
+			List<Topic> topics = (List<Topic>) resultMap.get("topicList");
+			
+			Map<String, Object> result = new HashMap<String, Object>();
+			if (coteries != null) {
+				List<Map> coterieList = new ArrayList<Map>();
+				for (Coterie coterie : coteries) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("id", coterie.getId());
+					map.put("name", coterie.getName());
+					map.put("description", coterie.getDescription());
+					map.put("hot", coterie.getHot());
+					Tag tag = coterie.getTag();
+					if (tag != null) {
+						map.put("tagName", tag.getName());
+					}
+					coterieList.add(map);
+				}
+				result.put("coteries", coterieList);
+				result.put("coterieCnt", coterieList.size());
+			}
+			if (topics != null) {
+				List<Map> topicList = new ArrayList<Map>();
+				for (Topic topic : topics) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("id", topic.getId());
+					map.put("description", topic.getDescription());
+					topicList.add(map);
+				}
+				result.put("topics", topicList);
+				result.put("topicCnt", topicList.size());
+			}
+			
+			logger.info("=====> Search activity or topic type end <=====");
+			
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+		}
+		return responseMap;
 	}
 	
 }

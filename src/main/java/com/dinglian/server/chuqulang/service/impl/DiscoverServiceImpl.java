@@ -64,4 +64,14 @@ public class DiscoverServiceImpl implements DiscoverService {
 		return map;
 	}
 
+	@Override
+	public Map<String, Object> searchActivityOrTopic(String keyword) {
+		List<Coterie> coteries = coterieDao.getCoteriesByName(keyword);
+		List<Topic> topics = topicDao.getTopicsByName(keyword);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("coterieList", coteries);
+		map.put("topicList", topics);
+		return map;
+	}
+
 }

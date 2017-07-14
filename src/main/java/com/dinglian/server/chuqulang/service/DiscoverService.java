@@ -20,4 +20,6 @@ public interface DiscoverService {
 
 	Map<String, Object> getTopicList(SearchCriteria searchCriteria);
 
+	Map<String, Object> searchActivityOrTopic(String keyword);
+
 }

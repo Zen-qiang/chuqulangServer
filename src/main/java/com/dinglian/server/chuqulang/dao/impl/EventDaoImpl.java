@@ -86,5 +86,5 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 		int count = ((Number)query.uniqueResult()).intValue();
 		return count;
 	}
-	
+
 }

@@ -102,4 +102,15 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 		return query.list();
 	}
 
+	@Override
+	public List<Coterie> getCoteriesByName(String keyword) {
+		if (StringUtils.isNotBlank(keyword)) {
+			String hql = "FROM Coterie WHERE 1=1 AND (name like :keyword OR description like :keyword) ORDER BY hot DESC ";
+			Query query = getCurrentSession().createQuery(hql);
+			query.setString("keyword", "%" + keyword + "%");
+			return query.list();
+		}
+		return null;
+	}
+
 }

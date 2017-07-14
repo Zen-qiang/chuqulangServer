@@ -98,6 +98,12 @@
 <h2>Hello world!</h2>
 <P>  The time on the server is ${serverTime}. </P>
 
+<h2>搜索圈子或者话题</h2>
+<form action="discover/searchActivityOrTopic" method="get">
+keyword : <input type="text" name="keyword" value=""/><br>
+	<button type="submit" >搜索圈子或者话题</button>
+</form>
+
 <h2>关注用户</h2>
 <form action="user/followUser" method="post">
 userId : <input type="text" name="userId" value=""/><br>

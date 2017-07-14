@@ -18,4 +18,6 @@ public interface CoterieDao extends GenericDao<Coterie> {
 
 	List<Topic> getTopicList(SearchCriteria searchCriteria);
 
+	List<Coterie> getCoteriesByName(String keyword);
+
 }
