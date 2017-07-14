@@ -98,6 +98,12 @@
 <h2>Hello world!</h2>
 <P>  The time on the server is ${serverTime}. </P>
 
+<h2>关注用户</h2>
+<form action="user/followUser" method="post">
+userId : <input type="text" name="userId" value=""/><br>
+	<button type="submit" >关注用户</button>
+</form>
+
 <h2>获取标签列表</h2>
 <form action="activity/getTagList" method="get">
 typeNameId : <input type="text" name="typeNameId" value=""/><br>

@@ -19,6 +19,7 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.subject.Subject;
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -718,6 +719,45 @@ public class UserController {
 			logger.info("=====> Get user attention end <=====");
 			
 			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "", resultMap);
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+		}
+		return responseMap;
+	}
+	
+	/**
+	 * 关注用户
+	 * @param followUserId
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/followUser", method = RequestMethod.POST)
+	public Map<String, Object> followUser(@RequestParam("userId") int followUserId) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			logger.info("=====> Start to follow user <=====");
+			User currentUser = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
+			
+			int userId = currentUser.getId();
+			currentUser = userService.findUserById(userId);
+			if (currentUser == null) {
+				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+			}
+			
+			User followUser = userService.findUserById(followUserId);
+			if (followUser == null) {
+				throw new NullPointerException("用户ID：" + followUserId + " , 用户不存在。");
+			}
+			
+			UserAttention attention = new UserAttention(currentUser, followUser);
+			userService.saveUserAttention(attention);
+			
+			logger.info("=====> Follow user end <=====");
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "");
+		} catch (ConstraintViolationException e) {
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, "已经关注用户");
+//			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());

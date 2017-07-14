@@ -11,4 +11,6 @@ public interface GeneralDao {
 
 	int getUserAttentionTotalCount(SearchCriteria searchCriteria);
 
+	void saveUserAttention(UserAttention attention);
+
 }

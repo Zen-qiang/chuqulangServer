@@ -67,5 +67,18 @@ public class UserAttention {
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
 	}
+	
+	public UserAttention() {
+		// TODO Auto-generated constructor stub
+	}
+
+	public UserAttention(User user, User attentionUser) {
+		super();
+		this.user = user;
+		this.attentionUser = attentionUser;
+		this.creationDate = new Date();
+	}
+	
+	
 
 }

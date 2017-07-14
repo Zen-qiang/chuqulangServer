@@ -100,5 +100,10 @@ public class UserServiceImpl implements UserService {
 		return map;
 	}
 
+	@Override
+	public void saveUserAttention(UserAttention attention) {
+		generalDao.saveUserAttention(attention);
+	}
+
 
 }

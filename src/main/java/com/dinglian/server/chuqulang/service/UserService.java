@@ -35,4 +35,6 @@ public interface UserService {
 
 	public Map<String, Object> getUserAttentions(SearchCriteria searchCriteria);
 
+	public void saveUserAttention(UserAttention attention);
+
 }

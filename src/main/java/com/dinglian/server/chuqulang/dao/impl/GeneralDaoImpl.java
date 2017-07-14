@@ -61,4 +61,9 @@ public class GeneralDaoImpl implements GeneralDao {
 		return count;
 	}
 
+	@Override
+	public void saveUserAttention(UserAttention attention) {
+		getCurrentSession().save(attention);
+	}
+
 }
