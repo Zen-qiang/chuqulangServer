@@ -19,6 +19,7 @@ public class SearchCriteria {
 	private Integer tagId;
 
 	private int coterieId;
+	private boolean isAttention;
 
 	public int getUserId() {
 		return userId;
@@ -114,6 +115,14 @@ public class SearchCriteria {
 
 	public void setCoterieId(int coterieId) {
 		this.coterieId = coterieId;
+	}
+
+	public boolean isAttention() {
+		return isAttention;
+	}
+
+	public void setAttention(boolean isAttention) {
+		this.isAttention = isAttention;
 	}
 
 }

@@ -535,68 +535,6 @@ public class ActivityController {
 
 		return resultMap;
 	}
-
-    /*@ResponseBody
-	@RequestMapping(value = "/getAllActivity")
-	public Map<String, Object> getAllActivity(@RequestParam(name = "orderBy", required = false) String orderBy, 
-			@RequestParam(name = "category", required = false) String category, 
-			@RequestParam(name = "status", required = false) String status,
-			@RequestParam(name = "keyword", required = false) String keyword) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		try{
-			logger.info("=====> Start to get all activity <=====");
-			
-			List<Event> events = activityService.getAllActivity(keyword);
-			List<Map> resultList = new ArrayList<Map>();
-			for (Event event : events) {
-				Map<String, Object> result = new HashMap<String, Object>();
-				
-				EventPicture cover = event.getCover();
-				result.put("eventId", event.getId());
-				result.put("picture", cover != null ? cover.getUrl() : "");
-				result.put("name", event.getName());
-				result.put("releaseTime", event.getCreationDate());
-				result.put("startTime", event.getStartTime());
-				result.put("status", event.getStatus());
-				result.put("charge", event.getCharge());
-				result.put("cost", event.getCost());
-				result.put("gps", event.getGps());
-				result.put("isOpen", event.isOpen());
-				result.put("address", event.getAddress());
-				
-				// 个人/官方组织
-				TypeName typeName = event.getTypeName();
-				result.put("typeName", typeName != null ? typeName.getName() : "");
-				
-				List<Map> tagList = new ArrayList<>();
-				Set<EventTag> eventTags = event.getTags();
-				for (EventTag eventTag : eventTags) {
-					Tag tag = eventTag.getTag();
-					Map<String, Object> tagsMap = new HashMap<String, Object>();
-					tagsMap.put("tagId", tag.getId());
-					tagsMap.put("tagName", tag.getName());
-					tagList.add(tagsMap);
-				}
-				result.put("tags", tagList);
-				
-				Set<EventUser> eventUsers = event.getEventUsers();
-				Map<String, Object> numbersMap = new HashMap<String, Object>();
-				numbersMap.put("num", event.getUserCount());
-				numbersMap.put("enteringNum", eventUsers.size());
-				result.put("numbers", numbersMap);
-				
-				resultList.add(result);
-			}
-			
-			logger.info("=====> Get all activity end <=====");
-			
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
-		} catch (Exception e) {
-			e.printStackTrace();
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
-		}
-		return resultMap;
-	}*/
     
     /**
      * 获取标签列表

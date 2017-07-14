@@ -2,10 +2,11 @@ package com.dinglian.server.chuqulang.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.dinglian.server.chuqulang.base.SearchCriteria;
-import com.dinglian.server.chuqulang.model.Contact;
 import com.dinglian.server.chuqulang.model.User;
+import com.dinglian.server.chuqulang.model.UserAttention;
 import com.dinglian.server.chuqulang.model.VerifyNo;
 
 public interface UserService {
@@ -32,6 +33,6 @@ public interface UserService {
 
 	public User getUserByUsername(String username);
 
-//	public List<Contact> getContactList(int id);
+	public Map<String, Object> getUserAttentions(SearchCriteria searchCriteria);
 
 }

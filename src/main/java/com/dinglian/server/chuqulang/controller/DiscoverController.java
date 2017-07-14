@@ -2,13 +2,11 @@ package com.dinglian.server.chuqulang.controller;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
@@ -28,7 +26,6 @@ import com.dinglian.server.chuqulang.comparator.TopicPraiseComparator;
 import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.CoteriePicture;
-import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.Topic;
 import com.dinglian.server.chuqulang.model.TopicComment;
 import com.dinglian.server.chuqulang.model.TopicPicture;

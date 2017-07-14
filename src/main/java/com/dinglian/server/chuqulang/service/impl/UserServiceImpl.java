@@ -1,18 +1,20 @@
 package com.dinglian.server.chuqulang.service.impl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dinglian.server.chuqulang.base.SearchCriteria;
-import com.dinglian.server.chuqulang.dao.ContactDao;
+import com.dinglian.server.chuqulang.dao.GeneralDao;
 import com.dinglian.server.chuqulang.dao.UserDao;
 import com.dinglian.server.chuqulang.dao.VerifyNoDao;
-import com.dinglian.server.chuqulang.model.Contact;
 import com.dinglian.server.chuqulang.model.User;
+import com.dinglian.server.chuqulang.model.UserAttention;
 import com.dinglian.server.chuqulang.model.VerifyNo;
 import com.dinglian.server.chuqulang.service.UserService;
 
@@ -26,7 +28,7 @@ public class UserServiceImpl implements UserService {
     private VerifyNoDao verifyNoDao;
     
     @Autowired
-    private ContactDao contactDao;
+    private GeneralDao generalDao;
 
     @Override
     public void register(User user) throws Exception {
@@ -87,6 +89,16 @@ public class UserServiceImpl implements UserService {
     public void test() {
         System.out.println(new Date());
     }
+
+	@Override
+	public Map<String, Object> getUserAttentions(SearchCriteria searchCriteria) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		List<UserAttention> attentions = generalDao.getUserAttentions(searchCriteria);
+		int totalCount = generalDao.getUserAttentionTotalCount(searchCriteria);
+		map.put("totalCount", totalCount);
+		map.put("resultList", attentions);
+		return map;
+	}
 
 
 }

@@ -1,7 +1,6 @@
 package com.dinglian.server.chuqulang.controller;
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -9,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -28,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.comparator.UserInterestComparator;
 import com.dinglian.server.chuqulang.model.Contact;
@@ -626,13 +625,21 @@ public class UserController {
 	}
 	
 	/**
-	 * 获取用户关注
+	 * 获取用户关注/粉丝
+	 * @param isAttention	true：返回我的关注	false：返回我的粉丝
+	 * @param pageSize
+	 * @param startRow
+	 * @param orderBy
 	 * @return
 	 */
 	@ResponseBody
-	@RequestMapping(value = "/getUserAttention", method = RequestMethod.POST)
-	public Map<String, Object> getUserAttention() {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+	@RequestMapping(value = "/getUserAttention", method = RequestMethod.GET)
+	public Map<String, Object> getUserAttention(
+			@RequestParam("isAttention") boolean isAttention,
+			@RequestParam(name = "pagesize", required = false) Integer pageSize,
+			@RequestParam(name = "start", required = false) Integer startRow,
+			@RequestParam(name = "orderby", required = false) String orderBy) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
 			logger.info("=====> Start to get user attention <=====");
 			
@@ -644,71 +651,58 @@ public class UserController {
 			if (user == null) {
 				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
 			}
+			// default value
+			if (startRow == null) {
+				startRow = 0;
+			}
+			if (pageSize == null) {
+				pageSize = ApplicationConfig.getInstance().getDefaultPageSize();
+			}
+			
+			SearchCriteria searchCriteria = new SearchCriteria();
+			searchCriteria.setStartRow(startRow);
+			searchCriteria.setPageSize(pageSize);
+			searchCriteria.setOrderBy(orderBy);
+			searchCriteria.setUserId(userId);
+			searchCriteria.setAttention(isAttention);
+			
+			Map<String, Object> attentionMap = userService.getUserAttentions(searchCriteria);
+			List<UserAttention> attentions = (List<UserAttention>) attentionMap.get("resultList");
+			int total = (int) attentionMap.get("totalCount");
+			
+			Map<String, Object> resultMap = new HashMap<String, Object>();
+			resultMap.put("total", total);
+			resultMap.put("start", startRow);
 			
 			List<Map> resultList = new ArrayList<Map>();
 			Map<String, Object> map = null;
-			Set<UserAttention> attentions = user.getAttentions();
 			for (UserAttention userAttention : attentions) {
-				if (userAttention.getAttentionUser() != null) {
+				User attentionUser = null;
+				if (isAttention) {
+					attentionUser = userAttention.getAttentionUser();
+				} else {
+					attentionUser = userAttention.getUser();
+				}
+				if (attentionUser != null) {
 					map = new HashMap<String, Object>();
-					map.put("attentionUserId", userAttention.getAttentionUser().getId());
-					map.put("attentionUserName", userAttention.getAttentionUser().getNickName());
-					map.put("attentionUserPicture", userAttention.getAttentionUser().getPicture());
+					map.put("userId", attentionUser.getId());
+					map.put("nickName", attentionUser.getNickName());
+					map.put("picture", attentionUser.getPicture());
 					resultList.add(map);
 				}
 			}
+			resultMap.put("cnt", resultList.size());
+			resultMap.put("lists", resultList);
+			
 			logger.info("=====> Get user attention end <=====");
 			
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "", resultMap);
 		} catch (Exception e) {
 			e.printStackTrace();
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
-		return resultMap;
+		return responseMap;
 	}
-	
-	/**
-	 * 获取用户粉丝
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/getUserFollow", method = RequestMethod.POST)
-	public Map<String, Object> getUserFollow() {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		try {
-			logger.info("=====> Start to get user follow <=====");
-			
-			Subject currentUser = SecurityUtils.getSubject();
-			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-			
-			int userId = user.getId();
-			user = userService.findUserById(userId);
-			if (user == null) {
-				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}
-			
-			List<Map> resultList = new ArrayList<Map>();
-			Map<String, Object> map = null;
-			Set<UserAttention> followers = user.getFollowers();
-			for (UserAttention userAttention : followers) {
-				if (userAttention.getUser() != null) {
-					map = new HashMap<String, Object>();
-					map.put("followUserId", userAttention.getUser().getId());
-					map.put("followUserName", userAttention.getUser().getNickName());
-					map.put("followUserPicture", userAttention.getUser().getPicture());
-					resultList.add(map);
-				}
-			}
-			logger.info("=====> Get user follow end <=====");
-			
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
-		} catch (Exception e) {
-			e.printStackTrace();
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
-		}
-		return resultMap;
-	}
-	
 	
 	@ResponseBody
 	@RequestMapping(value = "/test")

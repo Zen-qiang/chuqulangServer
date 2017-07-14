@@ -21,19 +21,6 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 		super(entityClass);
 	}
 
-	/*@Override
-	public List<Event> getAllActivity(String keyword) {
-		String hql = "FROM Event WHERE 1=1 ";
-		if (StringUtils.isNotBlank(keyword)) {
-			hql += "AND name like :keyword ";
-		}
-		Query query = getCurrentSession().createQuery(hql);
-		if (StringUtils.isNotBlank(keyword)) {
-			query.setString("keyword", "%" + keyword + "%");
-		}
-		return query.list();
-	}*/
-
 	@Override
 	public List<Event> getActivityList(SearchCriteria searchCriteria) {
 		StringBuffer sb = new StringBuffer("FROM Event e ");

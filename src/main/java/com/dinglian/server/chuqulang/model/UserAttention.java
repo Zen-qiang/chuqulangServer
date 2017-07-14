@@ -14,7 +14,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
-@Table(name = "user_attention_to", uniqueConstraints = { 
+@Table(name = "user_attention", uniqueConstraints = { 
 		@UniqueConstraint(columnNames = { "fk_user_id", "attention_user_id" })
 })
 @Entity
@@ -67,7 +67,5 @@ public class UserAttention {
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
 	}
-	
-	
 
 }

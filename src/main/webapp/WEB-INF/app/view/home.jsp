@@ -107,14 +107,14 @@ type : <input type="text" name="type" value="活动类型"/><br>
 	<button type="submit" >>获取活动类型</button>
 </form>
 
-<h2>获取用户关注</h2>
-<form action="user/getUserAttention" method="post">
+<h2>获取用户关注/粉丝</h2>
+<form action="user/getUserAttention" method="get">
+isAttention : <input type="text" name="isAttention" value="true"/><br>
+start : <input type="text" name="start" value="0"/><br>
+pagesize : <input type="text" name="pagesize" value="1"/><br>
 	<button type="submit" >获取用户关注</button>
 </form>
-<h2>获取用户粉丝</h2>
-<form action="user/getUserFollow" method="post">
-	<button type="submit" >获取用户粉丝</button>
-</form>
+
 
 <h2>获取联系人</h2>
 <form action="user/getContacts" method="get">
