@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -234,11 +235,11 @@ public class DiscoverController {
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			
-			int userId = user.getId();
-			user = userService.findUserById(userId);
-			if (user == null) {
-				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}
+//			int userId = user.getId();
+//			user = userService.findUserById(userId);
+//			if (user == null) {
+//				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+//			}
 
 			// 当前话题属于哪个圈子
 			int coterieId = Integer.parseInt(coterieIdStr);
@@ -279,11 +280,11 @@ public class DiscoverController {
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			
-			int userId = user.getId();
-			user = userService.findUserById(userId);
-			if (user == null) {
-				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}
+//			int userId = user.getId();
+//			user = userService.findUserById(userId);
+//			if (user == null) {
+//				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+//			}
 			
 			// 当前话题属于哪个圈子
 			int topicId = Integer.parseInt(topicIdStr);
@@ -444,6 +445,40 @@ public class DiscoverController {
 			logger.info("=====> Search activity or topic type end <=====");
 			
 			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+		}
+		return responseMap;
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/praiseTopic")
+	public Map<String, Object> praiseTopic(@RequestParam("topicId")int topicId) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try{
+			logger.info("=====> Start to praise topic <=====");
+			Subject currentUser = SecurityUtils.getSubject();
+			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			
+//			int userId = user.getId();
+//			user = userService.findUserById(userId);
+//			if (user == null) {
+//				throw new NullPointerException("用户信息不存在，请重新登录。");
+//			}
+			
+			Topic topic = discoverService.findTopicById(topicId);
+			if (topic == null) {
+				throw new NullPointerException("话题ID：" + topicId + " , 话题不存在。");
+			}
+			
+			int nextOrderNo = topic.getNextOrderNo();
+			discoverService.saveTopicPraise(new TopicPraise(topic, user, nextOrderNo));
+			
+			logger.info("=====> Praise topic type end <=====");
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "");
+		} catch (ConstraintViolationException e) {
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, "不能重复点赞");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());

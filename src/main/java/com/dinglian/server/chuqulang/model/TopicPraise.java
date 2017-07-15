@@ -79,8 +79,17 @@ public class TopicPraise implements Serializable{
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
 	}
+
+	public TopicPraise() {
+		// TODO Auto-generated constructor stub
+	}
 	
-	
-	
+	public TopicPraise(Topic topic, User user, int orderNo) {
+		super();
+		this.topic = topic;
+		this.user = user;
+		this.orderNo = orderNo;
+		this.creationDate = new Date();
+	}
 	
 }

@@ -17,9 +17,6 @@ import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.utils.JsonString;
 import com.dinglian.server.chuqulang.utils.RequestHelper;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
 public class LoginInterceptor implements HandlerInterceptor{
 
 	private static final Log logger = LogFactory.getLog(LoginInterceptor.class);

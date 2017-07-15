@@ -95,8 +95,14 @@
 	</script>
 </head>
 <body>
-<h2>Hello world!</h2>
+<h2>测试页面</h2>
 <P>  The time on the server is ${serverTime}. </P>
+
+<h2>话题点赞</h2>
+<form action="discover/praiseTopic" method="get">
+topicId : <input type="text" name="topicId" value=""/><br>
+	<button type="submit" >话题点赞</button>
+</form>
 
 <h2>搜索圈子或者话题</h2>
 <form action="discover/searchActivityOrTopic" method="get">
@@ -224,9 +230,8 @@ isOwnList：<input type="text" name="isOwnList" value="false"/><br>
 <button type="button" id="launchActivity">launchActivity</button>
 
 <h2>更改头像：</h2>
-<form action="user/updatePicture" method="post">
-	<input type="hidden" name="userId" value="1"/>
-	新头像：<input type="file" name="url"/><br>
+<form action="user/updatePicture" enctype="multipart/form-data" method="post">
+	<input type="file" name="file" />
 	<button type="submit" >更改头像</button>
 </form>
 

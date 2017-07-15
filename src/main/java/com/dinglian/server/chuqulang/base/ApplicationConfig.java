@@ -42,4 +42,20 @@ public class ApplicationConfig {
 		return System.getProperty("phone.no.regex", "^1(3|4|5|7|8)\\d{9}$");
 	}
 
+	public String getResourceRoot() {
+		return System.getProperty("resource.root", "/chuqulang/resources");
+	}
+
+	public String getResourceProfileFolder() {
+		return System.getProperty("resource.profile.folder", "/profile/");
+	}
+
+	public String getResourceProfilePictureFolder() {
+		return System.getProperty("resource.profile.picture.folder", "/picture");
+	}
+	
+	public String getUserProfilePicturePath() {
+		return System.getProperty("resource.profile.picture.folder", getResourceRoot() + getResourceProfileFolder() + "%s" + getResourceProfilePictureFolder() + "/");
+	}
+
 }

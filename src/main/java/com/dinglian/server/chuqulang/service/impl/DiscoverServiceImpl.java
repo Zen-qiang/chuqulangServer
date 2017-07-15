@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.dao.CoterieDao;
+import com.dinglian.server.chuqulang.dao.GeneralDao;
 import com.dinglian.server.chuqulang.dao.TopicDao;
 import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.Topic;
+import com.dinglian.server.chuqulang.model.TopicPraise;
 import com.dinglian.server.chuqulang.service.DiscoverService;
 
 @Service
@@ -23,11 +25,9 @@ public class DiscoverServiceImpl implements DiscoverService {
 
 	@Autowired
 	private TopicDao topicDao;
-
-	/*
-	 * @Override public List<Coterie> getCoterieList(int tagId, String type)
-	 * throws Exception { return coterieDao.getCoterieList(tagId, type); }
-	 */
+	
+	@Autowired
+	private GeneralDao generalDao;
 
 	@Override
 	public Coterie findCoterieById(int id) throws Exception {
@@ -72,6 +72,11 @@ public class DiscoverServiceImpl implements DiscoverService {
 		map.put("coterieList", coteries);
 		map.put("topicList", topics);
 		return map;
+	}
+
+	@Override
+	public void saveTopicPraise(TopicPraise topicPraise) {
+		generalDao.saveTopicPraise(topicPraise);
 	}
 
 }

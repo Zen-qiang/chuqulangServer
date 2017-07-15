@@ -310,14 +310,14 @@ public class User implements Serializable{
 	}
 
 	@Transient
-	public int getUserCollectMaxOrderNo() {
+	public int getUserCollectNextOrderNo() {
 		int orderNo = 0;
 		for (UserCollect collect : userCollects) {
 			if (collect.getOrderNo() > orderNo) {
 				orderNo = collect.getOrderNo();
 			}
 		}
-		return orderNo;
+		return orderNo + 1;
 	}
 
 	

@@ -51,9 +51,6 @@ public class ActivityController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private HttpServletRequest request;
-
     /**
      * 活动报名
      * @param eventIdStr	活动ID
@@ -68,13 +65,13 @@ public class ActivityController {
         	
             Subject currentUser = SecurityUtils.getSubject();
             User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-            int userId = user.getId();
+//          int userId = user.getId();
             int eventId = Integer.parseInt(eventIdStr);
 
-            user = userService.findUserById(userId);
-            if (user == null) {
-				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}
+//          user = userService.findUserById(userId);
+//          if (user == null) {
+//				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+//			}
             Event event = activityService.getEventById(eventId);
             if (event == null) {
             	throw new NullPointerException("活动ID：" + eventId + " , 活动不存在。");
@@ -162,11 +159,11 @@ public class ActivityController {
         	Subject currentUser = SecurityUtils.getSubject();
         	User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
         	
-        	int userId = user.getId();
+        	/*int userId = user.getId();
 			user = userService.findUserById(userId);
 			if (user == null) {
 				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}
+			}*/
         	
             Event event = new Event();
             TypeName typeName = activityService.getTypeNameByName(typeNameStr);
@@ -295,8 +292,8 @@ public class ActivityController {
 				return resultMap;
 			}
 			if (needCollect) {
-				int orderNo = user.getUserCollectMaxOrderNo();
-				userCollect = new UserCollect(event, orderNo + 1, user);
+				int orderNo = user.getUserCollectNextOrderNo();
+				userCollect = new UserCollect(event, orderNo, user);
 				
 				activityService.saveUserCollect(userCollect);
 			} else {
@@ -341,11 +338,11 @@ public class ActivityController {
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			
-			int userId = user.getId();
+			/*int userId = user.getId();
 			user = userService.findUserById(userId);
 			if (user == null) {
 				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}
+			}*/
 			
 			// default value
 			if (startRow == null) {
@@ -367,7 +364,7 @@ public class ActivityController {
 			searchCriteria.setOwnList(isOwnList);
 			searchCriteria.setKeyword(keyword);
 			if (isOwnList) {
-				searchCriteria.setUserId(userId);
+				searchCriteria.setUserId(user.getId());
 			}
 			Map<String, Object> eventListMap = activityService.getActivityList(searchCriteria);
 			List<Event> events = (List<Event>) eventListMap.get("resultList");
@@ -390,7 +387,7 @@ public class ActivityController {
 					result.put("startTime", event.getStartTime());
 					
 					// 判断好友参与
-					boolean friendJoin = activityService.checkFriendJoin(event.getId(), userId);
+					boolean friendJoin = activityService.checkFriendJoin(event.getId(), user.getId());
 					result.put("status", friendJoin ? Event.STATUS_FRIENDS : event.getStatus());
 					
 					result.put("charge", event.getCharge());

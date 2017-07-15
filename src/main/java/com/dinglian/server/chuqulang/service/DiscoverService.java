@@ -5,10 +5,9 @@ import java.util.Map;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.Topic;
+import com.dinglian.server.chuqulang.model.TopicPraise;
 
 public interface DiscoverService {
-
-//	List<Coterie> getCoterieList(int tagId, String type) throws Exception;
 
 	Coterie findCoterieById(int coterieId) throws Exception;
 
@@ -21,5 +20,7 @@ public interface DiscoverService {
 	Map<String, Object> getTopicList(SearchCriteria searchCriteria);
 
 	Map<String, Object> searchActivityOrTopic(String keyword);
+
+	void saveTopicPraise(TopicPraise topicPraise);
 
 }

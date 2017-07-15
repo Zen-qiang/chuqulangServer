@@ -17,13 +17,17 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 /**
  * 话题
  * @author Mr.xu
  *
  */
-@Table(name = "topic")
+@Table(name = "topic", uniqueConstraints = { 
+		@UniqueConstraint(columnNames = { "fk_coterie_id", "fk_user_id" })
+})
 @Entity
 public class Topic implements Serializable {
 	
@@ -129,6 +133,21 @@ public class Topic implements Serializable {
 		this.description = description;
 		this.creationDate = new Date();
 	}
-	
+
+	public Topic(int id) {
+		super();
+		this.id = id;
+	}
+
+	@Transient
+	public int getNextOrderNo() {
+		int orderNo = 0;
+		for (TopicPraise praise : this.getPraises()) {
+			if (orderNo < praise.getOrderNo()) {
+				orderNo = praise.getOrderNo();
+			}
+		}
+		return orderNo + 1;
+	}
 	
 }

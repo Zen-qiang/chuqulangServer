@@ -3,6 +3,7 @@ package com.dinglian.server.chuqulang.dao;
 import java.util.List;
 
 import com.dinglian.server.chuqulang.base.SearchCriteria;
+import com.dinglian.server.chuqulang.model.TopicPraise;
 import com.dinglian.server.chuqulang.model.UserAttention;
 
 public interface GeneralDao {
@@ -12,5 +13,7 @@ public interface GeneralDao {
 	int getUserAttentionTotalCount(SearchCriteria searchCriteria);
 
 	void saveUserAttention(UserAttention attention);
+
+	void saveTopicPraise(TopicPraise topicPraise);
 
 }

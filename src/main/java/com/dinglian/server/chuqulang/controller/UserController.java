@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
@@ -45,6 +46,7 @@ import com.dinglian.server.chuqulang.utils.AddressUtils;
 import com.dinglian.server.chuqulang.utils.CodeUtils;
 import com.dinglian.server.chuqulang.utils.DateUtils;
 import com.dinglian.server.chuqulang.utils.EncryptHelper;
+import com.dinglian.server.chuqulang.utils.FileUploadHelper;
 import com.dinglian.server.chuqulang.utils.RequestHelper;
 import com.dinglian.server.chuqulang.utils.ResponseHelper;
 
@@ -56,9 +58,6 @@ public class UserController {
 	
 	@Autowired
 	private UserService userService;
-
-	@Autowired
-	private ActivityService activityService;
 
 	@Autowired
 	private HttpServletRequest request;
@@ -383,7 +382,7 @@ public class UserController {
 			result.put("lastLoginCity", user.getLastLoginCity());
 			result.put("lastLoginDate", user.getLastLoginDate());
 			result.put("lastLoginPhone", user.getLastLoginPhone());
-			result.put("typename", user.getTypeName());
+			result.put("typename", user.getTypeName() != null ? user.getTypeName().getName() : "");
 			
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
 		} catch (Exception e) {
@@ -408,11 +407,11 @@ public class UserController {
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 
-			int userId = user.getId();
+			/*int userId = user.getId();
 			user = userService.findUserById(userId);
 			if (user == null) {
 				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}
+			}*/
 			
 			user.setSignLog(signLog);
 			userService.saveOrUpdateUser(user);
@@ -433,23 +432,30 @@ public class UserController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/updatePicture", method = RequestMethod.POST)
-	public Map<String, Object> updatePicture(@RequestParam(name = "url") String url) {
+	public Map<String, Object> updatePicture(@RequestParam(name = "file") CommonsMultipartFile uploadFile) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
 			logger.info("=====> Start to change user picture <=====");
+			if (uploadFile.getSize() == 0 || !uploadFile.getFileItem().getContentType().contains("image")) {
+				resultMap.put("success", false);
+				resultMap.put("errorMsg", "请选择正确的图片");
+				return resultMap;
+			}
+			
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			
-			int userId = user.getId();
+			/*int userId = user.getId();
 			user = userService.findUserById(userId);
 			if (user == null) {
 				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}
-			
-			user.setPicture(url);
-			// 图片文件需要保存到本地
+			}*/
+        	
+        	String picturePath = FileUploadHelper.uploadProfilePicture(user.getId(), uploadFile.getInputStream());
+        	
+			user.setPicture(picturePath);
 			userService.saveOrUpdateUser(user);
-			
+
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -473,11 +479,11 @@ public class UserController {
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			
-			int userId = user.getId();
+			/*int userId = user.getId();
 			user = userService.findUserById(userId);
 			if (user == null) {
 				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}
+			}*/
 			
 			// 密码MD5加密
 			user.setPassword(EncryptHelper.encryptByMD5(user.getPhoneNo(), newPassword));
@@ -492,72 +498,6 @@ public class UserController {
 		return resultMap;
 	}
 
-	/*@ResponseBody
-	@RequestMapping(value = "/getMyActivityList", method = RequestMethod.POST)
-	public Map<String, Object> getMyActivityList() {
-		Map<String, Object> responseMap = new HashMap<String, Object>();
-		try {
-			logger.info("=====> Start to get my activity list <=====");
-			
-			Subject currentUser = SecurityUtils.getSubject();
-			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-			
-			int userId = user.getId();
-			user = userService.findUserById(userId);
-			if (user == null) {
-				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}
-			
-			List<Map> resultList = new ArrayList<Map>();
-			Set<Event> events = user.getEventSet();
-			for (Event event : events) {
-				Map<String, Object> result = new HashMap<String, Object>();
-				
-				EventPicture cover = event.getCover();
-				result.put("eventId", event.getId());
-				result.put("picture", cover != null ? cover.getUrl() : "");
-				result.put("name", event.getName());
-				result.put("releaseTime", event.getCreationDate());
-				result.put("startTime", event.getStartTime());
-				result.put("status", event.getStatus());
-				result.put("charge", event.getCharge());
-				result.put("cost", event.getCost());
-				result.put("gps", event.getGps());
-				result.put("address", event.getAddress());
-				result.put("isOpen", event.isOpen());
-				
-				TypeName typeName = event.getTypeName();
-				result.put("typename", typeName != null ? typeName.getName() : "");
-				
-				List<Map> tagList = new ArrayList<>();
-				Set<EventTag> eventTags = event.getTags();
-				for (EventTag eventTag : eventTags) {
-					Tag tag = eventTag.getTag();
-					Map<String, Object> tagsMap = new HashMap<String, Object>();
-					tagsMap.put("tagId", tag.getId());
-					tagsMap.put("tagName", tag.getName());
-					tagList.add(tagsMap);
-				}
-				result.put("tags", tagList);
-				
-				Map<String, Object> numbersMap = new HashMap<String, Object>();
-				numbersMap.put("num", event.getUserCount());
-				numbersMap.put("enteringNum", event.getEventUsers().size());
-				result.put("numbers", numbersMap);
-				
-				resultList.add(result);
-			}
-			logger.info("=====> Get my activity list end <=====");
-			
-			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
-		} catch (Exception e) {
-			e.printStackTrace();
-			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
-		}
-
-		return responseMap;
-	}*/
-	
 	/**
 	 * 获取联系人
 	 * @return
@@ -668,11 +608,11 @@ public class UserController {
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			
-			int userId = user.getId();
+			/*int userId = user.getId();
 			user = userService.findUserById(userId);
 			if (user == null) {
 				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}
+			}*/
 			// default value
 			if (startRow == null) {
 				startRow = 0;
@@ -685,7 +625,7 @@ public class UserController {
 			searchCriteria.setStartRow(startRow);
 			searchCriteria.setPageSize(pageSize);
 			searchCriteria.setOrderBy(orderBy);
-			searchCriteria.setUserId(userId);
+			searchCriteria.setUserId(user.getId());
 			searchCriteria.setAttention(isAttention);
 			
 			Map<String, Object> attentionMap = userService.getUserAttentions(searchCriteria);
@@ -739,11 +679,11 @@ public class UserController {
 			logger.info("=====> Start to follow user <=====");
 			User currentUser = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
 			
-			int userId = currentUser.getId();
+			/*int userId = currentUser.getId();
 			currentUser = userService.findUserById(userId);
 			if (currentUser == null) {
 				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}
+			}*/
 			
 			User followUser = userService.findUserById(followUserId);
 			if (followUser == null) {
@@ -757,7 +697,6 @@ public class UserController {
 			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "");
 		} catch (ConstraintViolationException e) {
 			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, "已经关注用户");
-//			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
