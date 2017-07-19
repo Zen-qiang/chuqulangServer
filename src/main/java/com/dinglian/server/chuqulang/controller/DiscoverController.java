@@ -332,7 +332,7 @@ public class DiscoverController {
 				userMap.put("userId", topic.getCreator().getId());
 				userMap.put("nickname", topic.getCreator().getNickName());
 				userMap.put("picture", topic.getCreator().getPicture());
-				infoMap.put("user ", userMap);
+				infoMap.put("user", userMap);
 			}
 			
 			Map<String, Object> topicMap = new HashMap<String, Object>();
@@ -351,7 +351,7 @@ public class DiscoverController {
 				pictures.add(topicPicture.getUrl());
 			}
 			topicMap.put("pictures", pictures);
-			infoMap.put("topics ", topicMap);
+			infoMap.put("topics", topicMap);
 			
 			// 评论
 			List<TopicComment> topicComments = new ArrayList<TopicComment>(topic.getComments());
