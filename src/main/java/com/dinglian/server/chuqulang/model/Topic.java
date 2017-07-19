@@ -25,9 +25,7 @@ import javax.persistence.UniqueConstraint;
  * @author Mr.xu
  *
  */
-@Table(name = "topic", uniqueConstraints = { 
-		@UniqueConstraint(columnNames = { "fk_coterie_id", "fk_user_id" })
-})
+@Table(name = "topic")
 @Entity
 public class Topic implements Serializable {
 	
