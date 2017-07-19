@@ -445,12 +445,6 @@ public class UserController {
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			
-			/*int userId = user.getId();
-			user = userService.findUserById(userId);
-			if (user == null) {
-				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}*/
-        	
         	String picturePath = FileUploadHelper.uploadProfilePicture(user.getId(), uploadFile.getInputStream());
         	
 			user.setPicture(picturePath);

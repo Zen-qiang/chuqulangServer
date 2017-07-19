@@ -2,6 +2,7 @@ package com.dinglian.server.chuqulang.controller;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +104,7 @@ public class DiscoverController {
 					result.put("name", coterie.getName());
 					result.put("description", coterie.getDescription());
 					result.put("fllowers", coterieGuys.size());
+					result.put("topicCnt", coterie.getTopics().size());
 					resultList.add(result);
 				}
 			}
@@ -486,4 +488,33 @@ public class DiscoverController {
 		return responseMap;
 	}
 	
+	@ResponseBody
+	@RequestMapping(value = "/joinCoterie", method = RequestMethod.POST)
+	public Map<String, Object> joinCoterie(@RequestParam("coterieId")int coterieId) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try{
+			logger.info("=====> Start to join coterie <=====");
+			Subject currentUser = SecurityUtils.getSubject();
+			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			
+			Coterie coterie = discoverService.findCoterieById(coterieId);
+			if (coterie == null) {
+				throw new NullPointerException("圈子ID：" + coterie + " , 圈子不存在。");
+			}
+			
+			int nextOrderNo = coterie.getCoterieNextOrderNo();
+			CoterieGuy coterieGuy = new CoterieGuy(coterie, nextOrderNo, user, new Date(), false, true);
+			
+			discoverService.saveCoterieGuy(coterieGuy);
+			
+			logger.info("=====> Join coterie type end <=====");
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "");
+		} catch (ConstraintViolationException e) {
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, "不能重复加入");
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+		}
+		return responseMap;
+	}
 }

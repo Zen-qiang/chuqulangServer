@@ -4,7 +4,9 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 
-@Table(name = "coterie_guy")
+@Table(name = "coterie_guy", uniqueConstraints = { 
+		@UniqueConstraint(columnNames = { "fk_coterie_id", "fk_user_id" })
+})
 @Entity
 public class CoterieGuy implements Serializable{
 
@@ -88,4 +90,20 @@ public class CoterieGuy implements Serializable{
 	public void setAllowed(boolean allowed) {
 		this.allowed = allowed;
 	}
+	
+	public CoterieGuy() {
+		// TODO Auto-generated constructor stub
+	}
+
+	public CoterieGuy(Coterie coterie, int orderNo, User user, Date creationDate, boolean admin, boolean allowed) {
+		super();
+		this.coterie = coterie;
+		this.orderNo = orderNo;
+		this.user = user;
+		this.creationDate = creationDate;
+		this.admin = admin;
+		this.allowed = allowed;
+	}
+	
+	
 }

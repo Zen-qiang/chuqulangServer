@@ -12,6 +12,7 @@ import com.dinglian.server.chuqulang.dao.CoterieDao;
 import com.dinglian.server.chuqulang.dao.GeneralDao;
 import com.dinglian.server.chuqulang.dao.TopicDao;
 import com.dinglian.server.chuqulang.model.Coterie;
+import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.Topic;
 import com.dinglian.server.chuqulang.model.TopicPraise;
@@ -77,6 +78,11 @@ public class DiscoverServiceImpl implements DiscoverService {
 	@Override
 	public void saveTopicPraise(TopicPraise topicPraise) {
 		generalDao.saveTopicPraise(topicPraise);
+	}
+
+	@Override
+	public void saveCoterieGuy(CoterieGuy coterieGuy) {
+		generalDao.saveCoterieGuy(coterieGuy);
 	}
 
 }

@@ -98,6 +98,12 @@
 <h2>测试页面</h2>
 <P>  The time on the server is ${serverTime}. </P>
 
+<h2>加入圈子</h2>
+<form action="discover/joinCoterie" method="post">
+coterieId : <input type="text" name="coterieId" value=""/><br>
+	<button type="submit" >加入圈子</button>
+</form>
+
 <h2>话题点赞</h2>
 <form action="discover/praiseTopic" method="get">
 topicId : <input type="text" name="topicId" value=""/><br>
@@ -234,6 +240,16 @@ isOwnList：<input type="text" name="isOwnList" value="false"/><br>
 	<input type="file" name="file" />
 	<button type="submit" >更改头像</button>
 </form>
+
+<form id="uploadForm" action="user/updatePicture" method="post" enctype="multipart/form-data">
+	<input id="fileImage" type="file" name="file" multiple />
+	<button type="submit" id="fileSubmit">多文件上传</button>
+</form>
+
+<!-- <form enctype="multipart/form-data" method="post">
+	<input type="file" multiple=true onchange="doSomething(this.files)"/>
+	<button type="submit" >多文件上传</button>
+</form> -->
 
 <h2>更改签名：</h2>
 <form action="user/changeSignLog" method="post">

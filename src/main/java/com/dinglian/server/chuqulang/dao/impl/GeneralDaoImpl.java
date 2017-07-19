@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.dao.GeneralDao;
+import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.TopicPraise;
 import com.dinglian.server.chuqulang.model.UserAttention;
 
@@ -70,6 +71,11 @@ public class GeneralDaoImpl implements GeneralDao {
 	@Override
 	public void saveTopicPraise(TopicPraise topicPraise) {
 		getCurrentSession().save(topicPraise);
+	}
+
+	@Override
+	public void saveCoterieGuy(CoterieGuy coterieGuy) {
+		getCurrentSession().save(coterieGuy);
 	}
 
 }

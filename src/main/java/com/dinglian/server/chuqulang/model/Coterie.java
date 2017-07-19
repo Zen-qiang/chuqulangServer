@@ -17,6 +17,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 @Table(name = "coterie")
 @Entity
@@ -146,6 +147,17 @@ public class Coterie implements Serializable{
 
 	public void setTopics(Set<Topic> topics) {
 		this.topics = topics;
+	}
+
+	@Transient
+	public int getCoterieNextOrderNo() {
+		int next = 0;
+		for (CoterieGuy coterieGuy : this.getCoterieGuys()) {
+			if (next < coterieGuy.getOrderNo()) {
+				next = coterieGuy.getOrderNo();
+			}
+		}
+		return next + 1;
 	}
 	
 	
