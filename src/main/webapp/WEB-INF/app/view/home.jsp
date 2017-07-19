@@ -154,21 +154,21 @@ pagesize : <input type="text" name="pagesize" value="1"/><br>
 </form>
 
 <h2>获取评论信息</h2>
-<form action="discover/getDiscoverComments" method="post">
-	topicId：<input type="text" name="discoverid"/><br>
+<form action="discover/getTopicComments" method="post">
+	topicId：<input type="text" name="topicId"/><br>
 	<button type="submit" >获取评论信息</button>
 </form>
 
 <h2>评论话题</h2>
-<form action="discover/commentDiscover" method="post">
-	topicId：<input type="text" name="discoverid"/><br>
+<form action="discover/commentTopic" method="post">
+	topicId：<input type="text" name="topicId"/><br>
 	comment：<input type="text" name="comment"/><br>
 	<button type="submit" >评论话题</button>
 </form>
 
 <h2>发布话题</h2>
 <form action="discover/editDiscover" method="post">
-	ringId：<input type="text" name="ringId"/><br>
+	coterieId：<input type="text" name="coterieId"/><br>
 	img：<input type="text" name="img"/><br>
 	description：<input type="text" name="description"/><br>
 	<button type="submit" >发布话题</button>

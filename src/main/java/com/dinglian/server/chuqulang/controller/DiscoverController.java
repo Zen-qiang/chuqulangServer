@@ -175,6 +175,7 @@ public class DiscoverController {
 					Map<String, Object> userMap = new HashMap<String, Object>();
 					User creator = topic.getCreator();
 					if (creator != null) {
+						userMap.put("userId", creator.getId());
 						userMap.put("nickname", creator.getNickName());
 						userMap.put("picture", creator.getPicture());
 					}
@@ -227,7 +228,7 @@ public class DiscoverController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/editDiscover", method = RequestMethod.POST)
-	public Map<String, Object> releaseTopic(@RequestParam(name = "ringId") String coterieIdStr,
+	public Map<String, Object> releaseTopic(@RequestParam(name = "coterieId") int coterieId,
 			@RequestParam(name = "img", required = false) String img,
 			@RequestParam(name = "description", required = false) String description) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -244,7 +245,6 @@ public class DiscoverController {
 //			}
 
 			// 当前话题属于哪个圈子
-			int coterieId = Integer.parseInt(coterieIdStr);
 			Coterie coterie = discoverService.findCoterieById(coterieId);
 			
 			Topic topic = new Topic(coterie, user, description);
@@ -272,8 +272,8 @@ public class DiscoverController {
 	 * @return
 	 */
 	@ResponseBody
-	@RequestMapping(value = "/commentDiscover", method = RequestMethod.POST)
-	public Map<String, Object> commentTopic(@RequestParam(name = "discoverid") String topicIdStr,
+	@RequestMapping(value = "/commentTopic", method = RequestMethod.POST)
+	public Map<String, Object> commentTopic(@RequestParam(name = "topicId") int topicId,
 			@RequestParam(name = "comment") String content) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
@@ -289,7 +289,6 @@ public class DiscoverController {
 //			}
 			
 			// 当前话题属于哪个圈子
-			int topicId = Integer.parseInt(topicIdStr);
 			Topic topic = discoverService.findTopicById(topicId);
 			if (topic == null) {
 				throw new NullPointerException("话题ID：" + topicId + " , 话题不存在。");
@@ -315,25 +314,33 @@ public class DiscoverController {
 	 * @return
 	 */
 	@ResponseBody
-	@RequestMapping(value = "/getDiscoverComments", method = RequestMethod.POST)
-	public Map<String, Object> getTopicComments(@RequestParam(name = "discoverid") String topicIdStr) {
+	@RequestMapping(value = "/getTopicComments", method = RequestMethod.POST)
+	public Map<String, Object> getTopicComments(@RequestParam(name = "topicId") int topicId) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
 			logger.info("=====> Start to get topic comments <=====");
 			
-			int topicId = Integer.parseInt(topicIdStr);
 			Topic topic = discoverService.findTopicById(topicId);
 			if (topic == null) {
 				throw new NullPointerException("话题ID：" + topicId + " , 话题不存在。");
 			}
 			
 			Map<String, Object> result = new HashMap<String, Object>();
-			Map<String, Object> discover = new HashMap<String, Object>();
-			discover.put("discoverId", topic.getId());
-			discover.put("description", topic.getDescription());
-			discover.put("publishTime", DateUtils.format(topic.getCreationDate(), DateUtils.yMdHms));
-			discover.put("commentNum", topic.getComments().size());
-			discover.put("getFavNum", topic.getPraises().size());
+			Map<String, Object> infoMap = new HashMap<String, Object>();
+			if (topic.getCreator() != null) {
+				Map<String, Object> userMap = new HashMap<String, Object>();
+				userMap.put("userId", topic.getCreator().getId());
+				userMap.put("nickname", topic.getCreator().getNickName());
+				userMap.put("picture", topic.getCreator().getPicture());
+				infoMap.put("user ", userMap);
+			}
+			
+			Map<String, Object> topicMap = new HashMap<String, Object>();
+			topicMap.put("topicId", topic.getId());
+			topicMap.put("description", topic.getDescription());
+			topicMap.put("releaseTime", DateUtils.format(topic.getCreationDate(), DateUtils.yMdHms));
+			topicMap.put("commentsCount", topic.getComments().size());
+			topicMap.put("praisesCount", topic.getPraises().size());
 			
 			// 图片
 			List<TopicPicture> topicPictures = new ArrayList<TopicPicture>(topic.getPictures());
@@ -343,7 +350,8 @@ public class DiscoverController {
 			for (TopicPicture topicPicture : topicPictures) {
 				pictures.add(topicPicture.getUrl());
 			}
-			discover.put("pictures", pictures);
+			topicMap.put("pictures", pictures);
+			infoMap.put("topics ", topicMap);
 			
 			// 评论
 			List<TopicComment> topicComments = new ArrayList<TopicComment>(topic.getComments());
@@ -356,13 +364,13 @@ public class DiscoverController {
 				User commentUser = topicComment.getUser();
 				Map<String, Object> userMap = new HashMap<String, Object>();
 				if (commentUser != null) {
-					userMap.put("userid", commentUser.getId());
-					userMap.put("nickname", commentUser.getNickName());
+					userMap.put("userId", commentUser.getId());
+					userMap.put("nickName", commentUser.getNickName());
 					userMap.put("picture", commentUser.getPicture());
 				}
 				comment.put("user", userMap);
 				comment.put("comment", topicComment.getContent());
-				comment.put("publishTime", DateUtils.format(topicComment.getCreationDate(), DateUtils.yMdHms));
+				comment.put("commentTime", DateUtils.format(topicComment.getCreationDate(), DateUtils.yMdHms));
 				comments.add(comment);
 			}
 			
@@ -384,9 +392,9 @@ public class DiscoverController {
 				praises.add(praise);
 			}
 			
-			result.put("discover", discover);
+			result.put("info", infoMap);
 			result.put("comments", comments);
-			result.put("favs", praises);
+			result.put("praises", praises);
 				
 			logger.info("=====> Get topic comments end <=====");
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
@@ -488,6 +496,11 @@ public class DiscoverController {
 		return responseMap;
 	}
 	
+	/**
+	 * 加入圈子
+	 * @param coterieId
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/joinCoterie", method = RequestMethod.POST)
 	public Map<String, Object> joinCoterie(@RequestParam("coterieId")int coterieId) {
@@ -517,4 +530,6 @@ public class DiscoverController {
 		}
 		return responseMap;
 	}
+	
+	
 }
