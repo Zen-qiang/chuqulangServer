@@ -139,6 +139,9 @@ public class DiscoverController {
 		try {
 			logger.info("=====> Start to get topic list <=====");
 			
+			Subject currentUser = SecurityUtils.getSubject();
+			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			
 			if (startRow == null) {
 				startRow = 0;
 			}
@@ -165,7 +168,7 @@ public class DiscoverController {
 			resultMap.put("pictures", coterie.getCoteriePicture() != null ? coterie.getCoteriePicture().getUrl() : "");
 			resultMap.put("description", coterie.getDescription());
 			resultMap.put("fllowers", coterie.getCoterieGuys().size());
-			
+			resultMap.put("isJoined", coterie.isJoined(user.getId()));
 
 			List<Map> resultList = new ArrayList<Map>();
 			if (topics != null) {

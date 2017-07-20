@@ -159,7 +159,16 @@ public class Coterie implements Serializable{
 		}
 		return next + 1;
 	}
+
+	@Transient
+	public boolean isJoined(int userId) {
+		for (CoterieGuy coterieGuy : this.getCoterieGuys()) {
+			User user = coterieGuy.getUser();
+			if (user.getId() == userId) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
-	
-    
 }
