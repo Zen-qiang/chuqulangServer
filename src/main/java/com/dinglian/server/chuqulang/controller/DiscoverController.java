@@ -278,7 +278,7 @@ public class DiscoverController {
 	@RequestMapping(value = "/commentTopic", method = RequestMethod.POST)
 	public Map<String, Object> commentTopic(@RequestParam(name = "topicId") int topicId,
 			@RequestParam(name = "comment") String content) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
 			logger.info("=====> Start to comment topic <=====");
 			
@@ -300,15 +300,18 @@ public class DiscoverController {
 			TopicComment topicComment = new TopicComment(topic, user, content);
 			topic.getComments().add(topicComment);
 			discoverService.saveTopic(topic);
+			
+			Map<String, Object> resultMap = new HashMap<String, Object>();
+			resultMap.put("commentCnt", topic.getComments().size());
 
 			logger.info("=====> Comment topic end <=====");
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "", resultMap);
 		} catch (Exception e) {
 			e.printStackTrace();
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
 
-		return resultMap;
+		return responseMap;
 	}
 
 	/**
@@ -486,10 +489,15 @@ public class DiscoverController {
 			}
 			
 			int nextOrderNo = topic.getNextOrderNo();
-			discoverService.saveTopicPraise(new TopicPraise(topic, user, nextOrderNo));
+//			discoverService.saveTopicPraise(new TopicPraise(topic, user, nextOrderNo));
+			topic.getPraises().add(new TopicPraise(topic, user, nextOrderNo));
+			discoverService.saveTopic(topic);
+			
+			Map<String, Object> resultMap = new HashMap<String, Object>();
+			resultMap.put("praiseCnt", topic.getPraises().size());
 			
 			logger.info("=====> Praise topic type end <=====");
-			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "");
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "", resultMap);
 		} catch (ConstraintViolationException e) {
 			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, "不能重复点赞");
 		} catch (Exception e) {
