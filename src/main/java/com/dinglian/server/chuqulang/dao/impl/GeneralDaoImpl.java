@@ -78,4 +78,11 @@ public class GeneralDaoImpl implements GeneralDao {
 		getCurrentSession().save(coterieGuy);
 	}
 
+	@Override
+	public void deleteCoterieGuy(int coterieId, int userId) {
+		String hql = "DELETE FROM CoterieGuy WHERE coterie.id = :coterieId AND user.id = :userId ";
+		getCurrentSession().createQuery(hql).setInteger("coterieId", coterieId).setInteger("userId", userId).executeUpdate();
+		
+	}
+
 }

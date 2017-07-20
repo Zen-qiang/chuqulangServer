@@ -26,4 +26,6 @@ public interface DiscoverService {
 
 	void saveCoterieGuy(CoterieGuy coterieGuy);
 
+	void exitCoterie(int coterieId, int id);
+
 }

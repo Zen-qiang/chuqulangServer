@@ -534,5 +534,25 @@ public class DiscoverController {
 		return responseMap;
 	}
 	
+	@ResponseBody
+	@RequestMapping(value = "/exitCoterie", method = RequestMethod.POST)
+	public Map<String, Object> exitCoterie(@RequestParam("coterieId")int coterieId) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try{
+			logger.info("=====> Start to exit coterie <=====");
+			Subject currentUser = SecurityUtils.getSubject();
+			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			
+			discoverService.exitCoterie(coterieId, user.getId());
+			
+			logger.info("=====> Exit coterie type end <=====");
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "");
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+		}
+		return responseMap;
+	}
+	
 	
 }

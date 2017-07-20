@@ -98,6 +98,12 @@
 <h2>测试页面</h2>
 <P>  The time on the server is ${serverTime}. </P>
 
+<h2>退出圈子</h2>
+<form action="discover/exitCoterie" method="post">
+coterieId : <input type="text" name="coterieId" value=""/><br>
+	<button type="submit" >退出圈子</button>
+</form>
+
 <h2>加入圈子</h2>
 <form action="discover/joinCoterie" method="post">
 coterieId : <input type="text" name="coterieId" value=""/><br>

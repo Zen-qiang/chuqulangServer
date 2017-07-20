@@ -19,4 +19,6 @@ public interface GeneralDao {
 
 	void saveCoterieGuy(CoterieGuy coterieGuy);
 
+	void deleteCoterieGuy(int coterieId, int userId);
+
 }

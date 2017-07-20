@@ -85,4 +85,9 @@ public class DiscoverServiceImpl implements DiscoverService {
 		generalDao.saveCoterieGuy(coterieGuy);
 	}
 
+	@Override
+	public void exitCoterie(int coterieId, int userId) {
+		generalDao.deleteCoterieGuy(coterieId, userId);
+	}
+
 }
