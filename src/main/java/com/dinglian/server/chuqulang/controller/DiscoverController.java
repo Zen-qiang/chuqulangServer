@@ -451,6 +451,7 @@ public class DiscoverController {
 				for (Topic topic : topics) {
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("id", topic.getId());
+					map.put("coterieId", topic.getCoterie().getId());
 					map.put("description", topic.getDescription());
 					topicList.add(map);
 				}
