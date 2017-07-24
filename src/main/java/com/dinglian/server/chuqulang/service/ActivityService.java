@@ -43,4 +43,6 @@ public interface ActivityService {
 
 	boolean checkFriendJoin(int id, int userId);
 
+	Map<String, Object> getUserActivityList(SearchCriteria searchCriteria);
+
 }

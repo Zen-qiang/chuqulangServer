@@ -11,4 +11,8 @@ public interface EventDao extends GenericDao<Event> {
 
 	int getActivityTotalCount();
 
+	int getUserActivityTotalCount(int userId);
+
+	List<Event> getUserActivityList(SearchCriteria searchCriteria);
+
 }

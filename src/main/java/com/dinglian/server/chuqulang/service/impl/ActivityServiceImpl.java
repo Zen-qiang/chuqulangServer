@@ -134,5 +134,15 @@ public class ActivityServiceImpl implements ActivityService {
 	public boolean checkFriendJoin(int eventId, int userId) {
 		return activityDao.checkFriendJoin(eventId, userId);
 	}
+
+	@Override
+	public Map<String, Object> getUserActivityList(SearchCriteria searchCriteria) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		int totalCount = eventDao.getUserActivityTotalCount(searchCriteria.getUserId());
+		List<Event> events = eventDao.getUserActivityList(searchCriteria);
+		map.put("totalCount", totalCount);
+		map.put("resultList", events);
+		return map;
+	}
 	
 }

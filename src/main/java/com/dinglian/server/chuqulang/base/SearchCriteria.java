@@ -20,6 +20,8 @@ public class SearchCriteria {
 
 	private int coterieId;
 	private boolean isAttention;
+	
+	private String dataType;
 
 	public int getUserId() {
 		return userId;
@@ -123,6 +125,14 @@ public class SearchCriteria {
 
 	public void setAttention(boolean isAttention) {
 		this.isAttention = isAttention;
+	}
+
+	public String getDataType() {
+		return dataType;
+	}
+
+	public void setDataType(String dataType) {
+		this.dataType = dataType;
 	}
 
 }

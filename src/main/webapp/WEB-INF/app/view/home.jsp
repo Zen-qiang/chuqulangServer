@@ -98,6 +98,22 @@
 <h2>测试页面</h2>
 <P>  The time on the server is ${serverTime}. </P>
 
+<h2>账号登录：</h2>
+<form action="user/login" method="post">
+	<input type="hidden" value="username" name="type">
+	用户名：<input type="text" name="phoneno" value="18270790997"/><br>
+	密码：<input type="text" name="password" value="admin"/><br>
+	<button type="submit" >登录</button>
+</form>
+
+<h2>我的活动</h2>
+<form action="activity/getUserActivityList">
+dataType : <input type="text" name="dataType" value="0"/><br>
+start : <input type="text" name="start" value="0"/><br>
+pagesize : <input type="text" name="pagesize" value="20"/><br>
+	<button type="submit" >我的活动</button>
+</form>
+
 <h2>退出圈子</h2>
 <form action="discover/exitCoterie" method="post">
 coterieId : <input type="text" name="coterieId" value=""/><br>
@@ -277,14 +293,6 @@ isOwnList：<input type="text" name="isOwnList" value="false"/><br>
 	密码：<input type="text" name="password"/><br>
 	验证码：<input type="text" name="verifyno"/><br>
 	<button type="submit" >注册</button>
-</form>
-
-<h2>账号登录：</h2>
-<form action="user/login" method="post">
-	<input type="hidden" value="username" name="type">
-	用户名：<input type="text" name="phoneno" value="18270790997"/><br>
-	密码：<input type="text" name="password" value="admin"/><br>
-	<button type="submit" >登录</button>
 </form>
 
 <h2>手机登录：</h2>

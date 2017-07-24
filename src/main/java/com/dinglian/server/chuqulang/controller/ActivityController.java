@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -601,6 +599,107 @@ public class ActivityController {
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
 		return resultMap;
+	}
+    
+    /**
+     * 获取我的活动列表
+     * @param dataType	0:全部活动	1：我发起的	2：我参与的	3：历史活动
+     * @param startRow
+     * @param pageSize
+     * @return
+     */
+    @ResponseBody
+	@RequestMapping(value = "/getUserActivityList", method = RequestMethod.POST)
+	public Map<String, Object> getUserActivityList(
+			@RequestParam(name = "dataType", required = false) String dataType, 
+			@RequestParam(name = "start", required = false) Integer startRow,
+			@RequestParam(name = "pagesize", required = false) Integer pageSize) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			logger.info("=====> Start to get user activity list <=====");
+			
+			Subject currentUser = SecurityUtils.getSubject();
+			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			if (StringUtils.isBlank(dataType)) {
+				dataType = Event.DATATYPE_ALL;
+			}
+			if (startRow == null) {
+				startRow = 0;
+			}
+			if (pageSize == null) {
+				pageSize = ApplicationConfig.getInstance().getDefaultPageSize();
+			}
+			
+			SearchCriteria searchCriteria = new SearchCriteria();
+			searchCriteria.setStartRow(startRow);
+			searchCriteria.setPageSize(pageSize);
+			searchCriteria.setUserId(user.getId());
+			searchCriteria.setDataType(dataType);
+			
+			Map<String, Object> eventListMap = activityService.getUserActivityList(searchCriteria);
+			List<Event> events = (List<Event>) eventListMap.get("resultList");
+			int total = (int) eventListMap.get("totalCount");
+			Map<String, Object> resultMap = new HashMap<String, Object>();
+			resultMap.put("total", total);
+			resultMap.put("start", startRow);
+			
+			List<Map> resultList = new ArrayList<Map>();
+			if (events != null) {
+				for (Event event : events) {
+					Map<String, Object> result = new HashMap<String, Object>();
+					
+					EventPicture cover = event.getCover();
+					result.put("eventId", event.getId());
+					result.put("picture", cover != null ? cover.getUrl() : "");
+					result.put("name", event.getName());
+					result.put("releaseTime", event.getCreationDate());
+					result.put("startTime", event.getStartTime());
+					
+					// 判断好友参与
+					boolean friendJoin = activityService.checkFriendJoin(event.getId(), user.getId());
+					result.put("status", friendJoin ? Event.STATUS_FRIENDS : event.getStatus());
+					
+					result.put("charge", event.getCharge());
+					result.put("cost", event.getCost());
+					result.put("gps", event.getGps());
+					result.put("address", event.getAddress());
+					result.put("isOpen", event.isOpen());
+					
+					TypeName typeName = event.getTypeName();
+					result.put("typename", typeName != null ? typeName.getName() : "");
+					
+					List<Map> tagList = new ArrayList<>();
+					Set<EventTag> eventTags = event.getTags();
+					for (EventTag eventTag : eventTags) {
+						Tag tag = eventTag.getTag();
+						Map<String, Object> tagsMap = new HashMap<String, Object>();
+						tagsMap.put("tagId", tag.getId());
+						tagsMap.put("tagName", tag.getName());
+						tagList.add(tagsMap);
+					}
+					result.put("tags", tagList);
+					
+					Map<String, Object> numbersMap = new HashMap<String, Object>();
+					numbersMap.put("num", event.getUserCount());
+					numbersMap.put("enteringNum", event.getEventUsers().size());
+					result.put("numbers", numbersMap);
+					
+					resultList.add(result);
+				}
+			}
+			
+			resultMap.put("cnt", resultList.size());
+			resultMap.put("lists", resultList);
+			
+			logger.info("=====> Get user activity list end <=====");
+			
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "", resultMap);
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+		}
+
+		return responseMap;
 	}
     
 }

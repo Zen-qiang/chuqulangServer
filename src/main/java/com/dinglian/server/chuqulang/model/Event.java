@@ -44,6 +44,15 @@ public class Event implements Serializable {
 	// 价格由高到低
 	public static final String ORDERBY_COST_DESC = "4";
 	
+	// 全部活动
+	public static final String DATATYPE_ALL = "0";
+	// 我发起的
+	public static final String DATATYPE_RELEASE = "1";
+	// 我参与的
+	public static final String DATATYPE_JOIN = "2";
+	// 历史活动
+	public static final String DATATYPE_EXPIRE = "3";
+	
 	private int id;
 
 //	private String no; // 活动编号

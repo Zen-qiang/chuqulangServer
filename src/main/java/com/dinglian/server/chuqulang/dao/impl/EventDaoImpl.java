@@ -87,4 +87,34 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 		return count;
 	}
 
+	@Override
+	public int getUserActivityTotalCount(int userId) {
+		String sql = "SELECT COUNT(1) FROM event_user WHERE fk_user_id = :userId";
+		Query query = getCurrentSession().createSQLQuery(sql).setInteger("userId", userId);
+		int count = ((Number)query.uniqueResult()).intValue();
+		return count;
+	}
+
+	@Override
+	public List<Event> getUserActivityList(SearchCriteria searchCriteria) {
+		String sql = "SELECT e.* FROM EVENT e LEFT JOIN event_user eu ON e.id = eu.fk_event_id WHERE 1=1 ";
+		if (searchCriteria.getDataType().equals(Event.DATATYPE_ALL)) {
+			sql += "AND eu.fk_user_id = :userId ";
+		} else if (searchCriteria.getDataType().equals(Event.DATATYPE_RELEASE)) {
+			sql += "AND e.fk_user_id = :userId ";
+		} else if (searchCriteria.getDataType().equals(Event.DATATYPE_JOIN)) {
+			sql += "AND eu.fk_user_id = :userId AND e.fk_user_id != :userId ";
+		} else if (searchCriteria.getDataType().equals(Event.DATATYPE_EXPIRE)) {
+			sql += "AND eu.fk_user_id = :userId AND e.status = '" + Event.STATUS_OVER + "' ";
+		}
+		sql += "ORDER BY e.creation_date DESC";
+		Query query = getCurrentSession().createSQLQuery(sql).addEntity(Event.class);
+		query.setInteger("userId", searchCriteria.getUserId());
+		if (searchCriteria.getPageSize() != 0) {
+			query.setFirstResult(searchCriteria.getStartRow());
+			query.setMaxResults(searchCriteria.getPageSize());
+		}
+		return query.list();
+	}
+
 }
