@@ -28,7 +28,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
@@ -39,7 +40,6 @@ import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.model.UserAttention;
 import com.dinglian.server.chuqulang.model.UserInterest;
 import com.dinglian.server.chuqulang.model.VerifyNo;
-import com.dinglian.server.chuqulang.service.ActivityService;
 import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.shiro.realms.CustomizedToken;
 import com.dinglian.server.chuqulang.utils.AddressUtils;
@@ -47,8 +47,11 @@ import com.dinglian.server.chuqulang.utils.CodeUtils;
 import com.dinglian.server.chuqulang.utils.DateUtils;
 import com.dinglian.server.chuqulang.utils.EncryptHelper;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
+import com.dinglian.server.chuqulang.utils.NeteaseIMUtil;
 import com.dinglian.server.chuqulang.utils.RequestHelper;
 import com.dinglian.server.chuqulang.utils.ResponseHelper;
+
+import net.sf.json.JSONObject;
 
 @Controller
 @RequestMapping("/user")
@@ -204,7 +207,21 @@ public class UserController {
 					existVerifyNo.setValid(false);
 					userService.saveVerifyNo(existVerifyNo);
 					
-					ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
+					// 注册云信ID
+					String response = NeteaseIMUtil.getInstance().create(user.getPhoneNo(), "", "", "", "");
+					JSONObject responseObj = JSONObject.fromObject(response);
+					if (responseObj.getInt("code") == 200) {
+						JSONObject info = responseObj.getJSONObject("info");
+						user.setAccid(info.getString("accid"));
+						user.setToken(info.getString("token"));
+						userService.saveOrUpdateUser(user);
+						ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
+					} else {
+						Map<String, Object> result = new HashMap<String, Object>();
+						result.put("code", responseObj.getInt("code"));
+						result.put("desc", responseObj.getInt("desc"));
+						ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "",result);
+					}
 				} else {
 					ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "验证码无效，请重新获取。");
 					return resultMap;
@@ -383,6 +400,8 @@ public class UserController {
 			result.put("lastLoginDate", user.getLastLoginDate());
 			result.put("lastLoginPhone", user.getLastLoginPhone());
 			result.put("typename", user.getTypeName() != null ? user.getTypeName().getName() : "");
+			result.put("accid", user.getAccid());
+			result.put("token", user.getToken());
 			
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
 		} catch (Exception e) {
@@ -432,11 +451,16 @@ public class UserController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/updatePicture", method = RequestMethod.POST)
-	public Map<String, Object> updatePicture(@RequestParam(name = "file") CommonsMultipartFile uploadFile) {
+	public Map<String, Object> updatePicture(HttpServletRequest request) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
 			logger.info("=====> Start to change user picture <=====");
-			if (uploadFile.getSize() == 0 || !uploadFile.getFileItem().getContentType().contains("image")) {
+			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+			List<MultipartFile> list = multipartRequest.getFiles("file");
+			for (MultipartFile multipartFile : list) {
+				System.out.println(multipartFile);
+			}
+			/*if (uploadFile.getSize() == 0 || !uploadFile.getFileItem().getContentType().contains("image")) {
 				resultMap.put("success", false);
 				resultMap.put("errorMsg", "请选择正确的图片");
 				return resultMap;
@@ -449,8 +473,11 @@ public class UserController {
         	
 			user.setPicture(picturePath);
 			userService.saveOrUpdateUser(user);
+			
+			Map<String, Object> result = new HashMap<String, Object>();
+			result.put("imgurl", picturePath);
 
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);*/
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
@@ -458,6 +485,22 @@ public class UserController {
 		logger.info("=====> Change user picture end <=====");
 		return resultMap;
 	}
+	
+	/*@ResponseBody
+	@RequestMapping(value = "/updatePicture", method = RequestMethod.POST)
+	public Map<String, Object> updatePicture(@RequestParam(name = "file") String uploadFile) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			BASE64Decoder decoder = new BASE64Decoder();
+			FileOutputStream write = new FileOutputStream(new File("d:/test.png"));
+			byte[] decoderBytes = decoder.decodeBuffer(uploadFile);
+			write.write(decoderBytes);
+			write.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return resultMap;
+	}*/
 	
 	/**
 	 * 修改密码

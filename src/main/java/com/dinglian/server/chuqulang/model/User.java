@@ -69,6 +69,10 @@ public class User implements Serializable{
 	
 	private Set<UserAttention> followers = new HashSet<UserAttention>();
 	
+	private String accid;
+	
+	private String token;
+	
 	// 拥有的聊天室
 //	private Set<ChatRoom> ownedRooms = new HashSet<ChatRoom>();
 	// 参与的聊天室
@@ -297,6 +301,22 @@ public class User implements Serializable{
 
 	public void setFollowers(Set<UserAttention> followers) {
 		this.followers = followers;
+	}
+	
+	public String getAccid() {
+		return accid;
+	}
+
+	public void setAccid(String accid) {
+		this.accid = accid;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
 	}
 
 	public User() {

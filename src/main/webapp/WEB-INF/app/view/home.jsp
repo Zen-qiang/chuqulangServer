@@ -98,11 +98,19 @@
 <h2>测试页面</h2>
 <P>  The time on the server is ${serverTime}. </P>
 
+<h2>发送信息：</h2>
+<form action="chat/sendMessage" method="post">
+	to：<input type="text" name="to" value="helloworld"/><br>
+	type：<input type="text" name="type" value="0"/><br>
+	body：<input type="text" name="body" value="message"/><br>
+	<button type="submit" >发送信息</button>
+</form>
+
 <h2>账号登录：</h2>
 <form action="user/login" method="post">
 	<input type="hidden" value="username" name="type">
 	用户名：<input type="text" name="phoneno" value="18270790997"/><br>
-	密码：<input type="text" name="password" value="admin"/><br>
+	密码：<input type="text" name="password" value="xxh131420"/><br>
 	<button type="submit" >登录</button>
 </form>
 
