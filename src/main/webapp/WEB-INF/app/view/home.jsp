@@ -5,6 +5,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title>Home</title>
 	
 	<script type="text/javascript" src="resources/jquery-3.2.1.js"></script>
@@ -97,6 +98,46 @@
 <body>
 <h2>测试页面</h2>
 <P>  The time on the server is ${serverTime}. </P>
+
+<h2>发送聊天室消息：</h2>
+<form action="chat/chatRoomSendMsg" method="post">
+	roomid：<input type="text" name="roomid" value="10179360"/><br>
+	msgId：<input type="text" name="msgId" value="c9e6c306-804f-4ec3-b8f0-573778829419"/><br>
+	msgType：<input type="text" name="msgType" value="0"/><br>
+	resendFlag：<input type="text" name="resendFlag" value="0"/><br>
+	attach：<input type="text" name="attach" value="发送聊天室消息内容"/><br>
+	<button type="submit" >发送聊天室消息</button>
+</form>
+
+<h2>请求聊天室地址：</h2>
+<form action="chat/requestChatRoomAddr" method="post">
+	roomid：<input type="text" name="roomid" value="10179360"/><br>
+	clienttype：<input type="text" name="clienttype" value="1"/><br>
+	<button type="submit" >请求聊天室地址</button>
+</form>
+
+<h2>切换聊天室状态：</h2>
+<form action="chat/toggleCloseChatRoom" method="post">
+	roomid：<input type="text" name="roomid" value="10179360"/><br>
+	valid：<input type="text" name="valid" value="true"/><br>
+	<button type="submit" >切换聊天室状态</button>
+</form>
+
+<h2>更新聊天室：</h2>
+<form action="chat/updateChatRoom" method="post">
+	roomid：<input type="text" name="roomid" value="10179360"/><br>
+	name：<input type="text" name="name" value="聊天室tt"/><br>
+	announcement：<input type="text" name="announcement" value="公告tt"/><br>
+	<button type="submit" >更新聊天室</button>
+</form>
+
+<h2>创建聊天室：</h2>
+<form action="chat/createChatRoom" method="post">
+	eventId：<input type="text" name="eventId" value=""/><br>
+	name：<input type="text" name="name" value="聊天室"/><br>
+	announcement：<input type="text" name="announcement" value="公告"/><br>
+	<button type="submit" >创建聊天室</button>
+</form>
 
 <h2>发送信息：</h2>
 <form action="chat/sendMessage" method="post">

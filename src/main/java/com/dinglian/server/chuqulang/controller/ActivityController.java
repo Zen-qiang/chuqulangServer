@@ -397,6 +397,8 @@ public class ActivityController {
 					TypeName typeName = event.getTypeName();
 					result.put("typename", typeName != null ? typeName.getName() : "");
 					
+					result.put("chatroomId", event.getChatRoom() != null ? event.getChatRoom().getId() : "");
+					
 					List<Map> tagList = new ArrayList<>();
 					Set<EventTag> eventTags = event.getTags();
 					for (EventTag eventTag : eventTags) {
@@ -486,6 +488,7 @@ public class ActivityController {
 			result.put("charge", event.getCharge());
 			result.put("cost", event.getCost());
 			result.put("description", event.getDescription());
+			result.put("chatroomId", event.getChatRoom() != null ? event.getChatRoom().getId() : "");
 			
 			List<Map> tagList = new ArrayList<>();
 			Set<EventTag> eventTags = event.getTags();
@@ -667,6 +670,8 @@ public class ActivityController {
 					
 					TypeName typeName = event.getTypeName();
 					result.put("typename", typeName != null ? typeName.getName() : "");
+					
+					result.put("chatroomId", event.getChatRoom() != null ? event.getChatRoom().getId() : "");
 					
 					List<Map> tagList = new ArrayList<>();
 					Set<EventTag> eventTags = event.getTags();

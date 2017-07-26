@@ -46,6 +46,7 @@
 			<mvc:mapping path="/user/**"/>
 			<mvc:mapping path="/activity/**"/>
 			<mvc:mapping path="/discover/**"/>
+			<mvc:mapping path="/chat/**"/>
 			<mvc:exclude-mapping path="/user/login"/>
 			<mvc:exclude-mapping path="/user/register"/>
 			<mvc:exclude-mapping path="/user/resetPassword"/>

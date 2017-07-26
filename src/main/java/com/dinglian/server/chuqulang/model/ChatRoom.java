@@ -25,21 +25,27 @@ public class ChatRoom implements Serializable{
 
 	private int id;
 
-	private Integer no;
+//	private Integer no;
+	
+	private int chatRoomId;// 云信聊天室ID
 
 	private String name;
+	
+	private String announcement;// 公告
 
-	private User owner;
+	private User creator; // 创建者
 
 	private Date creationDate;
+	
+	private boolean valid;
 
-	private boolean open;
+//	private boolean open;
 
-	private String password;
+//	private String password;
 
 	private Event event; // 所属活动
 
-	private Coterie coterie; // 所属圈子
+//	private Coterie coterie; // 所属圈子
 	
 	private Set<ChatNote> chatNotes = new HashSet<ChatNote>();
 
@@ -53,12 +59,13 @@ public class ChatRoom implements Serializable{
 		this.id = id;
 	}
 
-	public Integer getNo() {
-		return no;
+	@Column(name = "chatroom_id", unique = true)
+	public int getChatRoomId() {
+		return chatRoomId;
 	}
-
-	public void setNo(Integer no) {
-		this.no = no;
+	
+	public void setChatRoomId(int chatRoomId) {
+		this.chatRoomId = chatRoomId;
 	}
 
 	public String getName() {
@@ -71,12 +78,12 @@ public class ChatRoom implements Serializable{
 
 	@JoinColumn(name = "fk_user_id")
 	@ManyToOne(fetch = FetchType.LAZY)
-	public User getOwner() {
-		return owner;
+	public User getCreator() {
+		return creator;
 	}
-
-	public void setOwner(User owner) {
-		this.owner = owner;
+	
+	public void setCreator(User creator) {
+		this.creator = creator;
 	}
 
 	@Temporal(TemporalType.TIMESTAMP)
@@ -87,23 +94,6 @@ public class ChatRoom implements Serializable{
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
-	}
-
-	@Column(name = "is_open")
-	public boolean isOpen() {
-		return open;
-	}
-	
-	public void setOpen(boolean open) {
-		this.open = open;
-	}
-	
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
 	}
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, mappedBy = "chatRoom")
@@ -126,13 +116,20 @@ public class ChatRoom implements Serializable{
 		this.event = event;
 	}
 
-	@JoinColumn(name = "fk_coterie_id")
-	@ManyToOne(fetch = FetchType.LAZY)
-	public Coterie getCoterie() {
-		return coterie;
+	public String getAnnouncement() {
+		return announcement;
 	}
 
-	public void setCoterie(Coterie coterie) {
-		this.coterie = coterie;
+	public void setAnnouncement(String announcement) {
+		this.announcement = announcement;
 	}
+
+	public boolean isValid() {
+		return valid;
+	}
+
+	public void setValid(boolean valid) {
+		this.valid = valid;
+	}
+	
 }

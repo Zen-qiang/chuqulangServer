@@ -296,7 +296,7 @@ public class Event implements Serializable {
 	}
 
 	@JoinColumn(name = "fk_chatroom_id", unique = true)
-	@OneToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
 	public ChatRoom getChatRoom() {
 		return chatRoom;
 	}
