@@ -58,29 +58,28 @@ public class ChatController {
      */
     @ResponseBody
     @RequestMapping(value = "/sendMessage", method = RequestMethod.POST)
-    public Map<String, Object> createUserID(@RequestParam("to") String to, @RequestParam("type") int type, 
+    public String createUserID(@RequestParam("to") String to, @RequestParam("type") int type, 
     		@RequestParam("body") String body) {
-        Map<String, Object> resultMap = new HashMap<String, Object>();
+//        Map<String, Object> resultMap = new HashMap<String, Object>();
+    	String responseStr = "";
         try {
         	logger.info("=====> Start to send message <=====");
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			
-			String response = NeteaseIMUtil.getInstance().basicSendMsg(user.getAccid(), 0, to, type, body);
-			JSONObject responseObj = JSONObject.fromObject(response);
+			responseStr = NeteaseIMUtil.getInstance().basicSendMsg(user.getAccid(), 0, to, type, body);
+			/*JSONObject responseObj = JSONObject.fromObject(responseStr);
 			if (responseObj.getInt("code") == 200) {
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
 			} else {
 				Map<String, Object> result = new HashMap<String, Object>();
 				result.put("code", responseObj.getInt("code"));
 				result.put("desc", responseObj.getInt("desc"));
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "", result);
-			}
+			}*/
         } catch (Exception e) {
             e.printStackTrace();
-            ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+            responseStr = e.getMessage();
         }
-        return resultMap;
+        return responseStr;
     }
     
     @ResponseBody
