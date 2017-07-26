@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
@@ -451,16 +452,11 @@ public class UserController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/updatePicture", method = RequestMethod.POST)
-	public Map<String, Object> updatePicture(HttpServletRequest request) {
+	public Map<String, Object> updatePicture(@RequestParam(name = "file") CommonsMultipartFile uploadFile) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
 			logger.info("=====> Start to change user picture <=====");
-			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-			List<MultipartFile> list = multipartRequest.getFiles("file");
-			for (MultipartFile multipartFile : list) {
-				System.out.println(multipartFile);
-			}
-			/*if (uploadFile.getSize() == 0 || !uploadFile.getFileItem().getContentType().contains("image")) {
+			if (uploadFile.getSize() == 0 || !uploadFile.getFileItem().getContentType().contains("image")) {
 				resultMap.put("success", false);
 				resultMap.put("errorMsg", "请选择正确的图片");
 				return resultMap;
@@ -477,7 +473,7 @@ public class UserController {
 			Map<String, Object> result = new HashMap<String, Object>();
 			result.put("imgurl", picturePath);
 
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);*/
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
