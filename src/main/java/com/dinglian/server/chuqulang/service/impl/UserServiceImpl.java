@@ -13,6 +13,7 @@ import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.dao.GeneralDao;
 import com.dinglian.server.chuqulang.dao.UserDao;
 import com.dinglian.server.chuqulang.dao.VerifyNoDao;
+import com.dinglian.server.chuqulang.model.Contact;
 import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.model.UserAttention;
 import com.dinglian.server.chuqulang.model.VerifyNo;
@@ -103,6 +104,26 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void saveUserAttention(UserAttention attention) {
 		generalDao.saveUserAttention(attention);
+	}
+
+	@Override
+	public User getUserByAccid(String faccid) {
+		return userDao.getUserByAccid(faccid);
+	}
+
+	@Override
+	public Contact getContact(int userId, int contactUserId) {
+		return generalDao.getContact(userId, contactUserId);
+	}
+
+	@Override
+	public void saveContact(Contact contact) {
+		generalDao.saveContact(contact);
+	}
+
+	@Override
+	public void deleteContact(int userId, int contactUserId) {
+		generalDao.deleteContact(userId, contactUserId);
 	}
 
 

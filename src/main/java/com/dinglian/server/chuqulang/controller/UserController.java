@@ -1,5 +1,7 @@
 package com.dinglian.server.chuqulang.controller;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -558,7 +561,7 @@ public class UserController {
 					map.put("nickName", contact.getContactUser().getNickName());
 					map.put("picture", contact.getContactUser().getPicture());
 					map.put("degree", contact.getDegree());
-					map.put("description", contact.getDescription());
+//					map.put("description", contact.getDescription());
 					resultList.add(map);
 				}
 			}
@@ -733,6 +736,21 @@ public class UserController {
 			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
 		return responseMap;
+	}
+	
+	@RequestMapping(value = "/profilePicture")
+	public void profilePicture(HttpServletResponse response){
+		try {
+			logger.info("=====> Start to preview profile picture <=====");
+			User currentUser = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
+			
+			FileUploadHelper.readLocalImage(response, currentUser.getPicture());
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		logger.info("=====> Preview profile picture end <=====");
 	}
 	
 	@ResponseBody

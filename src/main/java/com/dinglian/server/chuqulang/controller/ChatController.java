@@ -1,14 +1,11 @@
 package com.dinglian.server.chuqulang.controller;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dinglian.server.chuqulang.model.ChatRoom;
+import com.dinglian.server.chuqulang.model.Contact;
 import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.service.ActivityService;
 import com.dinglian.server.chuqulang.service.ChatService;
+import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.utils.NeteaseIMUtil;
-import com.dinglian.server.chuqulang.utils.RequestHelper;
-import com.dinglian.server.chuqulang.utils.ResponseHelper;
 
 import net.sf.json.JSONObject;
 
@@ -35,10 +32,10 @@ public class ChatController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
 
-	/*
-	 * @Autowired private UserService userService;
-	 */
-
+	
+	@Autowired
+	private UserService userService;
+	 
 	@Autowired
 	private ActivityService activityService;
 
@@ -48,26 +45,26 @@ public class ChatController {
 	@Autowired
 	private HttpServletResponse response;
 
-	@ResponseBody
-	@RequestMapping(value = "/chating", method = RequestMethod.POST)
-	public Map<String, Object> chating(@RequestParam(name = "eventId") String eventIdStr,
-			@RequestParam(name = "password") String password) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		try {
-			int eventId = Integer.parseInt(eventIdStr);
-			Subject currentUser = SecurityUtils.getSubject();
-			if (currentUser.isAuthenticated()) {
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
-			} else {
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "请先登录");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
-		}
-
-		return resultMap;
-	}
+	/*
+	 * @ResponseBody
+	 * 
+	 * @RequestMapping(value = "/chating", method = RequestMethod.POST) public
+	 * Map<String, Object> chating(@RequestParam(name = "eventId") String
+	 * eventIdStr,
+	 * 
+	 * @RequestParam(name = "password") String password) { Map<String, Object>
+	 * resultMap = new HashMap<String, Object>(); try { int eventId =
+	 * Integer.parseInt(eventIdStr); Subject currentUser =
+	 * SecurityUtils.getSubject(); if (currentUser.isAuthenticated()) {
+	 * ResponseHelper.addResponseData(resultMap,
+	 * RequestHelper.RESPONSE_STATUS_OK, ""); } else {
+	 * ResponseHelper.addResponseData(resultMap,
+	 * RequestHelper.RESPONSE_STATUS_FAIL, "请先登录"); } } catch (Exception e) {
+	 * e.printStackTrace(); ResponseHelper.addResponseData(resultMap,
+	 * RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage()); }
+	 * 
+	 * return resultMap; }
+	 */
 
 	/**
 	 * 发送信息
@@ -87,11 +84,10 @@ public class ChatController {
 		String responseStr = "";
 		try {
 			logger.info("=====> Start to send message <=====");
-			Subject currentUser = SecurityUtils.getSubject();
-			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			User user = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
 
 			responseStr = NeteaseIMUtil.getInstance().basicSendMsg(user.getAccid(), 0, to, type, body);
-			
+
 			// 保存内容到本地
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -118,8 +114,7 @@ public class ChatController {
 		String responseStr = "";
 		try {
 			logger.info("=====> Start to create chatroom <=====");
-			Subject currentUser = SecurityUtils.getSubject();
-			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			User user = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
 
 			Event event = activityService.findEventById(eventId);
 
@@ -227,8 +222,7 @@ public class ChatController {
 		response.setCharacterEncoding("UTF-8");
 		try {
 			logger.info("=====> Start to toggle chatroom closed <=====");
-			Subject currentUser = SecurityUtils.getSubject();
-			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			User user = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
 
 			ChatRoom chatRoom = ChatService.findChatRoomByRoomId(roomid);
 			if (chatRoom != null && chatRoom.getCreator().getAccid().equalsIgnoreCase(user.getAccid())) {
@@ -261,8 +255,7 @@ public class ChatController {
 		String responseStr = "";
 		try {
 			logger.info("=====> Start to request chatroom address <=====");
-			Subject currentUser = SecurityUtils.getSubject();
-			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			User user = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
 
 			if (clienttype == null) {
 				clienttype = 1;
@@ -301,18 +294,110 @@ public class ChatController {
 		String responseStr = "";
 		try {
 			logger.info("=====> Start to send chatroom message <=====");
-			Subject currentUser = SecurityUtils.getSubject();
-			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			User user = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
 
 			responseStr = NeteaseIMUtil.getInstance().sendChatroomMsg(roomid, msgId, user.getAccid(), msgType,
 					resendFlag, attach);
-			
+
 			// 保存内容到本地
 		} catch (Exception e) {
 			e.printStackTrace();
 			responseStr = e.getMessage();
 		}
 		logger.info("=====> Send chatroom essage end <=====");
+		return responseStr;
+	}
+
+	/**
+	 * 添加好友
+	 * @param faccid	好友accid
+	 * @param type		1直接加好友，2请求加好友，3同意加好友，4拒绝加好友
+	 * @param msg		加好友对应的请求消息，第三方组装，最长256字符
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/addFriend", method = RequestMethod.POST)
+	public String addFriend(@RequestParam("faccid") String faccid, @RequestParam("type") int type,
+			@RequestParam(name = "msg", required = false) String msg) {
+		String responseStr = "";
+		try {
+			logger.info("=====> Start to add friend <=====");
+			User user = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
+			
+			user = userService.findUserById(user.getId());
+
+			responseStr = NeteaseIMUtil.getInstance().addFriend(user.getAccid(), faccid, type, msg);
+			JSONObject responseObj = JSONObject.fromObject(responseStr);
+			if (responseObj.getInt("code") == 200) {
+				User friend = userService.getUserByAccid(faccid);
+				int nextOrder = user.getContactNextOrder();
+				Contact contact = new Contact();
+				contact.setOrderNo(nextOrder);
+				contact.setUser(user);
+				contact.setContactUser(friend);
+				contact.setDegree(0);
+				contact.setCreatonDate(new Date());
+				
+				user.getContacts().add(contact);
+				userService.saveOrUpdateUser(user);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseStr = e.getMessage();
+		}
+		logger.info("=====> Add friend end <=====");
+		return responseStr;
+	}
+
+	/**
+	 * 更新好友
+	 * @param faccid
+	 * @param alias
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/updateFriend", method = RequestMethod.POST)
+	public String updateFriend(@RequestParam("faccid") String faccid, @RequestParam("alias") String alias) {
+		String responseStr = "";
+		try {
+			logger.info("=====> Start to update friend <=====");
+			User user = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
+			
+			responseStr = NeteaseIMUtil.getInstance().updateFriend(user.getAccid(), faccid, alias, null);
+			JSONObject responseObj = JSONObject.fromObject(responseStr);
+			if (responseObj.getInt("code") == 200) {
+				User contactUser = userService.getUserByAccid(faccid);
+				Contact contact = userService.getContact(user.getId(), contactUser.getId());
+				contact.setAlias(alias);
+				userService.saveContact(contact);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseStr = e.getMessage();
+		}
+		logger.info("=====> Update friend end <=====");
+		return responseStr;
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/deleteFriend", method = RequestMethod.POST)
+	public String deleteFriend(@RequestParam("faccid") String faccid) {
+		String responseStr = "";
+		try {
+			logger.info("=====> Start to delete friends <=====");
+			User user = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
+
+			responseStr = NeteaseIMUtil.getInstance().deleteFriend(user.getAccid(), faccid);
+			JSONObject responseObj = JSONObject.fromObject(responseStr);
+			if (responseObj.getInt("code") == 200) {
+				User contactUser = userService.getUserByAccid(faccid);
+				userService.deleteContact(user.getId(), contactUser.getId());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			responseStr = e.getMessage();
+		}
+		logger.info("=====> Delete friends end <=====");
 		return responseStr;
 	}
 

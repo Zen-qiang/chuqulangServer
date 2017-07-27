@@ -31,7 +31,9 @@ public class Contact implements Serializable {
 
 	private int degree; // 亲密度
 
-	private String description; // 添加来源
+//	private String description; // 添加来源
+	
+	private String alias; // 备注
 
 	private Date creatonDate;
 
@@ -82,12 +84,12 @@ public class Contact implements Serializable {
 		this.degree = degree;
 	}
 
-	public String getDescription() {
-		return description;
+	public String getAlias() {
+		return alias;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 
 	@Temporal(TemporalType.TIMESTAMP)

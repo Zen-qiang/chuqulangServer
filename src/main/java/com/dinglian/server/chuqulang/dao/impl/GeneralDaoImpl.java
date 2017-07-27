@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.dao.GeneralDao;
+import com.dinglian.server.chuqulang.model.Contact;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.TopicPraise;
 import com.dinglian.server.chuqulang.model.UserAttention;
@@ -81,8 +82,28 @@ public class GeneralDaoImpl implements GeneralDao {
 	@Override
 	public void deleteCoterieGuy(int coterieId, int userId) {
 		String hql = "DELETE FROM CoterieGuy WHERE coterie.id = :coterieId AND user.id = :userId ";
-		getCurrentSession().createQuery(hql).setInteger("coterieId", coterieId).setInteger("userId", userId).executeUpdate();
-		
+		getCurrentSession().createQuery(hql).setInteger("coterieId", coterieId).setInteger("userId", userId)
+				.executeUpdate();
+
+	}
+
+	@Override
+	public Contact getContact(int userId, int contactUserId) {
+		String hql = "FROM Contact WHERE user.id = :userId AND contactUser.id = :contactUserId ";
+		return (Contact) getCurrentSession().createQuery(hql).setInteger("userId", userId)
+				.setInteger("contactUserId", contactUserId).uniqueResult();
+	}
+
+	@Override
+	public void saveContact(Contact contact) {
+		getCurrentSession().save(contact);
+	}
+
+	@Override
+	public void deleteContact(int userId, int contactUserId) {
+		String hql = "DELETE FROM Contact WHERE user.id = :userId AND contactUser.id = :contactUserId ";
+		getCurrentSession().createQuery(hql).setInteger("userId", userId).setInteger("contactUserId", contactUserId)
+				.executeUpdate();
 	}
 
 }

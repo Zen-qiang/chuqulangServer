@@ -99,6 +99,29 @@
 <h2>测试页面</h2>
 <P>  The time on the server is ${serverTime}. </P>
 
+<img src="user/profilePicture" onerror="" />
+
+<h2>删除好友：</h2>
+<form action="chat/deleteFriend" method="post">
+	faccid：<input type="text" name="faccid" value="18270790998"/><br>
+	<button type="submit" >删除好友</button>
+</form>
+
+<h2>修改备注：</h2>
+<form action="chat/updateFriend" method="post">
+	faccid：<input type="text" name="faccid" value="18270790998"/><br>
+	alias：<input type="text" name="alias" value="啊啊啊啊啊"/><br>
+	<button type="submit" >修改备注</button>
+</form>
+
+<h2>添加好友：</h2>
+<form action="chat/addFriend" method="post">
+	faccid：<input type="text" name="faccid" value="18270790998"/><br>
+	type：<input type="text" name="type" value="1"/><br>
+	msg：<input type="text" name="msg" value="是否添加好友"/><br>
+	<button type="submit" >添加好友</button>
+</form>
+
 <h2>发送聊天室消息：</h2>
 <form action="chat/chatRoomSendMsg" method="post">
 	roomid：<input type="text" name="roomid" value="10179360"/><br>

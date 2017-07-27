@@ -13,5 +13,7 @@ public interface UserDao extends GenericDao<User> {
 
 	User getUserByUsername(String username);
 
+	User getUserByAccid(String faccid);
+
 
 }

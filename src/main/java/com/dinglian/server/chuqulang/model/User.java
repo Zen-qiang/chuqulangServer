@@ -303,6 +303,7 @@ public class User implements Serializable{
 		this.followers = followers;
 	}
 	
+	@Column(name = "accid", unique = true)
 	public String getAccid() {
 		return accid;
 	}
@@ -335,6 +336,17 @@ public class User implements Serializable{
 		for (UserCollect collect : userCollects) {
 			if (collect.getOrderNo() > orderNo) {
 				orderNo = collect.getOrderNo();
+			}
+		}
+		return orderNo + 1;
+	}
+
+	@Transient
+	public int getContactNextOrder() {
+		int orderNo = 0;
+		for (Contact contact : contacts) {
+			if (contact.getOrderNo() > orderNo) {
+				orderNo = contact.getOrderNo();
 			}
 		}
 		return orderNo + 1;
