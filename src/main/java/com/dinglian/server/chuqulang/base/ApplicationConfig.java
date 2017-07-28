@@ -1,5 +1,7 @@
 package com.dinglian.server.chuqulang.base;
 
+import java.io.File;
+
 import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,19 +45,19 @@ public class ApplicationConfig {
 	}
 
 	public String getResourceRoot() {
-		return System.getProperty("resource.root", "/Server/app-test-tomcat/webapps/chuqulang/");
+		return System.getProperty("resource.root", "/Server/app-test-tomcat/webapps");
+	}
+	
+	public String getResourceFolder() {
+		return System.getProperty("resource.folder", "/chuqulang-resource");
 	}
 
 	public String getResourceProfileFolder() {
-		return System.getProperty("resource.profile.folder", "/profile/");
-	}
-
-	public String getResourceProfilePictureFolder() {
-		return System.getProperty("resource.profile.picture.folder", "/picture");
+		return System.getProperty("resource.profile.folder", "/profile");
 	}
 	
-	public String getUserProfilePicturePath() {
-		return System.getProperty("resource.profile.picture.folder", getResourceRoot() + getResourceProfileFolder() + "%s" + getResourceProfilePictureFolder() + "/");
+	public String getUserProfilePath() {
+		return System.getProperty("resource.profile.picture.folder", getResourceRoot() + getResourceFolder() + getResourceProfileFolder() + "/%s/");
 	}
 
 }

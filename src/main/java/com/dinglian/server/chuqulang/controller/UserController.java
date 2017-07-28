@@ -466,7 +466,7 @@ public class UserController {
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			
-        	String picturePath = FileUploadHelper.uploadProfilePicture(user.getId(), uploadFile.getInputStream());
+        	String picturePath = FileUploadHelper.uploadProfilePicture(user.getPhoneNo(), uploadFile.getInputStream());
         	
 			user.setPicture(picturePath);
 			userService.saveOrUpdateUser(user);

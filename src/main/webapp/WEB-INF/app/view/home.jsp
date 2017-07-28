@@ -101,6 +101,14 @@
 
 <img src="user/profilePicture" onerror="" />
 
+<h2>账号登录：</h2>
+<form action="user/login" method="post">
+	<input type="hidden" value="username" name="type">
+	用户名：<input type="text" name="phoneno" value="18270790997"/><br>
+	密码：<input type="text" name="password" value="xxh131420"/><br>
+	<button type="submit" >登录</button>
+</form>
+
 <h2>删除好友：</h2>
 <form action="chat/deleteFriend" method="post">
 	faccid：<input type="text" name="faccid" value="18270790998"/><br>
@@ -168,14 +176,6 @@
 	type：<input type="text" name="type" value="0"/><br>
 	body：<input type="text" name="body" value="message"/><br>
 	<button type="submit" >发送信息</button>
-</form>
-
-<h2>账号登录：</h2>
-<form action="user/login" method="post">
-	<input type="hidden" value="username" name="type">
-	用户名：<input type="text" name="phoneno" value="18270790997"/><br>
-	密码：<input type="text" name="password" value="xxh131420"/><br>
-	<button type="submit" >登录</button>
 </form>
 
 <h2>我的活动</h2>

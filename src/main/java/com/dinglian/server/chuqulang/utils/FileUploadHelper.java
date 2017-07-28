@@ -3,7 +3,6 @@ package com.dinglian.server.chuqulang.utils;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -17,10 +16,10 @@ import sun.misc.BASE64Encoder;
 
 public class FileUploadHelper {
 
-	public static String uploadProfilePicture(int userId, InputStream inputStream) throws IOException {
+	public static String uploadProfilePicture(String phoneNo, InputStream inputStream) throws IOException {
 		ApplicationConfig config = ApplicationConfig.getInstance();
-		String path = config.getUserProfilePicturePath();
-		path = String.format(path, userId);
+		String path = config.getUserProfilePath();
+		path = String.format(path, phoneNo);
 		File folder = new File(path);
 		if (!folder.exists()) {
 			folder.mkdirs();
@@ -29,7 +28,10 @@ public class FileUploadHelper {
 		File file = new File(folder, "avatar.png");
     	BufferedImage im = ImageIO.read(inputStream);
     	ImageIO.write(im, "png", file);
-		return file.getAbsolutePath();
+		String filePath = file.getAbsolutePath();
+		String separator = config.getResourceFolder().replaceAll("/", "").trim();
+		String[] splitStr = filePath.split(separator);
+		return splitStr[1];
 	}
 
 	public static void readLocalImage(HttpServletResponse response, String picture) throws IOException {
