@@ -43,7 +43,7 @@ public class ApplicationConfig {
 	}
 
 	public String getResourceRoot() {
-		return System.getProperty("resource.root", "/chuqulang/resources");
+		return System.getProperty("resource.root", "/Server/app-test-tomcat/webapps/chuqulang/");
 	}
 
 	public String getResourceProfileFolder() {
