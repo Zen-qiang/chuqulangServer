@@ -134,8 +134,7 @@ public class ActivityController {
      */
     @ResponseBody
     @RequestMapping(value = "/launchActivity", method = RequestMethod.POST)
-    public Map<String, Object> launchActivity(@RequestParam("typename") String typeNameStr
-            , @RequestParam("isOpen") boolean isOpen
+    public Map<String, Object> launchActivity(@RequestParam("isOpen") boolean isOpen
             , @RequestParam(name = "password",required = false) String password
             , @RequestParam("tags") int[] tags
             , @RequestParam("name") String name
@@ -164,8 +163,8 @@ public class ActivityController {
 			}*/
         	
             Event event = new Event();
-            TypeName typeName = activityService.getTypeNameByName(typeNameStr);
-            event.setTypeName(typeName);
+//            TypeName typeName = activityService.getTypeNameByName(typeNameStr);
+//            event.setTypeName(typeName);
             event.setOpen(isOpen);
             if (isOpen) {
 				event.setPassword(password);
@@ -179,6 +178,9 @@ public class ActivityController {
 					event.getTags().add(eventTag);
 				}
             	i++;
+            	if (event.getTypeName() == null) {
+            		event.setTypeName(tag.getTypeName());
+				}
 			}
             
             event.setName(name);
@@ -226,7 +228,7 @@ public class ActivityController {
 			result.put("gps", event.getGps());
 			result.put("address", event.getAddress());
 			result.put("isOpen", event.isOpen());
-			result.put("typename", typeName != null ? typeName.getName() : "");
+			result.put("typename", event.getTypeName() != null ? event.getTypeName().getName() : "");
 			
 			List<Map> tagList = new ArrayList<>();
 			Set<EventTag> eventTags = event.getTags();

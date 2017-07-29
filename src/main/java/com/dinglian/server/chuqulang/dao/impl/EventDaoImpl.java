@@ -36,7 +36,8 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 		}
 		
 		if (searchCriteria.getCategory() != null) {
-			sb.append("AND tags.tag.id = :category ");
+//			sb.append("AND tags.tag.id = :category ");
+			sb.append("AND tags.tag.typeName.id = :category ");
 		}
 		if (StringUtils.isNotBlank(searchCriteria.getStatus())) {
 			if (searchCriteria.getStatus().equals(Event.STATUS_OVER)) {
