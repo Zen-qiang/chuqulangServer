@@ -209,8 +209,11 @@ public class UserController {
 					existVerifyNo.setValid(false);
 					userService.saveVerifyNo(existVerifyNo);
 					
+					ApplicationConfig config = ApplicationConfig.getInstance();
+					String profilePicture = config.getUserProfilePicturePath();
+					
 					// 注册云信ID
-					String response = NeteaseIMUtil.getInstance().create(user.getPhoneNo(), "", "", "", "");
+					String response = NeteaseIMUtil.getInstance().create(user.getPhoneNo(), user.getPhoneNo(), "", String.format(profilePicture, user.getPhoneNo()), "");
 					JSONObject responseObj = JSONObject.fromObject(response);
 					if (responseObj.getInt("code") == 200) {
 						JSONObject info = responseObj.getJSONObject("info");

@@ -57,7 +57,11 @@ public class ApplicationConfig {
 	}
 	
 	public String getUserProfilePath() {
-		return System.getProperty("resource.profile.picture.folder", getResourceRoot() + getResourceFolder() + getResourceProfileFolder() + "/%s/");
+		return System.getProperty("resource.user.profile.path", getResourceRoot() + getResourceFolder() + getResourceProfileFolder() + "/%s/");
 	}
 
+	public String getUserProfilePicturePath() {
+		return System.getProperty("resource.profile.picture.path", "/profile/%s/avatar.png");
+	}
+	
 }
