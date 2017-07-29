@@ -69,7 +69,7 @@ public class Event implements Serializable {
 
 	private String description; // 活动介绍
 
-//	private TypeName typeName; // 活动类型
+	private TypeName typeName; // 活动类型
 
 	private boolean open; // 是否公开
 
@@ -169,7 +169,7 @@ public class Event implements Serializable {
 		this.description = description;
 	}
 
-	/*@JoinColumn(name = "fk_type_name_id")
+	@JoinColumn(name = "fk_type_name_id")
 	@ManyToOne(fetch = FetchType.LAZY)
 	public TypeName getTypeName() {
 		return typeName;
@@ -177,7 +177,7 @@ public class Event implements Serializable {
 
 	public void setTypeName(TypeName typeName) {
 		this.typeName = typeName;
-	}*/
+	}
 
 	public boolean isOpen() {
 		return open;
