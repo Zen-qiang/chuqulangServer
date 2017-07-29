@@ -381,14 +381,17 @@ public class UserController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/getUser", method = RequestMethod.GET)
-	public Map<String, Object> getUser() {
+	public Map<String, Object> getUser(@RequestParam(name = "userId", required = false) Integer userId) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
 			logger.info("=====> Start to get user information <=====");
-			Subject currentUser = SecurityUtils.getSubject();
-			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			User user = null;
+			if (userId == null || userId == 0) {
+				Subject currentUser = SecurityUtils.getSubject();
+				user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+				userId = user.getId();
+			}
 			
-			int userId = user.getId();
 			user = userService.findUserById(userId);
 			if (user == null) {
 				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
@@ -687,6 +690,7 @@ public class UserController {
 					map.put("userId", attentionUser.getId());
 					map.put("nickName", attentionUser.getNickName());
 					map.put("picture", attentionUser.getPicture());
+					map.put("accid", attentionUser.getAccid());
 					resultList.add(map);
 				}
 			}

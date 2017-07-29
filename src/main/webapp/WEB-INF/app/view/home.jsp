@@ -99,7 +99,7 @@
 <h2>测试页面</h2>
 <P>  The time on the server is ${serverTime}. </P>
 
-<img src="user/profilePicture" onerror="" />
+<img src="http://localhost:8081/chuqulang-resource/profile/18270790999/avatar.png" onerror="" />
 
 <h2>账号登录：</h2>
 <form action="user/login" method="post">
@@ -107,6 +107,12 @@
 	用户名：<input type="text" name="phoneno" value="18270790997"/><br>
 	密码：<input type="text" name="password" value="xxh131420"/><br>
 	<button type="submit" >登录</button>
+</form>
+
+<h2>获取用户信息：</h2>
+<form action="user/getUser" method="get">
+	userId：<input type="text" name=userId value="2"/><br>
+	<button type="submit" >获取用户信息</button>
 </form>
 
 <h2>删除好友：</h2>
