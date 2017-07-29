@@ -420,6 +420,41 @@ public class UserController {
 		return resultMap;
 	}
 	
+	@ResponseBody
+	@RequestMapping(value = "/getUserByAccid", method = RequestMethod.GET)
+	public Map<String, Object> getUserByAccid(@RequestParam("accid") String accid) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			logger.info("=====> Start to get user information by accid <=====");
+			
+			User user = userService.getUserByAccid(accid);
+			if (user == null) {
+				throw new NullPointerException("用户ACCID：" + accid + " , 用户不存在");
+			}
+				
+			Map<String, Object> result = new HashMap<String, Object>();
+			result.put("id", user.getId());
+			result.put("phoneno", user.getPhoneNo());
+			result.put("nickname", user.getNickName());
+			result.put("picture", user.getPicture());
+			result.put("signLog", user.getSignLog());
+			result.put("lastLoginIp", user.getLastLoginIp());
+			result.put("lastLoginCity", user.getLastLoginCity());
+			result.put("lastLoginDate", user.getLastLoginDate());
+			result.put("lastLoginPhone", user.getLastLoginPhone());
+			result.put("typename", user.getTypeName() != null ? user.getTypeName().getName() : "");
+			result.put("accid", user.getAccid());
+			result.put("token", user.getToken());
+			
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+		}
+		logger.info("=====> Get user information by accid end <=====");
+		return resultMap;
+	}
+	
 	/**
 	 * 修改用户签名
 	 * @param signLog	签名内容
@@ -567,6 +602,7 @@ public class UserController {
 					map.put("nickName", contact.getContactUser().getNickName());
 					map.put("picture", contact.getContactUser().getPicture());
 					map.put("degree", contact.getDegree());
+					map.put("accid", contact.getContactUser().getAccid());
 //					map.put("description", contact.getDescription());
 					resultList.add(map);
 				}

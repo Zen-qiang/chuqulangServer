@@ -115,6 +115,12 @@
 	<button type="submit" >获取用户信息</button>
 </form>
 
+<h2>获取用户信息：</h2>
+<form action="user/getUserByAccid" method="get">
+	accid：<input type="text" name=accid value="18270790997"/><br>
+	<button type="submit" >获取用户信息</button>
+</form>
+
 <h2>删除好友：</h2>
 <form action="chat/deleteFriend" method="post">
 	faccid：<input type="text" name="faccid" value="18270790998"/><br>
