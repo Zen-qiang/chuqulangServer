@@ -1,5 +1,8 @@
 package com.dinglian.server.chuqulang.controller;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -7,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -34,8 +39,11 @@ import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.model.UserCollect;
 import com.dinglian.server.chuqulang.service.ActivityService;
 import com.dinglian.server.chuqulang.service.UserService;
+import com.dinglian.server.chuqulang.utils.FileUploadHelper;
 import com.dinglian.server.chuqulang.utils.RequestHelper;
 import com.dinglian.server.chuqulang.utils.ResponseHelper;
+
+import sun.misc.BASE64Decoder;
 
 @Controller
 @RequestMapping("/activity")
@@ -146,7 +154,7 @@ public class ActivityController {
             , @RequestParam("address") String address
             , @RequestParam(name = "description", required = false) String description
             , @RequestParam(name = "limiter", required = false) String limiter
-            , @RequestParam(name = "pictures", required = false) String picture
+            , @RequestParam(name = "pictures", required = false) String[] pictures
             , @RequestParam(name = "friends", required = false) int[] friends
             , @RequestParam(name = "phoneNo", required = false) String phoneNo) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -156,15 +164,7 @@ public class ActivityController {
         	Subject currentUser = SecurityUtils.getSubject();
         	User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
         	
-        	/*int userId = user.getId();
-			user = userService.findUserById(userId);
-			if (user == null) {
-				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}*/
-        	
             Event event = new Event();
-//            TypeName typeName = activityService.getTypeNameByName(typeNameStr);
-//            event.setTypeName(typeName);
             event.setOpen(isOpen);
             if (isOpen) {
 				event.setPassword(password);
@@ -176,11 +176,11 @@ public class ActivityController {
             	if (tag != null) {
 					EventTag eventTag = new EventTag(event, tag, 1, i);
 					event.getTags().add(eventTag);
+					if (event.getTypeName() == null) {
+						event.setTypeName(tag.getTypeName());
+					}
 				}
             	i++;
-            	if (event.getTypeName() == null) {
-            		event.setTypeName(tag.getTypeName());
-				}
 			}
             
             event.setName(name);
@@ -198,8 +198,20 @@ public class ActivityController {
             event.setCreationDate(new Date());
             event.setStatus(Event.STATUS_SIGNUP);
 
-            EventPicture eventPicture = new EventPicture(event, picture, 1, user);
-            event.getEventPictures().add(eventPicture);
+            activityService.saveEvent(event);
+            
+            if (pictures != null) {
+            	i = 1;
+            	String basePicturePath = ApplicationConfig.getInstance().getActivityPicturePath();
+            	for (String picBase64Str : pictures) {
+            		String pictureFolderPath = String.format(basePicturePath, event.getId());
+            		String picPath = FileUploadHelper.uploadActivityPicture(pictureFolderPath, picBase64Str, i);
+            		
+        			EventPicture eventPicture = new EventPicture(event, picPath, i, user);
+        			event.getEventPictures().add(eventPicture);
+        			i++;
+				}
+			}
             
             event.getEventUsers().add(new EventUser(event, user, 1));
             if (friends != null) {

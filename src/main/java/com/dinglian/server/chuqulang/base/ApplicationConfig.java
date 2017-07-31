@@ -56,8 +56,16 @@ public class ApplicationConfig {
 		return System.getProperty("resource.profile.folder", "/profile");
 	}
 	
+	public String getResourceActivityFolder() {
+		return System.getProperty("resource.activity.folder", "/activity");
+	}
+	
 	public String getUserProfilePath() {
 		return System.getProperty("resource.user.profile.path", getResourceRoot() + getResourceFolder() + getResourceProfileFolder() + "/%s/");
+	}
+	
+	public String getActivityPicturePath() {
+		return System.getProperty("resource.activity.picture.path", getResourceRoot() + getResourceFolder() + getResourceActivityFolder() + "/%s/");
 	}
 
 	public String getUserProfilePicturePath() {

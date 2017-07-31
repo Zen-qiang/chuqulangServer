@@ -3,6 +3,7 @@ package com.dinglian.server.chuqulang.utils;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 
+import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
 public class FileUploadHelper {
@@ -58,6 +60,34 @@ public class FileUploadHelper {
 		in.close();
 		BASE64Encoder base64Encoder = new BASE64Encoder();
 		return base64Encoder.encode(data);
+	}
+
+	public static String uploadActivityPicture(String picturePath, String picBase64Str, int index) throws IOException {
+		BASE64Decoder decoder = new BASE64Decoder();
+		File parentFolder = new File(picturePath);
+		if (!parentFolder.exists()) {
+			parentFolder.mkdirs();
+		}
+		File file = new File(parentFolder, index + ".png");
+		FileOutputStream write = new FileOutputStream(file);
+		byte[] decoderBytes = decoder.decodeBuffer(picBase64Str);
+		write.write(decoderBytes);
+		write.close();
+		
+		String filePath = file.getAbsolutePath();
+		String separator = ApplicationConfig.getInstance().getResourceFolder().replaceAll("/", "").trim();
+		String[] splitStr = filePath.split(separator);
+		
+		if (splitStr.length == 2) {
+			return splitStr[1].replace("\\", "/");
+		} else {
+			return "";
+		}
+		/*BufferedImage bIMG = ImageIO.read(file);
+		File formatFile = new File(file.getParentFile(), index + ".png");
+	    ImageIO.write(bIMG, "png", formatFile);
+	    file.delete();
+	    return formatFile;*/
 	}
 
 }
