@@ -1,14 +1,18 @@
 package com.dinglian.server.chuqulang.controller;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -23,6 +27,8 @@ import com.dinglian.server.chuqulang.service.ActivityService;
 import com.dinglian.server.chuqulang.service.ChatService;
 import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.utils.NeteaseIMUtil;
+import com.dinglian.server.chuqulang.utils.RequestHelper;
+import com.dinglian.server.chuqulang.utils.ResponseHelper;
 
 import net.sf.json.JSONObject;
 
@@ -317,16 +323,17 @@ public class ChatController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/addFriend", method = RequestMethod.POST)
-	public String addFriend(@RequestParam("faccid") String faccid, @RequestParam("type") int type,
+	public Map<String, Object> addFriend(@RequestParam("faccid") String faccid, @RequestParam("type") int type,
 			@RequestParam(name = "msg", required = false) String msg) {
-		String responseStr = "";
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+//		String responseStr = "";
 		try {
 			logger.info("=====> Start to add friend <=====");
 			User user = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
 			
 			user = userService.findUserById(user.getId());
 
-			responseStr = NeteaseIMUtil.getInstance().addFriend(user.getAccid(), faccid, type, msg);
+			String responseStr = NeteaseIMUtil.getInstance().addFriend(user.getAccid(), faccid, type, msg);
 			JSONObject responseObj = JSONObject.fromObject(responseStr);
 			if (responseObj.getInt("code") == 200) {
 				User friend = userService.getUserByAccid(faccid);
@@ -340,13 +347,36 @@ public class ChatController {
 				
 				user.getContacts().add(contact);
 				userService.saveOrUpdateUser(user);
+				
+				Map<String, Object> result = new HashMap<String, Object>();
+				result.put("id", friend.getId());
+				result.put("phoneno", friend.getPhoneNo());
+				result.put("nickname", friend.getNickName());
+				result.put("picture", friend.getPicture());
+				result.put("signLog", friend.getSignLog());
+				result.put("lastLoginIp", friend.getLastLoginIp());
+				result.put("lastLoginCity", friend.getLastLoginCity());
+				result.put("lastLoginDate", friend.getLastLoginDate());
+				result.put("lastLoginPhone", friend.getLastLoginPhone());
+				result.put("typename", friend.getTypeName() != null ? friend.getTypeName().getName() : "");
+				result.put("accid", friend.getAccid());
+//				result.put("token", friend.getToken());
+				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
+			} else {
+				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, responseStr);
 			}
+		} catch (DataIntegrityViolationException e) {
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "对方已经是你的好友");
+		} catch (ConstraintViolationException e) {
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "对方已经是你的好友");
 		} catch (Exception e) {
 			e.printStackTrace();
-			responseStr = e.getMessage();
+//			responseStr = e.getMessage();
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
 		logger.info("=====> Add friend end <=====");
-		return responseStr;
+//		return responseStr;
+		return resultMap;
 	}
 
 	/**
