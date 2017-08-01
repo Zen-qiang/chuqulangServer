@@ -63,6 +63,8 @@ public class FileUploadHelper {
 	}
 
 	public static String uploadActivityPicture(String picturePath, String picBase64Str, int index) throws IOException {
+		picBase64Str = picBase64Str.split(",")[1];
+		
 		BASE64Decoder decoder = new BASE64Decoder();
 		File parentFolder = new File(picturePath);
 		if (!parentFolder.exists()) {

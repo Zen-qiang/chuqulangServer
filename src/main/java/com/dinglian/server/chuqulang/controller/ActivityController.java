@@ -204,12 +204,14 @@ public class ActivityController {
             	i = 1;
             	String basePicturePath = ApplicationConfig.getInstance().getActivityPicturePath();
             	for (String picBase64Str : pictures) {
-            		String pictureFolderPath = String.format(basePicturePath, event.getId());
-            		String picPath = FileUploadHelper.uploadActivityPicture(pictureFolderPath, picBase64Str, i);
-            		
-        			EventPicture eventPicture = new EventPicture(event, picPath, i, user);
-        			event.getEventPictures().add(eventPicture);
-        			i++;
+            		if (picBase64Str.indexOf(",") > 0) {
+            			String pictureFolderPath = String.format(basePicturePath, event.getId());
+            			String picPath = FileUploadHelper.uploadActivityPicture(pictureFolderPath, picBase64Str, i);
+            			
+            			EventPicture eventPicture = new EventPicture(event, picPath, i, user);
+            			event.getEventPictures().add(eventPicture);
+            			i++;
+					}
 				}
 			}
             

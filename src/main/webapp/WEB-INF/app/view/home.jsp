@@ -102,7 +102,7 @@
 <h2>测试页面</h2>
 <P>  The time on the server is ${serverTime}. </P>
 
-<img src="http://localhost:8081/chuqulang-resource/profile/18270790999/avatar.png" onerror="" />
+<img src="resources/dllogo.svg" onerror="" />
 
 <h2>账号登录：</h2>
 <form action="user/login" method="post">
