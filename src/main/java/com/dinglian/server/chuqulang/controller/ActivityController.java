@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
+import com.dinglian.server.chuqulang.comparator.EventPictureComparator;
 import com.dinglian.server.chuqulang.comparator.EventUserComparator;
 import com.dinglian.server.chuqulang.model.ChatRoom;
 import com.dinglian.server.chuqulang.model.Event;
@@ -230,9 +231,16 @@ public class ActivityController {
             activityService.saveEvent(event);
             
             Map<String, Object> result = new HashMap<String, Object>();
-            EventPicture cover = event.getCover();
 			result.put("eventId", event.getId());
-			result.put("picture", cover != null ? cover.getUrl() : "");
+			
+			List<String> pictureList = new ArrayList<String>();
+			List<EventPicture> eventPictures = new ArrayList<EventPicture>(event.getEventPictures());
+			Collections.sort(eventPictures, new EventPictureComparator());
+			for (EventPicture eventPicture : eventPictures) {
+				pictureList.add(eventPicture.getUrl());
+			}
+			result.put("pictures", pictureList);
+			
 			result.put("name", event.getName());
 			result.put("releaseTime", event.getCreationDate());
 			result.put("startTime", event.getStartTime());
@@ -393,9 +401,18 @@ public class ActivityController {
 //					System.out.println(event.getId());
 					Map<String, Object> result = new HashMap<String, Object>();
 					
-					EventPicture cover = event.getCover();
+//					EventPicture cover = event.getCover();
 					result.put("eventId", event.getId());
-					result.put("picture", cover != null ? cover.getUrl() : "");
+					
+					List<String> pictureList = new ArrayList<String>();
+					List<EventPicture> eventPictures = new ArrayList<EventPicture>(event.getEventPictures());
+					Collections.sort(eventPictures, new EventPictureComparator());
+					for (EventPicture eventPicture : eventPictures) {
+						pictureList.add(eventPicture.getUrl());
+					}
+					result.put("pictures", pictureList);
+					
+//					result.put("picture", cover != null ? cover.getUrl() : "");
 					result.put("name", event.getName());
 					result.put("releaseTime", event.getCreationDate());
 					result.put("startTime", event.getStartTime());
@@ -476,8 +493,16 @@ public class ActivityController {
 			Event event = activityService.findEventById(id);
 			Map<String, Object> result = new HashMap<String, Object>();
 			
-			EventPicture cover = event.getCover();
-			result.put("picture", cover != null ? cover.getUrl() : "");
+//			EventPicture cover = event.getCover();
+//			result.put("picture", cover != null ? cover.getUrl() : "");
+			List<String> pictureList = new ArrayList<String>();
+			List<EventPicture> eventPictures = new ArrayList<EventPicture>(event.getEventPictures());
+			Collections.sort(eventPictures, new EventPictureComparator());
+			for (EventPicture eventPicture : eventPictures) {
+				pictureList.add(eventPicture.getUrl());
+			}
+			result.put("pictures", pictureList);
+			
 			result.put("name", event.getName());
 			
 			ChatRoom chatRoom = event.getChatRoom();
@@ -667,9 +692,18 @@ public class ActivityController {
 				for (Event event : events) {
 					Map<String, Object> result = new HashMap<String, Object>();
 					
-					EventPicture cover = event.getCover();
+//					EventPicture cover = event.getCover();
 					result.put("eventId", event.getId());
-					result.put("picture", cover != null ? cover.getUrl() : "");
+					
+					List<String> pictureList = new ArrayList<String>();
+					List<EventPicture> eventPictures = new ArrayList<EventPicture>(event.getEventPictures());
+					Collections.sort(eventPictures, new EventPictureComparator());
+					for (EventPicture eventPicture : eventPictures) {
+						pictureList.add(eventPicture.getUrl());
+					}
+					result.put("pictures", pictureList);
+					
+//					result.put("picture", cover != null ? cover.getUrl() : "");
 					result.put("name", event.getName());
 					result.put("releaseTime", event.getCreationDate());
 					result.put("startTime", event.getStartTime());
