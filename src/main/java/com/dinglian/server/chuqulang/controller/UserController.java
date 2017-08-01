@@ -455,6 +455,76 @@ public class UserController {
 		return resultMap;
 	}
 	
+	@ResponseBody
+	@RequestMapping(value = "/getUserInfo", method = RequestMethod.GET)
+	public Map<String, Object> getUserInfo(@RequestParam(name = "userId", required = false) Integer userId,
+			@RequestParam(name = "accid", required = false) String accid) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			logger.info("=====> Start to get user information by accid <=====");
+			if (userId == null && StringUtils.isBlank(accid)) {
+				throw new NullPointerException("必须有一个参数userId/accid");
+			}
+			if (userId != null && StringUtils.isNotBlank(accid)) {
+				throw new RuntimeException("只需一个参数userId/accid");
+			}
+			
+			User user = null;
+			if (userId != null) {
+				user = userService.findUserById(userId);
+			} else if (StringUtils.isNotBlank(accid)) {
+				user = userService.getUserByAccid(accid);
+			}
+			
+			if (user == null) {
+				throw new NullPointerException("用户不存在");
+			}
+			
+			Map<String, Object> result = new HashMap<String, Object>();
+			result.put("userId", user.getId());
+			result.put("accid", user.getAccid());
+			result.put("phoneno", user.getPhoneNo());
+			result.put("nickname", user.getNickName());
+			result.put("picture", user.getPicture());
+			result.put("signLog", user.getSignLog());
+			
+			SearchCriteria searchCriteria = new SearchCriteria();
+			searchCriteria.setUserId(user.getId());
+			// 我的粉丝
+			searchCriteria.setAttention(true);
+			int attentionsCount = userService.getUserAttentionsTotalCount(searchCriteria);
+			result.put("attentionsCount", attentionsCount);
+			// 我的关注
+			searchCriteria.setAttention(false);
+			int followersCount = userService.getUserAttentionsTotalCount(searchCriteria);
+			result.put("followersCount", followersCount);
+			// 兴趣标签
+			List<Map> tags = new ArrayList<Map>();
+			List<UserInterest> interests = new ArrayList<UserInterest>(user.getInterests());
+			Collections.sort(interests, new UserInterestComparator());
+			
+			Map<String, Object> map = null;
+			for (UserInterest interest : interests) {
+				Tag tag = interest.getTag();
+				if (tag != null) {
+					map = new HashMap<String, Object>();
+					map.put("id", tag.getId());
+					map.put("name", tag.getName());
+					map.put("typename", tag.getTypeName() != null ? tag.getTypeName().getName() : "");
+					tags.add(map);
+				}
+			}
+			result.put("tags", tags);
+			
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+		}
+		logger.info("=====> Get user information by accid end <=====");
+		return resultMap;
+	}
+	
 	/**
 	 * 修改用户签名
 	 * @param signLog	签名内容

@@ -112,6 +112,13 @@
 	<button type="submit" >登录</button>
 </form>
 
+<h2>获取用户名片：</h2>
+<form action="user/getUserInfo" method="get">
+	userId：<input type="text" name=userId value="1"/><br>
+	accid:<input type="text" name=accid value="18270790997"/><br>
+	<button type="submit" >获取用户名片</button>
+</form>
+
 <h2>获取用户信息：</h2>
 <form action="user/getUser" method="get">
 	userId：<input type="text" name=userId value="2"/><br>

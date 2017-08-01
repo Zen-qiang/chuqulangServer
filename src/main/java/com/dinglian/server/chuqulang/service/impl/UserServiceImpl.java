@@ -100,6 +100,11 @@ public class UserServiceImpl implements UserService {
 		map.put("resultList", attentions);
 		return map;
 	}
+	
+	@Override
+	public int getUserAttentionsTotalCount(SearchCriteria searchCriteria) {
+		return generalDao.getUserAttentionTotalCount(searchCriteria);
+	}
 
 	@Override
 	public void saveUserAttention(UserAttention attention) {

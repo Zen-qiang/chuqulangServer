@@ -45,4 +45,6 @@ public interface UserService {
 
 	public void deleteContact(int id1, int id2);
 
+	public int getUserAttentionsTotalCount(SearchCriteria searchCriteria);
+
 }
