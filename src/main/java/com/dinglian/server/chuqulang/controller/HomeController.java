@@ -23,14 +23,8 @@ public class HomeController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
-	@Autowired
-	private UserService userService;
-	
-	/**
-	 * Simply selects the home view to render by returning its name.
-	 */
-	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public String home(Locale locale, Model model) {
+	@RequestMapping(value = "/test", method = RequestMethod.GET)
+	public String test(Locale locale, Model model) {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
 		Date date = new Date();
@@ -43,17 +37,9 @@ public class HomeController {
 		return "home";
 	}
 	
-	@RequestMapping(value = "/register")
-	public void register(){
-		User user = new User();
-		user.setNickName("TEST");
-		try {
-			userService.register(user);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	@RequestMapping("/")
+	public String home(Locale locale, Model model) {
+		return "index";
 	}
-	
 	
 }
