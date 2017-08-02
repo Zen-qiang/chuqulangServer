@@ -207,7 +207,7 @@ public class ActivityController {
             	for (String picBase64Str : pictures) {
             		if (picBase64Str.indexOf(",") > 0) {
             			String pictureFolderPath = String.format(basePicturePath, event.getId());
-            			String picPath = FileUploadHelper.uploadActivityPicture(pictureFolderPath, picBase64Str, i);
+            			String picPath = FileUploadHelper.uploadPicture(pictureFolderPath, picBase64Str, i + ".png");
             			
             			EventPicture eventPicture = new EventPicture(event, picPath, i, user);
             			event.getEventPictures().add(eventPicture);

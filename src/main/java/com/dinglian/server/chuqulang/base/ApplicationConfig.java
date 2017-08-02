@@ -60,12 +60,20 @@ public class ApplicationConfig {
 		return System.getProperty("resource.activity.folder", "/activity");
 	}
 	
+	public String getResourceCoterieFolder() {
+		return System.getProperty("resource.coterie.folder", "/coterie");
+	}
+	
 	public String getUserProfilePath() {
 		return System.getProperty("resource.user.profile.path", getResourceRoot() + getResourceFolder() + getResourceProfileFolder() + "/%s/");
 	}
 	
 	public String getActivityPicturePath() {
 		return System.getProperty("resource.activity.picture.path", getResourceRoot() + getResourceFolder() + getResourceActivityFolder() + "/%s/");
+	}
+	
+	public String getCoterieCoverPath() {
+		return System.getProperty("resource.coterie.cover.path", getResourceRoot() + getResourceFolder() + getResourceCoterieFolder() + "/%s/");
 	}
 
 	public String getUserProfilePicturePath() {

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.hibernate.exception.ConstraintViolationException;
@@ -34,9 +35,11 @@ import com.dinglian.server.chuqulang.model.TopicComment;
 import com.dinglian.server.chuqulang.model.TopicPicture;
 import com.dinglian.server.chuqulang.model.TopicPraise;
 import com.dinglian.server.chuqulang.model.User;
+import com.dinglian.server.chuqulang.service.ActivityService;
 import com.dinglian.server.chuqulang.service.DiscoverService;
 import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.utils.DateUtils;
+import com.dinglian.server.chuqulang.utils.FileUploadHelper;
 import com.dinglian.server.chuqulang.utils.RequestHelper;
 import com.dinglian.server.chuqulang.utils.ResponseHelper;
 
@@ -51,6 +54,9 @@ public class DiscoverController {
 	
 	@Autowired
     private UserService userService;
+	
+	@Autowired
+    private ActivityService activityService;
 
 	/**
 	 * 获取圈子列表
@@ -437,10 +443,13 @@ public class DiscoverController {
 					map.put("name", coterie.getName());
 					map.put("description", coterie.getDescription());
 					map.put("hot", coterie.getHot());
-					Tag tag = coterie.getTag();
-					if (tag != null) {
-						map.put("tagName", tag.getName());
+					
+					List<String> tags = new ArrayList<String>();
+					for (Tag tag : coterie.getTags()) {
+						Map<String, Object> tagMap = new HashMap<String, Object>();
+						tags.add(tag.getName());
 					}
+					map.put("tags", tags);
 					coterieList.add(map);
 				}
 				result.put("coteries", coterieList);
@@ -543,6 +552,11 @@ public class DiscoverController {
 		return responseMap;
 	}
 	
+	/**
+	 * 退出圈子
+	 * @param coterieId
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/exitCoterie", method = RequestMethod.POST)
 	public Map<String, Object> exitCoterie(@RequestParam("coterieId")int coterieId) {
@@ -563,5 +577,109 @@ public class DiscoverController {
 		return responseMap;
 	}
 	
+	/**
+	 * 创建圈子
+	 * @param name
+	 * @param tags
+	 * @param description
+	 * @param picture
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/createCoterie", method = RequestMethod.POST)
+	public Map<String, Object> createCoterie(
+			@RequestParam("name") String name, 
+			@RequestParam("tags") int[] tags,
+			@RequestParam(name = "description", required = false) String description, 
+			@RequestParam(name = "picture", required = false) String picture) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			logger.info("=====> Start to create coterie <=====");
+			
+			Subject currentUser = SecurityUtils.getSubject();
+        	User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+        	
+			Coterie coterie = new Coterie();
+			coterie.setName(name);
+			coterie.setDescription(description);
+			coterie.setCreationDate(new Date());
+			coterie.setCreator(user);
+			coterie.setHot(0);
+			
+			for (int tagId : tags) {
+				Tag tag = activityService.findTagById(tagId);
+            	if (tag != null) {
+            		coterie.getTags().add(tag);
+            	}
+			}
+			
+			coterie.getCoterieGuys().add(new CoterieGuy(coterie, 1, user, new Date(), true,	true));
+			
+			discoverService.saveCoterie(coterie);
+			
+			if (StringUtils.isNotBlank(picture) && coterie.getId() != 0) {
+				String coverPath = ApplicationConfig.getInstance().getCoterieCoverPath();
+        		if (picture.indexOf(",") > 0) {
+        			String coverFolderPath = String.format(coverPath, coterie.getId());
+        			String picPath = FileUploadHelper.uploadPicture(coverFolderPath, picture, "cover.png");
+        			
+        			CoteriePicture coteriePicture = new CoteriePicture();
+        			coteriePicture.setCoterie(coterie);
+        			coteriePicture.setCreationDate(new Date());
+        			coteriePicture.setUser(user);
+        			coteriePicture.setUrl(picPath);
+        			coterie.setCoteriePicture(coteriePicture);
+				}
+        		discoverService.saveCoterie(coterie);
+			}
+			
+			
+			logger.info("=====> Create coterie end <=====");
+			
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "");
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+		}
+
+		return responseMap;
+	}
 	
+	/**
+	 * 我的圈子
+	 * @param dataType	1：我创建的	2：我参与的
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/getMyCoteries", method = RequestMethod.POST)
+	public Map<String, Object> getMyCoteries(@RequestParam(name = "dataType", required = false) String dataType) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			logger.info("=====> Start to get my coteries <=====");
+			
+			Subject currentUser = SecurityUtils.getSubject();
+        	User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+        	
+        	List<Coterie> coteries = discoverService.getMyCoteries(dataType, user.getId());
+        	List<Map> resultList = new ArrayList<Map>();
+        	if (coteries != null) {
+				for (Coterie coterie : coteries) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("id", coterie.getId());
+					map.put("name", coterie.getName());
+					map.put("picture", coterie.getCoteriePicture() != null ? coterie.getCoteriePicture().getUrl() : "");
+					resultList.add(map);
+				}
+			}
+        	
+			logger.info("=====> Get my coteries end <=====");
+			
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_OK, "", resultList);
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseData(responseMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
+		}
+
+		return responseMap;
+	}
 }

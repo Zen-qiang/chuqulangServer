@@ -1,5 +1,6 @@
 package com.dinglian.server.chuqulang.service;
 
+import java.util.List;
 import java.util.Map;
 
 import com.dinglian.server.chuqulang.base.SearchCriteria;
@@ -27,5 +28,9 @@ public interface DiscoverService {
 	void saveCoterieGuy(CoterieGuy coterieGuy);
 
 	void exitCoterie(int coterieId, int id);
+
+	void saveCoterie(Coterie coterie) throws Exception;
+
+	List<Coterie> getMyCoteries(String dataType, int userId);
 
 }

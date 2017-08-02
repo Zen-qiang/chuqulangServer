@@ -113,4 +113,18 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 		return null;
 	}
 
+	@Override
+	public List<Coterie> getMyCoteries(String dataType, int userId) {
+		String hql = "SELECT distinct c FROM Coterie c LEFT JOIN FETCH c.coterieGuys guy WHERE 1=1 ";
+		if (dataType.equalsIgnoreCase(Coterie.DATATYPE_CREATED)) {
+			hql += "AND c.creator.id = :userId ";
+		} else if (dataType.equalsIgnoreCase(Coterie.DATATYPE_ATTENTION)) {
+			hql += "AND c.creator.id != :userId AND guy.user.id = :userId ";
+		} else {
+			hql += "AND guy.user.id = :userId ";
+		}
+		hql += "ORDER BY guy.creationDate DESC ";
+		return getCurrentSession().createQuery(hql).setInteger("userId", userId).list();
+	}
+
 }

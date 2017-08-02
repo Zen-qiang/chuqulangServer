@@ -12,6 +12,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -25,10 +27,14 @@ public class Coterie implements Serializable{
 	
 	public static final String TYPE_HOT = "hot";
 	public static final String TYPE_NEW = "new";
+	
+	public static final String DATATYPE_CREATED = "1";
+	public static final String DATATYPE_ATTENTION = "2";
 
     private int id;
     
-    private Tag tag;
+//    private Tag tag;
+    private Set<Tag> tags = new HashSet<Tag>(); // 活动标签
 
     private String name; //圈子名称
 
@@ -36,7 +42,7 @@ public class Coterie implements Serializable{
 
     private User creator; //创建人
 
-    private int orderNo; //序号
+//    private int orderNo; //序号
 
     private int hot; //热度
 
@@ -84,14 +90,14 @@ public class Coterie implements Serializable{
         this.creator = creator;
     }
 
-    @Column(name = "order_no")
+    /*@Column(name = "order_no")
     public int getOrderNo() {
         return orderNo;
     }
 
     public void setOrderNo(int orderNo) {
         this.orderNo = orderNo;
-    }
+    }*/
 
     public int getHot() {
         return hot;
@@ -111,7 +117,7 @@ public class Coterie implements Serializable{
     	this.creationDate = creationDate;
     }
 
-    @JoinColumn(name = "fk_tag_id")
+    /*@JoinColumn(name = "fk_tag_id")
     @ManyToOne(fetch = FetchType.LAZY)
 	public Tag getTag() {
 		return tag;
@@ -119,10 +125,10 @@ public class Coterie implements Serializable{
 
 	public void setTag(Tag tag) {
 		this.tag = tag;
-	}
+	}*/
 
 	@JoinColumn(name = "fk_coterie_picture_id")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
 	public CoteriePicture getCoteriePicture() {
 		return coteriePicture;
 	}
@@ -147,6 +153,18 @@ public class Coterie implements Serializable{
 
 	public void setTopics(Set<Topic> topics) {
 		this.topics = topics;
+	}
+	
+	@JoinTable(name = "coterie_tag_map", joinColumns = {
+			@JoinColumn(name = "fk_coterie_id", referencedColumnName = "id") }, inverseJoinColumns = {
+					@JoinColumn(name = "fk_tag_id", referencedColumnName = "id") })
+	@ManyToMany
+	public Set<Tag> getTags() {
+		return tags;
+	}
+
+	public void setTags(Set<Tag> tags) {
+		this.tags = tags;
 	}
 
 	@Transient

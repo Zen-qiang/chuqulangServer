@@ -62,15 +62,15 @@ public class FileUploadHelper {
 		return base64Encoder.encode(data);
 	}
 
-	public static String uploadActivityPicture(String picturePath, String picBase64Str, int index) throws IOException {
+	public static String uploadPicture(String folderPath, String picBase64Str, String fileName) throws IOException {
 		picBase64Str = picBase64Str.split(",")[1];
 		
 		BASE64Decoder decoder = new BASE64Decoder();
-		File parentFolder = new File(picturePath);
+		File parentFolder = new File(folderPath);
 		if (!parentFolder.exists()) {
 			parentFolder.mkdirs();
 		}
-		File file = new File(parentFolder, index + ".png");
+		File file = new File(parentFolder, fileName);
 		FileOutputStream write = new FileOutputStream(file);
 		byte[] decoderBytes = decoder.decodeBuffer(picBase64Str);
 		write.write(decoderBytes);

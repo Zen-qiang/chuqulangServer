@@ -14,9 +14,9 @@ public class CoteriePicture implements Serializable{
 
 	private String url; //图片地址
 
-	private String description; //图片描述
+//	private String description; //图片描述
 
-	private int orderNo; //序号
+//	private int orderNo; //序号
 
 	private User user; //创建人
 
@@ -50,7 +50,7 @@ public class CoteriePicture implements Serializable{
 		this.url = url;
 	}
 
-	public String getDescription() {
+	/*public String getDescription() {
 		return description;
 	}
 
@@ -65,7 +65,7 @@ public class CoteriePicture implements Serializable{
 
 	public void setOrderNo(int orderNo) {
 		this.orderNo = orderNo;
-	}
+	}*/
 
 	@JoinColumn(name = "fk_user_id")
 	@ManyToOne(fetch = FetchType.LAZY)

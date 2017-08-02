@@ -90,4 +90,14 @@ public class DiscoverServiceImpl implements DiscoverService {
 		generalDao.deleteCoterieGuy(coterieId, userId);
 	}
 
+	@Override
+	public void saveCoterie(Coterie coterie) throws Exception {
+		coterieDao.save(coterie);
+	}
+
+	@Override
+	public List<Coterie> getMyCoteries(String dataType, int userId) {
+		return coterieDao.getMyCoteries(dataType, userId);
+	}
+
 }
