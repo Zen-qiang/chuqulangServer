@@ -45,7 +45,7 @@ public class ApplicationConfig {
 	}
 
 	public String getResourceRoot() {
-		return System.getProperty("resource.root", "/Server/app-test-tomcat/webapps");
+		return System.getProperty("resource.root", "/Debug-Server/apache-tomcat-8.0.32/webapps");
 	}
 	
 	public String getResourceFolder() {
