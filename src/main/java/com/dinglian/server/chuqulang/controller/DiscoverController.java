@@ -610,6 +610,9 @@ public class DiscoverController {
 				Tag tag = activityService.findTagById(tagId);
             	if (tag != null) {
             		coterie.getTags().add(tag);
+            		if (coterie.getTypeName() == null) {
+            			coterie.setTypeName(tag.getTypeName());
+					}
             	}
 			}
 			

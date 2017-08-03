@@ -42,4 +42,13 @@ public class HomeController {
 		return "index";
 	}
 	
+	@RequestMapping("/index")
+	public String index(Locale locale, Model model) {
+		return "index";
+	}
+	
+	@RequestMapping("/community")
+	public String community(Locale locale, Model model) {
+		return "community";
+	}
 }

@@ -54,6 +54,8 @@ public class Coterie implements Serializable{
     
     private Set<Topic> topics = new HashSet<Topic>(); //圈子成员
     
+    private TypeName typeName;
+    
     @GeneratedValue
     @Id
     public int getId() {
@@ -165,6 +167,16 @@ public class Coterie implements Serializable{
 
 	public void setTags(Set<Tag> tags) {
 		this.tags = tags;
+	}
+	
+	@JoinColumn(name = "fk_type_name_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	public TypeName getTypeName() {
+		return typeName;
+	}
+
+	public void setTypeName(TypeName typeName) {
+		this.typeName = typeName;
 	}
 
 	@Transient

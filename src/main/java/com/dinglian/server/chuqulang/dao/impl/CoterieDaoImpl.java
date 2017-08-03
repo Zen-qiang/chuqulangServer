@@ -22,7 +22,7 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 		super(entityClass);
 	}
 
-	@Override
+	/*@Override
 	public List<Coterie> getCoterieList(int tagId, String type) {
 		String hql = "FROM Coterie WHERE 1=1 ";
 		if (tagId != 0) {
@@ -40,7 +40,7 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 		List<Coterie> list = query.list();
 		return list;
 	}
-
+*/
 	@Override
 	public int getCoterieTotalCount() {
 		Query query = getCurrentSession().createQuery("SELECT COUNT(c) FROM Coterie c ");
@@ -50,16 +50,17 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 
 	@Override
 	public List<Coterie> getCoterieList(SearchCriteria searchCriteria) {
-		String hql = "FROM Coterie WHERE 1=1 ";
+		String hql = "SELECT distinct c FROM Coterie c LEFT JOIN FETCH c.tags tag WHERE 1=1 ";
+//		String hql = "FROM Coterie WHERE 1=1 ";
 		if (StringUtils.isNotBlank(searchCriteria.getTypeName())) {
 			hql += "AND tag.typeName.name = :typeName ";
 		}
 		if (searchCriteria.getTagId() != null) {
 			hql += "AND tag.id = :tagId ";
 		}
-		String orderBy = "ORDER BY creationDate DESC";
+		String orderBy = "ORDER BY c.creationDate DESC";
 		if (StringUtils.isNotBlank(searchCriteria.getOrderBy()) && searchCriteria.getOrderBy().equalsIgnoreCase(Coterie.TYPE_HOT)) {
-			orderBy = "ORDER BY hot DESC";
+			orderBy = "ORDER BY c.hot DESC";
 		}
 		hql += orderBy;
 		Query query = getCurrentSession().createQuery(hql);

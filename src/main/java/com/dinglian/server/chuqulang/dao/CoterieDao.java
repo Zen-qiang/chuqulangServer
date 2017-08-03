@@ -8,7 +8,7 @@ import com.dinglian.server.chuqulang.model.Topic;
 
 public interface CoterieDao extends GenericDao<Coterie> {
 
-	List<Coterie> getCoterieList(int tagId, String type);
+//	List<Coterie> getCoterieList(int tagId, String type);
 
 	int getCoterieTotalCount();
 
