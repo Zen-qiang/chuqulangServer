@@ -108,6 +108,8 @@ public class Event implements Serializable {
 	private Set<EventPicture> eventPictures = new HashSet<EventPicture>();// 活动图片（第一张封面）
 
 	// private Set<EventLog> eventLogs = new HashSet<EventLog>();
+	
+//	private Coterie coterie;
 
 	@GeneratedValue
 	@Id

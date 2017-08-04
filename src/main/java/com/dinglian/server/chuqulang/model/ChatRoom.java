@@ -47,7 +47,7 @@ public class ChatRoom implements Serializable{
 
 //	private Coterie coterie; // 所属圈子
 	
-	private Set<ChatNote> chatNotes = new HashSet<ChatNote>();
+//	private Set<ChatNote> chatNotes = new HashSet<ChatNote>();
 
 	@GeneratedValue
 	@Id
@@ -96,14 +96,14 @@ public class ChatRoom implements Serializable{
 		this.creationDate = creationDate;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, mappedBy = "chatRoom")
+	/*@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, mappedBy = "chatRoom")
 	public Set<ChatNote> getChatNotes() {
 		return chatNotes;
 	}
 
 	public void setChatNotes(Set<ChatNote> chatNotes) {
 		this.chatNotes = chatNotes;
-	}
+	}*/
 
 //	@JoinColumn(name = "fk_event_id")
 //	@ManyToOne(fetch = FetchType.LAZY)

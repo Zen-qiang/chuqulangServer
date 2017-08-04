@@ -4,8 +4,8 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 
-@Table(name = "event_sign")
-@Entity
+//@Table(name = "event_sign")
+//@Entity
 public class EventSign implements Serializable{
 
     private int id;

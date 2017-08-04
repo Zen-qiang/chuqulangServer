@@ -30,6 +30,12 @@ public class EventUser implements Serializable{
 	private int orderNo;
 	
 	private Date creationDate;
+	
+	private String realName;
+	
+	private String phoneNo;
+	
+	private String gender;
 
 	@GeneratedValue
 	@Id
@@ -82,6 +88,32 @@ public class EventUser implements Serializable{
 		this.creationDate = creationDate;
 	}
 	
+	@Column(name = "real_name")
+	public String getRealName() {
+		return realName;
+	}
+
+	public void setRealName(String realName) {
+		this.realName = realName;
+	}
+
+	@Column(name = "phone_no")
+	public String getPhoneNo() {
+		return phoneNo;
+	}
+
+	public void setPhoneNo(String phoneNo) {
+		this.phoneNo = phoneNo;
+	}
+
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
+
 	public EventUser() {
 		// TODO Auto-generated constructor stub
 	}

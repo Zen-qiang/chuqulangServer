@@ -14,8 +14,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-@Table(name = "chat_note")
-@Entity
+//@Table(name = "chat_note")
+//@Entity
 public class ChatNote implements Serializable{
 
 	private Integer id;

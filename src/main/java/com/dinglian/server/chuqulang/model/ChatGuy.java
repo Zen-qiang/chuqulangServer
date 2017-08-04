@@ -11,8 +11,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-@Table(name = "chat_guy")
-@Entity
+//@Table(name = "chat_guy")
+//@Entity
 public class ChatGuy implements Serializable {
 
     private int id;

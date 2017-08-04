@@ -14,8 +14,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-@Table(name = "event_log")
-@Entity
+//@Table(name = "event_log")
+//@Entity
 public class EventLog implements Serializable{
 
 	private int id;

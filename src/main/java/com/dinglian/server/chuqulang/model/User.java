@@ -49,7 +49,7 @@ public class User implements Serializable{
 
 //	private double balance;
 
-	private TypeName typeName;
+	private TypeName typeName; // 个人 / 商家
 
 	private boolean active; //是否可用
 

@@ -4,8 +4,8 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 
-@Table(name = "fans")
-@Entity
+//@Table(name = "fans")
+//@Entity
 public class Fans implements Serializable{
 
     private int id;

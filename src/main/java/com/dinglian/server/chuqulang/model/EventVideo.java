@@ -14,8 +14,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-@Table(name = "event_video")
-@Entity
+//@Table(name = "event_video")
+//@Entity
 public class EventVideo implements Serializable{
 
 	private int id;

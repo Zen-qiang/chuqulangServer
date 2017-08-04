@@ -51,27 +51,6 @@ public class ChatController {
 	@Autowired
 	private HttpServletResponse response;
 
-	/*
-	 * @ResponseBody
-	 * 
-	 * @RequestMapping(value = "/chating", method = RequestMethod.POST) public
-	 * Map<String, Object> chating(@RequestParam(name = "eventId") String
-	 * eventIdStr,
-	 * 
-	 * @RequestParam(name = "password") String password) { Map<String, Object>
-	 * resultMap = new HashMap<String, Object>(); try { int eventId =
-	 * Integer.parseInt(eventIdStr); Subject currentUser =
-	 * SecurityUtils.getSubject(); if (currentUser.isAuthenticated()) {
-	 * ResponseHelper.addResponseData(resultMap,
-	 * RequestHelper.RESPONSE_STATUS_OK, ""); } else {
-	 * ResponseHelper.addResponseData(resultMap,
-	 * RequestHelper.RESPONSE_STATUS_FAIL, "请先登录"); } } catch (Exception e) {
-	 * e.printStackTrace(); ResponseHelper.addResponseData(resultMap,
-	 * RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage()); }
-	 * 
-	 * return resultMap; }
-	 */
-
 	/**
 	 * 发送信息
 	 * 

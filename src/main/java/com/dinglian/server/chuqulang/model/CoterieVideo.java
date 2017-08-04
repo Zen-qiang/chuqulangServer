@@ -4,8 +4,8 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 
-@Table(name = "coterie_video")
-@Entity
+//@Table(name = "coterie_video")
+//@Entity
 public class CoterieVideo implements Serializable{
 
 	private Integer id;
