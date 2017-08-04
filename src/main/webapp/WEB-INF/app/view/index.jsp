@@ -43,7 +43,7 @@
 				<ul class="nav navbar-nav">
 					<li class="active"><a href="#">首页</a></li>
 					<li><a href="#about">发现活动</a></li>
-					<li><a href="#contact">兴趣圈子</a></li>
+					<li><a href="community">兴趣圈子</a></li>
 					<li><a href="#contact">常见问题</a></li>
 				</ul>
 				<form class="navbar-form navbar-right">
@@ -70,7 +70,7 @@
 						<button class="btn btn-lg download-btn btn-disable pull-left">敬请期待</button>
 					</div>
 				</div> -->
-				<button class="btn btn-lg download-btn btn-disable dinglian-button">敬请期待</button>
+				<button class="btn btn-lg dinglian-btn btn-disable dinglian-button">敬请期待</button>
 			</div>
 			<!-- <div class="item">
 				<img class="second-slide" src="resources/img/首页_02.jpg" alt="Second slide">
