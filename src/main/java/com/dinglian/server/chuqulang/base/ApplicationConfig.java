@@ -80,4 +80,20 @@ public class ApplicationConfig {
 		return System.getProperty("resource.profile.picture.path", "/profile/%s/avatar.png");
 	}
 	
+	public String getWxMpToken () {
+		return System.getProperty("wx.mp.token", "dingliantech");
+	}
+	
+	public String getWxMpEncodingAESKey () {
+		return System.getProperty("wx.mp.encoding.aeskey", "tOPAjsqxYq3hFsnA3ukdyxus6KfD7rVi0hdl3eBJS3E");
+	}
+	
+	public String getWxMpAppId () {
+		return System.getProperty("wx.mp.appid", "wxc9ec7e5bf6f50c00");
+	}
+	
+	public String getWxMpAppSecret () {
+		return System.getProperty("wx.mp.appsecret", "5b5e8f910bd61cb3a9214f0443eb4230");
+	}
+	
 }
