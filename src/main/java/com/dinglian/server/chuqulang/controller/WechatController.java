@@ -64,7 +64,7 @@ public class WechatController {
 		return result;
 	}
 	
-	@RequestMapping(value = "/getUserInfo", method = RequestMethod.POST)
+	@RequestMapping(value = "/getUserInfo", method = RequestMethod.GET)
 	public String getUserInfo() {
 		logger.info("=====> Start to get user info <=====");
 		String response = "";
@@ -93,7 +93,7 @@ public class WechatController {
 	 * @param code	换取access_token的票据
 	 * @return
 	 */
-	@RequestMapping(value = "/getOAuth2AccessToken", method = RequestMethod.POST)
+	@RequestMapping(value = "/getOAuth2AccessToken", method = RequestMethod.GET)
 	public String getOAuth2AccessToken(@RequestParam("code") String code, @RequestParam("state") String state) {
 		logger.info("=====> Start to get OAuth2 access token <=====");
 		logger.info("code : " + code + ", state : " + state);
@@ -134,7 +134,7 @@ public class WechatController {
 		return response;
 	}
 	
-	@RequestMapping(value = "/refreshAuthAccessToken", method = RequestMethod.POST)
+	@RequestMapping(value = "/refreshAuthAccessToken", method = RequestMethod.GET)
 	public String refreshAuthAccessToken(@RequestParam("openId") String openId) {
 		logger.info("=====> Start to refresh OAuth2 access token <=====");
 		logger.info("openId : " + openId);
