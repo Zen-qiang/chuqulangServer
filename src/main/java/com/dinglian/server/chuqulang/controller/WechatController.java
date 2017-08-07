@@ -43,7 +43,7 @@ public class WechatController {
 		try {
 			ApplicationConfig config = ApplicationConfig.getInstance();
 			WXBizMsgCrypt wxcpt = new WXBizMsgCrypt(config.getWxMpToken(), config.getWxMpEncodingAESKey(), config.getWxMpAppId());
-			result = wxcpt.verifyUrl(signature, timestamp, nonce, echostr);
+			result = wxcpt.checkSignature(signature, timestamp, nonce, echostr);
 		} catch (AesException e) {
 			e.printStackTrace();
 		}

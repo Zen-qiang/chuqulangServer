@@ -287,5 +287,17 @@ public class WXBizMsgCrypt {
 		String result = decrypt(echoStr);
 		return result;
 	}
+	
+	public String checkSignature(String msgSignature, String timestamp, String nonce, String echostr)
+			throws AesException {
+		String signature = SHA1.getSHA1(token, timestamp, nonce);
+
+		if (!signature.equals(msgSignature)) {
+			throw new AesException(AesException.ValidateSignatureError);
+		}
+
+//		String result = decrypt(echostr);
+		return echostr;
+	}
 
 }
