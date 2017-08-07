@@ -38,7 +38,7 @@ public class UpdateWxMpAccessTokenTask {
 		
 		ApplicationConfig config = ApplicationConfig.getInstance();
 		
-		String url = config.getWxMpAccessToken();
+		String url = config.getWxMpAccessTokenUrl();
 		url = String.format(url, config.getWxMpAppId(), config.getWxMpAppSecret());
 		
 		try {
