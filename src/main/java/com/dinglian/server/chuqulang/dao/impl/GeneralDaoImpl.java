@@ -15,6 +15,8 @@ import com.dinglian.server.chuqulang.model.Contact;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.TopicPraise;
 import com.dinglian.server.chuqulang.model.UserAttention;
+import com.dinglian.server.chuqulang.model.WxAccessToken;
+import com.dinglian.server.chuqulang.model.WxOAuth2AccessToken;
 
 @Repository
 public class GeneralDaoImpl implements GeneralDao {
@@ -104,6 +106,27 @@ public class GeneralDaoImpl implements GeneralDao {
 		String hql = "DELETE FROM Contact WHERE user.id = :userId AND contactUser.id = :contactUserId ";
 		getCurrentSession().createQuery(hql).setInteger("userId", userId).setInteger("contactUserId", contactUserId)
 				.executeUpdate();
+	}
+
+	@Override
+	public WxAccessToken findWxAccessTokenById(int accessTokenId) {
+		return (WxAccessToken) getCurrentSession().get(WxAccessToken.class, accessTokenId);
+	}
+
+	@Override
+	public void saveWxAccessToken(WxAccessToken token) {
+		getCurrentSession().save(token);
+	}
+
+	@Override
+	public WxOAuth2AccessToken findWxOAuth2AccessTokenByOpenId(String openId) {
+		String hql = "FROM WxOAuth2AccessToken WHERE openId = :openId ";
+		return (WxOAuth2AccessToken) getCurrentSession().createQuery(hql).setString("openId", openId).uniqueResult();
+	}
+
+	@Override
+	public void saveWxOAuth2AccessToken(WxOAuth2AccessToken token) {
+		getCurrentSession().save(token);
 	}
 
 }

@@ -7,6 +7,8 @@ import com.dinglian.server.chuqulang.model.Contact;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.TopicPraise;
 import com.dinglian.server.chuqulang.model.UserAttention;
+import com.dinglian.server.chuqulang.model.WxAccessToken;
+import com.dinglian.server.chuqulang.model.WxOAuth2AccessToken;
 
 public interface GeneralDao {
 
@@ -27,5 +29,13 @@ public interface GeneralDao {
 	void saveContact(Contact contact);
 
 	void deleteContact(int userId, int contactUserId);
+
+	WxAccessToken findWxAccessTokenById(int accessTokenId);
+
+	void saveWxAccessToken(WxAccessToken token);
+
+	WxOAuth2AccessToken findWxOAuth2AccessTokenByOpenId(String openid);
+
+	void saveWxOAuth2AccessToken(WxOAuth2AccessToken token);
 
 }

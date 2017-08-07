@@ -96,4 +96,23 @@ public class ApplicationConfig {
 		return System.getProperty("wx.mp.appsecret", "5b5e8f910bd61cb3a9214f0443eb4230");
 	}
 	
+	public String getWxMpAccessTokenUrl () {
+		return System.getProperty("wx.mp.access.token.url", "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s");
+	}
+	
+	public String getWxMpOAuth2AccessTokenUrl () {
+		return System.getProperty("wx.mp.oauth2.access.token.url", "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code");
+	}
+	
+	public String getWxMpAuthorizeCodeUrl () {
+		return System.getProperty("wx.mp.oauth2.code.url", "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect");
+	}
+	
+	public String getWxMpAuthorizeRedirectUrl () {
+		return System.getProperty("wx.mp.oauth2.redirect.url", "http://www.dingliantech.com/api/getOAuth2AccessToken");
+	}
+	
+	public String getWxMpAuthorizeRefreshAccessTokenUrl () {
+		return System.getProperty("wx.mp.oauth2.access.token.refresh.url", "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=%s&grant_type=refresh_token&refresh_token=%s ");
+	}
 }

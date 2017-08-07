@@ -29,8 +29,8 @@ public class Test {
 //		NeteaseIMUtil.getInstance().getUinfos("[\"18270790999\"]");
 //		NeteaseIMUtil.getInstance().updateUinfo("18270790999", null, "/profile/18270790999/avatar.png", null, null, null, null, null, null);
 		
-		String str = "\\activity\\44\\1.png";
-		System.out.println(str.replace("\\", "/"));
+		String str = "{\"access_token\":\"ACCESS_TOKEN\",\"expires_in\":7200}";
+		System.out.println(str.indexOf("access_token") != -1);
 		
 		
 	}
