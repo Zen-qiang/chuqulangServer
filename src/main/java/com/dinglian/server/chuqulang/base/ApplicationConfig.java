@@ -109,10 +109,14 @@ public class ApplicationConfig {
 	}
 	
 	public String getWxMpAuthorizeRedirectUrl () {
-		return System.getProperty("wx.mp.oauth2.redirect.url", "http://www.dingliantech.com/api/getOAuth2AccessToken");
+		return System.getProperty("wx.mp.oauth2.redirect.url", "http://www.dingliantech.com/api/pullUserInfo");
 	}
 	
 	public String getWxMpAuthorizeRefreshAccessTokenUrl () {
-		return System.getProperty("wx.mp.oauth2.access.token.refresh.url", "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=%s&grant_type=refresh_token&refresh_token=%s ");
+		return System.getProperty("wx.mp.oauth2.access.token.refresh.url", "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=%s&grant_type=refresh_token&refresh_token=%s");
+	}
+
+	public String getWxMpUserInfoUrl() {
+		return System.getProperty("wx.mp.user.info.url", "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN");
 	}
 }

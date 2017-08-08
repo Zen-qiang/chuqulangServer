@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
@@ -866,12 +868,11 @@ public class UserController {
 		logger.info("=====> Preview profile picture end <=====");
 	}
 	
-	@ResponseBody
 	@RequestMapping(value = "/test")
-	public Map<String, Object> test() {
+	public ModelAndView test() {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
-		return resultMap;
+		return  new ModelAndView(new RedirectView("http://www.baidu.com"));
 	}
 
 }

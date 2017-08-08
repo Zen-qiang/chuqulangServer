@@ -12,10 +12,13 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.exception.AesException;
@@ -31,7 +34,7 @@ import net.sf.json.JSONObject;
  * @author Mr.xu
  *
  */
-@RestController
+@Controller
 @RequestMapping("/api")
 public class WechatController {
 
@@ -51,6 +54,7 @@ public class WechatController {
 	 * @param echostr		随机字符串
 	 * @return
 	 */
+	@ResponseBody
 	@RequestMapping(value = "/checkSignature", method = RequestMethod.GET)
 	public String checkSignature(String signature, String timestamp, String nonce, String echostr) {
 		String result = "";
@@ -64,28 +68,28 @@ public class WechatController {
 		return result;
 	}
 	
-	@RequestMapping(value = "/getUserInfo", method = RequestMethod.GET)
-	public String getUserInfo() {
-		logger.info("=====> Start to get user info <=====");
-		String response = "";
+	@ResponseBody
+	@RequestMapping(value = "/userAuthorization", method = RequestMethod.GET)
+	public ModelAndView userAuthorization() {
+		logger.info("=====> Start to user authorization <=====");
+		String url = "";
 		try {
 			ApplicationConfig config = ApplicationConfig.getInstance();
 			String redirectUrl = URLEncoder.encode(config.getWxMpAuthorizeRedirectUrl());
-			String url = config.getWxMpAuthorizeCodeUrl();
-			url = String.format(url, config.getWxMpAppId(), redirectUrl);
+			url = String.format(config.getWxMpAuthorizeCodeUrl(), config.getWxMpAppId(), redirectUrl);
 			logger.info("url : " + url);
 			
-			CloseableHttpClient httpclient = HttpClients.createDefault();
+			/*CloseableHttpClient httpclient = HttpClients.createDefault();
 			HttpGet httpGet = new HttpGet(url);
 			CloseableHttpResponse httpResponse = httpclient.execute(httpGet);
 			response = EntityUtils.toString(httpResponse.getEntity(), Consts.UTF_8);
 			
-			logger.info("response : " + response);
+			logger.info("response : " + response);*/
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		logger.info("=====> Get user info end <=====");
-		return response;
+		logger.info("=====> User authorization info end <=====");
+		return new ModelAndView(new RedirectView(url));
 	}
 	
 	/**
@@ -93,12 +97,14 @@ public class WechatController {
 	 * @param code	换取access_token的票据
 	 * @return
 	 */
-	@RequestMapping(value = "/getOAuth2AccessToken", method = RequestMethod.GET)
-	public String getOAuth2AccessToken(@RequestParam("code") String code, @RequestParam("state") String state) {
+	@ResponseBody
+	@RequestMapping(value = "/pullUserInfo", method = RequestMethod.GET)
+	public String pullUserInfo(@RequestParam("code") String code, @RequestParam("state") String state) {
 		logger.info("=====> Start to get OAuth2 access token <=====");
 		logger.info("code : " + code + ", state : " + state);
 		String response = "";
 		try {
+			// 通过code换取网页授权access_token
 			ApplicationConfig config = ApplicationConfig.getInstance();
 			String url = config.getWxMpOAuth2AccessTokenUrl();
 			url = String.format(url, config.getWxMpAppId(), config.getWxMpAppSecret(), code);
@@ -126,6 +132,12 @@ public class WechatController {
 				wxOAuth2AccessToken.setModifiedDate(new Date());
 				
 				wxMpService.updateWxOAuth2AccessToken(wxOAuth2AccessToken);
+				
+				// 拉取用户信息(需scope为 snsapi_userinfo)
+				url = String.format(config.getWxMpUserInfoUrl(), accessToken, openId);
+				httpGet = new HttpGet(url);
+				httpResponse = httpclient.execute(httpGet);
+				response = EntityUtils.toString(httpResponse.getEntity(), Consts.UTF_8);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -134,6 +146,7 @@ public class WechatController {
 		return response;
 	}
 	
+	@ResponseBody
 	@RequestMapping(value = "/refreshAuthAccessToken", method = RequestMethod.GET)
 	public String refreshAuthAccessToken(@RequestParam("openId") String openId) {
 		logger.info("=====> Start to refresh OAuth2 access token <=====");
