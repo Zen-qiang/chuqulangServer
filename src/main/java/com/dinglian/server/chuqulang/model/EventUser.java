@@ -35,7 +35,7 @@ public class EventUser implements Serializable{
 	
 	private String phoneNo;
 	
-	private String gender;
+	private Integer gender;//1时是男性，值为2时是女性，值为0时是未知
 
 	@GeneratedValue
 	@Id
@@ -106,11 +106,12 @@ public class EventUser implements Serializable{
 		this.phoneNo = phoneNo;
 	}
 
-	public String getGender() {
+	@Column(name = "gender", length = 1)
+	public Integer getGender() {
 		return gender;
 	}
 
-	public void setGender(String gender) {
+	public void setGender(Integer gender) {
 		this.gender = gender;
 	}
 

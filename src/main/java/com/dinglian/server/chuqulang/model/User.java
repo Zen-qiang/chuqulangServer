@@ -69,9 +69,17 @@ public class User implements Serializable{
 	
 	private Set<UserAttention> followers = new HashSet<UserAttention>();
 	
+	// 网易ACCID
 	private String accid;
-	
+	// 网易TOKEN
 	private String token;
+	
+	// 微信
+	private String openId;
+	
+	private Integer gender;// 1时是男性，值为2时是女性，值为0时是未知
+	
+	private Date birthday;
 	
 	// 拥有的聊天室
 //	private Set<ChatRoom> ownedRooms = new HashSet<ChatRoom>();
@@ -318,6 +326,34 @@ public class User implements Serializable{
 
 	public void setToken(String token) {
 		this.token = token;
+	}
+	
+	@Column(name = "open_id", unique = true)
+	public String getOpenId() {
+		return openId;
+	}
+
+	public void setOpenId(String openId) {
+		this.openId = openId;
+	}
+	
+	@Column(name = "gender", length = 1)
+	public Integer getGender() {
+		return gender;
+	}
+
+	public void setGender(Integer gender) {
+		this.gender = gender;
+	}
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "birthday")
+	public Date getBirthday() {
+		return birthday;
+	}
+
+	public void setBirthday(Date birthday) {
+		this.birthday = birthday;
 	}
 
 	public User() {

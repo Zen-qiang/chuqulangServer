@@ -1,39 +1,43 @@
 package com.dinglian.server.chuqulang.base;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.net.URLEncoder;
-
-import com.dinglian.server.chuqulang.utils.NeteaseIMUtil;
-
-import sun.misc.BASE64Decoder;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class Test {
 
 	public static void main(String[] args) throws Exception {
-		/*String imgStr = "";
-		BASE64Decoder decoder = new BASE64Decoder();
-		byte[] b = decoder.decodeBuffer(imgStr);
-		OutputStream out = new FileOutputStream(new File("D:/aa.png"));
-		out.write(b);
-		out.flush();
-		out.close();*/
-		
-		/*String str = "E:\\Server\\app-test-tomcat\\webapps\\chuqulang-resource\\profile\\18270790997\\avatar.png";
-		String[] a = str.split("chuqulang-resource");
-		for (String string : a) {
-			System.out.println(string);
-		}*/
-		// /profile/18270790999/avatar.png
-//		NeteaseIMUtil.getInstance().getUinfos("[\"18270790999\"]");
-//		NeteaseIMUtil.getInstance().updateUinfo("18270790999", null, "/profile/18270790999/avatar.png", null, null, null, null, null, null);
-		
-		String str = "localhost:8081/dinglian";
-		System.out.println(URLEncoder.encode(str));
-		
-		
+		URL url = new URL("http://wx.qlogo.cn/mmopen/VLjDyM7pibyK12nfJuWo8VIIR9mYXomlsUGlXGD3q5o8taPITKleBqv8zCj5kxpicgazf2f3Psn7ibbTxZcSoB59Q/0");  
+        HttpURLConnection conn = (HttpURLConnection)url.openConnection();  
+        conn.setRequestMethod("GET");  
+        conn.setConnectTimeout(5 * 1000);  
+        InputStream inStream = conn.getInputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();  
+        byte[] buffer = new byte[1024];  
+        int len = 0;  
+        while( (len=inStream.read(buffer)) != -1 ){  
+        	baos.write(buffer, 0, len);  
+        }  
+        inStream.close();  
+        byte[] data = baos.toByteArray();
+        File imageFile = new File("E:/BeautyGirl.jpg");  
+        FileOutputStream fos = new FileOutputStream(imageFile);  
+        fos.write(data);  
+        fos.close();  
 	}
+	
+	public static byte[] readInputStream(InputStream inStream) throws Exception{  
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();  
+        byte[] buffer = new byte[1024];  
+        int len = 0;  
+        while( (len=inStream.read(buffer)) != -1 ){  
+            outStream.write(buffer, 0, len);  
+        }  
+        inStream.close();  
+        return outStream.toByteArray();  
+    }  
 
 }

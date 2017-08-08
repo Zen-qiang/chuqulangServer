@@ -50,4 +50,10 @@ public class UserDaoImpl extends AbstractHibernateDao<User> implements UserDao {
         return (User) this.getCurrentSession().createQuery(hql).setString("accid", faccid).uniqueResult();
 	}
 
+	@Override
+	public User getUserByOpenId(String openId) {
+		String hql = "FROM User u WHERE 1=1 AND openId = :openId ";
+        return (User) this.getCurrentSession().createQuery(hql).setString("openId", openId).uniqueResult();
+	}
+
 }

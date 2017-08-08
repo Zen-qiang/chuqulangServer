@@ -47,4 +47,6 @@ public interface UserService {
 
 	public int getUserAttentionsTotalCount(SearchCriteria searchCriteria);
 
+	public User getUserByOpenId(String openId);
+
 }

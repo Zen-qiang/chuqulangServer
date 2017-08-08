@@ -624,7 +624,7 @@ public class DiscoverController {
 				String coverPath = ApplicationConfig.getInstance().getCoterieCoverPath();
         		if (picture.indexOf(",") > 0) {
         			String coverFolderPath = String.format(coverPath, coterie.getId());
-        			String picPath = FileUploadHelper.uploadPicture(coverFolderPath, picture, "cover.png");
+        			String picPath = FileUploadHelper.uploadPicture(coverFolderPath, picture, "cover.jpg");
         			
         			CoteriePicture coteriePicture = new CoteriePicture();
         			coteriePicture.setCoterie(coterie);

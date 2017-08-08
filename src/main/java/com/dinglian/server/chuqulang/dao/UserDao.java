@@ -15,5 +15,7 @@ public interface UserDao extends GenericDao<User> {
 
 	User getUserByAccid(String faccid);
 
+	User getUserByOpenId(String openId);
+
 
 }

@@ -131,5 +131,10 @@ public class UserServiceImpl implements UserService {
 		generalDao.deleteContact(userId, contactUserId);
 	}
 
+	@Override
+	public User getUserByOpenId(String openId) {
+		return userDao.getUserByOpenId(openId);
+	}
+
 
 }

@@ -226,7 +226,7 @@ public class UserController {
 					} else {
 						Map<String, Object> result = new HashMap<String, Object>();
 						result.put("code", responseObj.getInt("code"));
-						result.put("desc", responseObj.getInt("desc"));
+						result.put("desc", responseObj.getString("desc"));
 						ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "",result);
 					}
 				} else {
