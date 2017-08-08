@@ -24,6 +24,10 @@ public class RequestInterceptor implements HandlerInterceptor{
 		response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 //		response.setHeader("Content-Type", "application/json");
 		response.setHeader("Access-Control-Allow-Credentials","true");
+
+		// 解决字符乱码
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("text/html;charset=utf-8");
 		
 		logger.info("SESSION ID =======> " +SecurityUtils.getSubject().getSession().getId() + "<=======");
 		

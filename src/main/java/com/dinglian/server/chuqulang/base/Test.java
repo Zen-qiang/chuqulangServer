@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 
 import com.dinglian.server.chuqulang.utils.NeteaseIMUtil;
 
@@ -29,8 +30,8 @@ public class Test {
 //		NeteaseIMUtil.getInstance().getUinfos("[\"18270790999\"]");
 //		NeteaseIMUtil.getInstance().updateUinfo("18270790999", null, "/profile/18270790999/avatar.png", null, null, null, null, null, null);
 		
-		String str = "{\"access_token\":\"ACCESS_TOKEN\",\"expires_in\":7200}";
-		System.out.println(str.indexOf("access_token") != -1);
+		String str = "localhost:8081/dinglian";
+		System.out.println(URLEncoder.encode(str));
 		
 		
 	}
