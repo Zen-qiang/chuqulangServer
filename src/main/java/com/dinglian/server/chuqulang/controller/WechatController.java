@@ -69,7 +69,7 @@ public class WechatController {
 	}
 	
 	@ResponseBody
-	@RequestMapping(value = "/userAuthorization", method = RequestMethod.GET)
+	@RequestMapping(value = "/getUserAuthorization", method = RequestMethod.GET)
 	public ModelAndView userAuthorization() {
 		logger.info("=====> Start to user authorization <=====");
 		String url = "";
@@ -138,6 +138,8 @@ public class WechatController {
 				httpGet = new HttpGet(url);
 				httpResponse = httpclient.execute(httpGet);
 				response = EntityUtils.toString(httpResponse.getEntity(), Consts.UTF_8);
+				
+				logger.info("userInfo : " + response);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
