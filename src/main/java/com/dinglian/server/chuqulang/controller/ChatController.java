@@ -38,10 +38,9 @@ public class ChatController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
 
-	
 	@Autowired
 	private UserService userService;
-	 
+
 	@Autowired
 	private ActivityService activityService;
 
@@ -119,7 +118,6 @@ public class ChatController {
 					chatRoom.setValid(true);
 					chatRoom.setChatRoomId(chatRoomObj.getInt("roomid"));
 
-					// ChatService.saveChatRoom(chatRoom);
 					event.setChatRoom(chatRoom);
 					activityService.saveEvent(event);
 				}
@@ -295,9 +293,13 @@ public class ChatController {
 
 	/**
 	 * 添加好友
-	 * @param faccid	好友accid
-	 * @param type		1直接加好友，2请求加好友，3同意加好友，4拒绝加好友
-	 * @param msg		加好友对应的请求消息，第三方组装，最长256字符
+	 * 
+	 * @param faccid
+	 *            好友accid
+	 * @param type
+	 *            1直接加好友，2请求加好友，3同意加好友，4拒绝加好友
+	 * @param msg
+	 *            加好友对应的请求消息，第三方组装，最长256字符
 	 * @return
 	 */
 	@ResponseBody
@@ -305,11 +307,10 @@ public class ChatController {
 	public Map<String, Object> addFriend(@RequestParam("faccid") String faccid, @RequestParam("type") int type,
 			@RequestParam(name = "msg", required = false) String msg) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-//		String responseStr = "";
 		try {
 			logger.info("=====> Start to add friend <=====");
 			User user = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
-			
+
 			user = userService.findUserById(user.getId());
 
 			String responseStr = NeteaseIMUtil.getInstance().addFriend(user.getAccid(), faccid, type, msg);
@@ -323,10 +324,10 @@ public class ChatController {
 				contact.setContactUser(friend);
 				contact.setDegree(0);
 				contact.setCreatonDate(new Date());
-				
+
 				user.getContacts().add(contact);
 				userService.saveOrUpdateUser(user);
-				
+
 				Map<String, Object> result = new HashMap<String, Object>();
 				result.put("id", friend.getId());
 				result.put("phoneno", friend.getPhoneNo());
@@ -337,9 +338,7 @@ public class ChatController {
 				result.put("lastLoginCity", friend.getLastLoginCity());
 				result.put("lastLoginDate", friend.getLastLoginDate());
 				result.put("lastLoginPhone", friend.getLastLoginPhone());
-				result.put("typename", friend.getTypeName() != null ? friend.getTypeName().getName() : "");
 				result.put("accid", friend.getAccid());
-//				result.put("token", friend.getToken());
 				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", result);
 			} else {
 				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, responseStr);
@@ -350,16 +349,15 @@ public class ChatController {
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "对方已经是你的好友");
 		} catch (Exception e) {
 			e.printStackTrace();
-//			responseStr = e.getMessage();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
 		logger.info("=====> Add friend end <=====");
-//		return responseStr;
 		return resultMap;
 	}
 
 	/**
 	 * 更新好友
+	 * 
 	 * @param faccid
 	 * @param alias
 	 * @return
@@ -371,7 +369,7 @@ public class ChatController {
 		try {
 			logger.info("=====> Start to update friend <=====");
 			User user = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
-			
+
 			responseStr = NeteaseIMUtil.getInstance().updateFriend(user.getAccid(), faccid, alias, null);
 			JSONObject responseObj = JSONObject.fromObject(responseStr);
 			if (responseObj.getInt("code") == 200) {
@@ -388,6 +386,12 @@ public class ChatController {
 		return responseStr;
 	}
 
+	/**
+	 * 删除好友
+	 * 
+	 * @param faccid
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/deleteFriend", method = RequestMethod.POST)
 	public String deleteFriend(@RequestParam("faccid") String faccid) {
@@ -413,14 +417,7 @@ public class ChatController {
 	@ResponseBody
 	@RequestMapping(value = "/queryMembers", method = RequestMethod.POST)
 	public String queryMembers() {
-		String responseStr = "";
-		/*
-		 * try { logger.info("=====> Start to get chatroom <====="); responseStr
-		 * = NeteaseIMUtil.getInstance().getChatroom(roomid, true); } catch
-		 * (Exception e) { e.printStackTrace(); responseStr = e.getMessage(); }
-		 * logger.info("=====> Get chatroom end <=====");
-		 */
-		return responseStr;
+		return null;
 	}
 
 }

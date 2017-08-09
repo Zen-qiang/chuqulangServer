@@ -14,23 +14,21 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-//@Table(name = "event_video")
-//@Entity
-public class EventVideo implements Serializable{
+@Table(name = "coterie_tag")
+@Entity
+public class CoterieTag implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private int id;
 
-	private Event event;
+	private Coterie coterie;
 
-	private int orderNo;
+	private Tag tag;
 
-	private String url;
-
-	private String description;
+	private int orderNo;// 如果是主标签，orderNo应当为负值，排序在最前
 
 	private Date creationDate;
-
-	private User creator;
 
 	@GeneratedValue
 	@Id
@@ -42,14 +40,24 @@ public class EventVideo implements Serializable{
 		this.id = id;
 	}
 
-	@JoinColumn(name = "fk_event_id")
+	@JoinColumn(name = "fk_coterie_id")
 	@ManyToOne(fetch = FetchType.LAZY)
-	public Event getEvent() {
-		return event;
+	public Coterie getCoterie() {
+		return coterie;
 	}
 
-	public void setEvent(Event event) {
-		this.event = event;
+	public void setCoterie(Coterie coterie) {
+		this.coterie = coterie;
+	}
+
+	@JoinColumn(name = "fk_tag_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	public Tag getTag() {
+		return tag;
+	}
+
+	public void setTag(Tag tag) {
+		this.tag = tag;
 	}
 
 	@Column(name = "order_no")
@@ -59,22 +67,6 @@ public class EventVideo implements Serializable{
 
 	public void setOrderNo(int orderNo) {
 		this.orderNo = orderNo;
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 
 	@Temporal(TemporalType.TIMESTAMP)
@@ -87,14 +79,16 @@ public class EventVideo implements Serializable{
 		this.creationDate = creationDate;
 	}
 
-	@JoinColumn(name = "fk_user_id")
-	@ManyToOne(fetch = FetchType.LAZY)
-	public User getCreator() {
-		return creator;
+	public CoterieTag() {
+		// TODO Auto-generated constructor stub
 	}
 
-	public void setCreator(User creator) {
-		this.creator = creator;
+	public CoterieTag(Coterie coterie, Tag tag, int orderNo) {
+		super();
+		this.coterie = coterie;
+		this.tag = tag;
+		this.orderNo = orderNo;
+		this.creationDate = new Date();
 	}
 
 }

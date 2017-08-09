@@ -1,6 +1,7 @@
 package com.dinglian.server.chuqulang.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import com.dinglian.server.chuqulang.comparator.TopicPraiseComparator;
 import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.CoteriePicture;
+import com.dinglian.server.chuqulang.model.CoterieTag;
 import com.dinglian.server.chuqulang.model.Tag;
 import com.dinglian.server.chuqulang.model.Topic;
 import com.dinglian.server.chuqulang.model.TopicComment;
@@ -37,7 +39,6 @@ import com.dinglian.server.chuqulang.model.TopicPraise;
 import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.service.ActivityService;
 import com.dinglian.server.chuqulang.service.DiscoverService;
-import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.utils.DateUtils;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
 import com.dinglian.server.chuqulang.utils.RequestHelper;
@@ -51,9 +52,6 @@ public class DiscoverController {
 
 	@Autowired
 	private DiscoverService discoverService;
-	
-	@Autowired
-    private UserService userService;
 	
 	@Autowired
     private ActivityService activityService;
@@ -70,8 +68,7 @@ public class DiscoverController {
 	@ResponseBody
 	@RequestMapping(value = "/getCoterieList", method = RequestMethod.POST)
 	public Map<String, Object> getCoterieList(
-			@RequestParam(name = "typename", required = false) String typeName, 
-			@RequestParam(name = "tagid", required = false) Integer tagId,
+			@RequestParam(name = "tags", required = false) Integer[] tags,
 			@RequestParam(name = "pagesize", required = false) Integer pageSize,
 			@RequestParam(name = "start", required = false) Integer startRow,
 			@RequestParam(name = "orderby", required = false) String orderBy) {
@@ -85,8 +82,9 @@ public class DiscoverController {
 				pageSize = ApplicationConfig.getInstance().getDefaultPageSize();
 			}
 			SearchCriteria searchCriteria = new SearchCriteria();
-			searchCriteria.setTypeName(typeName);
-			searchCriteria.setTagId(tagId);
+			if (tags != null) {
+				searchCriteria.setTags(Arrays.asList(tags));
+			}
 			searchCriteria.setStartRow(startRow);
 			searchCriteria.setPageSize(pageSize);
 			searchCriteria.setOrderBy(orderBy);
@@ -247,12 +245,6 @@ public class DiscoverController {
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			
-//			int userId = user.getId();
-//			user = userService.findUserById(userId);
-//			if (user == null) {
-//				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-//			}
-
 			// 当前话题属于哪个圈子
 			Coterie coterie = discoverService.findCoterieById(coterieId);
 			
@@ -290,12 +282,6 @@ public class DiscoverController {
 			
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-			
-//			int userId = user.getId();
-//			user = userService.findUserById(userId);
-//			if (user == null) {
-//				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-//			}
 			
 			// 当前话题属于哪个圈子
 			Topic topic = discoverService.findTopicById(topicId);
@@ -445,9 +431,10 @@ public class DiscoverController {
 					map.put("hot", coterie.getHot());
 					
 					List<String> tags = new ArrayList<String>();
-					for (Tag tag : coterie.getTags()) {
-						Map<String, Object> tagMap = new HashMap<String, Object>();
-						tags.add(tag.getName());
+					for (CoterieTag coterieTag : coterie.getTags()) {
+						if (coterieTag.getTag() != null) {
+							tags.add(coterieTag.getTag().getName());
+						}
 					}
 					map.put("tags", tags);
 					coterieList.add(map);
@@ -487,19 +474,12 @@ public class DiscoverController {
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			
-//			int userId = user.getId();
-//			user = userService.findUserById(userId);
-//			if (user == null) {
-//				throw new NullPointerException("用户信息不存在，请重新登录。");
-//			}
-			
 			Topic topic = discoverService.findTopicById(topicId);
 			if (topic == null) {
 				throw new NullPointerException("话题ID：" + topicId + " , 话题不存在。");
 			}
 			
 			int nextOrderNo = topic.getNextOrderNo();
-//			discoverService.saveTopicPraise(new TopicPraise(topic, user, nextOrderNo));
 			topic.getPraises().add(new TopicPraise(topic, user, nextOrderNo));
 			discoverService.saveTopic(topic);
 			
@@ -536,7 +516,7 @@ public class DiscoverController {
 				throw new NullPointerException("圈子ID：" + coterie + " , 圈子不存在。");
 			}
 			
-			int nextOrderNo = coterie.getCoterieNextOrderNo();
+			int nextOrderNo = coterie.getCoterieGuyNextOrderNo();
 			CoterieGuy coterieGuy = new CoterieGuy(coterie, nextOrderNo, user, new Date(), false, true);
 			
 			discoverService.saveCoterieGuy(coterieGuy);
@@ -589,7 +569,7 @@ public class DiscoverController {
 	@RequestMapping(value = "/createCoterie", method = RequestMethod.POST)
 	public Map<String, Object> createCoterie(
 			@RequestParam("name") String name, 
-			@RequestParam("tags") int[] tags,
+			@RequestParam("tags[]") int[] tags,
 			@RequestParam(name = "description", required = false) String description, 
 			@RequestParam(name = "picture", required = false) String picture) {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -606,14 +586,13 @@ public class DiscoverController {
 			coterie.setCreator(user);
 			coterie.setHot(0);
 			
-			for (int tagId : tags) {
-				Tag tag = activityService.findTagById(tagId);
+			for (int i = 1; i <= tags.length; i++) {
+            	Tag tag = activityService.findTagById(tags[i - 1]);
             	if (tag != null) {
-            		coterie.getTags().add(tag);
-            		if (coterie.getTypeName() == null) {
-            			coterie.setTypeName(tag.getTypeName());
-					}
-            	}
+            		List<Tag> secondLevelTags = activityService.getSecondLevelTags(tag.getId());
+            		CoterieTag coterieTag = new CoterieTag(coterie, tag, secondLevelTags.size() > 0 ? -1 : i);
+            		coterie.getTags().add(coterieTag);
+				}
 			}
 			
 			coterie.getCoterieGuys().add(new CoterieGuy(coterie, 1, user, new Date(), true,	true));

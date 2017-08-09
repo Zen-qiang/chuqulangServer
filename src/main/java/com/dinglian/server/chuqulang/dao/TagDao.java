@@ -6,10 +6,8 @@ import com.dinglian.server.chuqulang.model.Tag;
 
 public interface TagDao extends GenericDao<Tag> {
 
-	List<Tag> getAllTags();
+	List<Tag> getTags(String tagType);
 
-	List<Tag> getTagsByTypeNameId(Integer typeNameId);
+	List<Tag> getChildTags(Integer parentId);
 	
-//	List<Tag> getTagListByTypeName(String typeName);
-
 }

@@ -22,25 +22,6 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 		super(entityClass);
 	}
 
-	/*@Override
-	public List<Coterie> getCoterieList(int tagId, String type) {
-		String hql = "FROM Coterie WHERE 1=1 ";
-		if (tagId != 0) {
-			hql += "AND tag.id = :tagId ";
-		}
-		if (type.equalsIgnoreCase(Coterie.TYPE_HOT)) {
-			hql += "ORDER BY hot DESC ";
-		} else if (type.equalsIgnoreCase(Coterie.TYPE_NEW)) {
-			hql += "ORDER BY creationDate DESC ";
-		}
-		Query query = getCurrentSession().createQuery(hql);
-		if (tagId != 0) {
-			query.setInteger("tagId", tagId);
-		}
-		List<Coterie> list = query.list();
-		return list;
-	}
-*/
 	@Override
 	public int getCoterieTotalCount() {
 		Query query = getCurrentSession().createQuery("SELECT COUNT(c) FROM Coterie c ");
@@ -50,13 +31,9 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 
 	@Override
 	public List<Coterie> getCoterieList(SearchCriteria searchCriteria) {
-		String hql = "SELECT distinct c FROM Coterie c LEFT JOIN FETCH c.tags tag WHERE 1=1 ";
-//		String hql = "FROM Coterie WHERE 1=1 ";
-		if (StringUtils.isNotBlank(searchCriteria.getTypeName())) {
-			hql += "AND tag.typeName.name = :typeName ";
-		}
-		if (searchCriteria.getTagId() != null) {
-			hql += "AND tag.id = :tagId ";
+		String hql = "SELECT distinct c FROM Coterie c LEFT JOIN c.tags tag WHERE 1=1 ";
+		if (searchCriteria.getTags() != null) {
+			hql += "AND tag.tag.id IN (:tagList) ";
 		}
 		String orderBy = "ORDER BY c.creationDate DESC";
 		if (StringUtils.isNotBlank(searchCriteria.getOrderBy()) && searchCriteria.getOrderBy().equalsIgnoreCase(Coterie.TYPE_HOT)) {
@@ -64,11 +41,8 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 		}
 		hql += orderBy;
 		Query query = getCurrentSession().createQuery(hql);
-		if (StringUtils.isNotBlank(searchCriteria.getTypeName())) {
-			query.setString("typeName", searchCriteria.getTypeName());
-		}
-		if (searchCriteria.getTagId() != null) {
-			query.setInteger("tagId", searchCriteria.getTagId());
+		if (searchCriteria.getTags() != null) {
+			query.setParameterList("tagList", searchCriteria.getTags());
 		}
 		if (searchCriteria.getPageSize() != 0) {
 			query.setFirstResult(searchCriteria.getStartRow());

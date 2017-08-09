@@ -3,6 +3,7 @@ package com.dinglian.server.chuqulang.controller;
 import java.net.URLEncoder;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,8 +29,8 @@ import com.dinglian.server.chuqulang.exception.UserException;
 import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.CoteriePicture;
+import com.dinglian.server.chuqulang.model.CoterieTag;
 import com.dinglian.server.chuqulang.model.Tag;
-import com.dinglian.server.chuqulang.model.TypeName;
 import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.model.VerifyNo;
 import com.dinglian.server.chuqulang.model.WxOAuth2AccessToken;
@@ -353,7 +354,7 @@ public class WechatController {
 	@ResponseBody
 	@RequestMapping(value = "/createCoterie", method = RequestMethod.POST)
 	public Map<String, Object> createCoterie(@RequestParam("userId") int userId, @RequestParam("name") String name,
-			@RequestParam("typeNameId") int typeNameId, @RequestParam(name = "tags", required = false) Integer[] tags,
+			@RequestParam("tags") int[] tags,
 			@RequestParam(name = "description", required = false) String description,
 			@RequestParam(name = "picture", required = false) String picture) {
 		logger.info("=====> Start to create coterie <=====");
@@ -371,18 +372,12 @@ public class WechatController {
 			coterie.setCreator(user);
 			coterie.setHot(0);
 			
-			TypeName typeName = discoverService.findTypeNameById(typeNameId);
-			if (typeName == null) {
-				throw new NullPointerException("TypeNameID : " + typeNameId + " 不存在");
-			}
-			coterie.setTypeName(typeName);
-			
-			if (tags != null) {
-				for (Integer tagId : tags) {
-					Tag tag = activityService.findTagById(tagId);
-	            	if (tag != null) {
-	            		coterie.getTags().add(tag);
-	            	}
+			for (int i = 1; i <= tags.length; i++) {
+            	Tag tag = activityService.findTagById(tags[i - 1]);
+            	if (tag != null) {
+            		List<Tag> secondLevelTags = activityService.getSecondLevelTags(tag.getId());
+            		CoterieTag coterieTag = new CoterieTag(coterie, tag, secondLevelTags.size() > 0 ? -1 : i);
+            		coterie.getTags().add(coterieTag);
 				}
 			}
 			
@@ -440,7 +435,7 @@ public class WechatController {
 			}
 			
 			if (isJoin) {
-				int nextOrderNo = coterie.getCoterieNextOrderNo();
+				int nextOrderNo = coterie.getCoterieGuyNextOrderNo();
 				CoterieGuy coterieGuy = new CoterieGuy(coterie, nextOrderNo, user, new Date(), false, true);
 				discoverService.saveCoterieGuy(coterieGuy);
 			} else {
@@ -474,7 +469,7 @@ public class WechatController {
 			}
 			
 			if (isJoin) {
-				int nextOrderNo = coterie.getCoterieNextOrderNo();
+				int nextOrderNo = coterie.getCoterieGuyNextOrderNo();
 				CoterieGuy coterieGuy = new CoterieGuy(coterie, nextOrderNo, user, new Date(), false, true);
 				discoverService.saveCoterieGuy(coterieGuy);
 			} else {

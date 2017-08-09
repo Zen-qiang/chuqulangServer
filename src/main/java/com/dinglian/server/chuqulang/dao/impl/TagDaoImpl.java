@@ -19,20 +19,16 @@ public class TagDaoImpl extends AbstractHibernateDao<Tag> implements TagDao {
 	}
 
 	@Override
-	public List<Tag> getAllTags() {
-		String hql = "FROM Tag ORDER BY typeName.id,orderNo ";
-		return getCurrentSession().createQuery(hql).list();
+	public List<Tag> getTags(String type) {
+		String hql = "FROM Tag WHERE type = :type ";
+		return getCurrentSession().createQuery(hql).setString("type", type).list();
 	}
 
 	@Override
-	public List<Tag> getTagsByTypeNameId(Integer typeNameId) {
-		String hql = "FROM Tag WHERE typeName.id = :typeNameId ORDER BY orderNo ";
-		return getCurrentSession().createQuery(hql).setInteger("typeNameId", typeNameId).list();
+	public List<Tag> getChildTags(Integer parentId) {
+		String sql = "SELECT ctag.* FROM tag_associate_map map JOIN tag ptag ON ptag.id = map.parent_tag_id ";
+		sql += "JOIN tag ctag ON ctag.id = map.child_tag_id WHERE map.parent_tag_id = :parentId ORDER BY ctag.times DESC";
+		return getCurrentSession().createSQLQuery(sql).addEntity(Tag.class).setInteger("parentId", parentId).list();
 	}
 
-	/*@Override
-	public List<Tag> getTagListByTypeName(String typeName) {
-		String hql = "FROM Tag WHERE typeName.name = :typeName ORDER BY times DESC ";
-		return getCurrentSession().createQuery(hql).setString("typeName", typeName).list();
-	}*/
 }

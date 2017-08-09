@@ -1,8 +1,12 @@
 package com.dinglian.server.chuqulang.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -12,8 +16,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -23,114 +25,91 @@ import javax.persistence.Transient;
 
 @Table(name = "coterie")
 @Entity
-public class Coterie implements Serializable{
-	
+public class Coterie implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	public static final String TYPE_HOT = "hot";
 	public static final String TYPE_NEW = "new";
-	
+
 	public static final String DATATYPE_CREATED = "1";
 	public static final String DATATYPE_ATTENTION = "2";
 
-    private int id;
-    
-//    private Tag tag;
-    private Set<Tag> tags = new HashSet<Tag>(); // 活动标签
+	private int id;
 
-    private String name; //圈子名称
+	private List<CoterieTag> tags = new ArrayList<CoterieTag>(); // 圈子标签
 
-    private String description; // 圈子备注
+	private String name; // 圈子名称
 
-    private User creator; //创建人
+	private String description; // 圈子备注
 
-//    private int orderNo; //序号
+	private User creator; // 创建人
 
-    private int hot; //热度
+	private int hot; // 活跃度/热度
 
-    private Date creationDate; //创建时间
-    
-    private CoteriePicture coteriePicture; // 圈子图片
-    
-    private Set<CoterieGuy> coterieGuys = new HashSet<CoterieGuy>(); //圈子成员
-    
-    private Set<Topic> topics = new HashSet<Topic>(); //圈子成员
-    
-    private TypeName typeName;
-    
-    @GeneratedValue
-    @Id
-    public int getId() {
-        return id;
-    }
+	private Date creationDate; // 创建时间
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	private CoteriePicture coteriePicture; // 圈子图片
 
-    public String getName() {
-        return name;
-    }
+	private Set<CoterieGuy> coterieGuys = new HashSet<CoterieGuy>(); // 圈子成员
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	private Set<Topic> topics = new HashSet<Topic>(); // 圈子话题
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    @JoinColumn(name = "fk_user_id")
-    @ManyToOne(fetch = FetchType.LAZY)
-    public User getCreator() {
-        return creator;
-    }
-
-    public void setCreator(User creator) {
-        this.creator = creator;
-    }
-
-    /*@Column(name = "order_no")
-    public int getOrderNo() {
-        return orderNo;
-    }
-
-    public void setOrderNo(int orderNo) {
-        this.orderNo = orderNo;
-    }*/
-
-    public int getHot() {
-        return hot;
-    }
-
-    public void setHot(int hot) {
-        this.hot = hot;
-    }
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "creation_date")
-    public Date getCreationDate() {
-    	return creationDate;
-    }
-    
-    public void setCreationDate(Date creationDate) {
-    	this.creationDate = creationDate;
-    }
-
-    /*@JoinColumn(name = "fk_tag_id")
-    @ManyToOne(fetch = FetchType.LAZY)
-	public Tag getTag() {
-		return tag;
+	@GeneratedValue
+	@Id
+	public int getId() {
+		return id;
 	}
 
-	public void setTag(Tag tag) {
-		this.tag = tag;
-	}*/
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	@JoinColumn(name = "fk_user_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	public User getCreator() {
+		return creator;
+	}
+
+	public void setCreator(User creator) {
+		this.creator = creator;
+	}
+
+	public int getHot() {
+		return hot;
+	}
+
+	public void setHot(int hot) {
+		this.hot = hot;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "creation_date")
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
 
 	@JoinColumn(name = "fk_coterie_picture_id")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+	@ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
 	public CoteriePicture getCoteriePicture() {
 		return coteriePicture;
 	}
@@ -156,31 +135,24 @@ public class Coterie implements Serializable{
 	public void setTopics(Set<Topic> topics) {
 		this.topics = topics;
 	}
-	
-	@JoinTable(name = "coterie_tag_map", joinColumns = {
-			@JoinColumn(name = "fk_coterie_id", referencedColumnName = "id") }, inverseJoinColumns = {
-					@JoinColumn(name = "fk_tag_id", referencedColumnName = "id") })
-	@ManyToMany
-	public Set<Tag> getTags() {
+
+	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "coterie")
+	public List<CoterieTag> getTags() {
+		Collections.sort(tags, new Comparator<CoterieTag>() {
+			@Override
+			public int compare(CoterieTag o1, CoterieTag o2) {
+				return o1.getOrderNo() - o2.getOrderNo();
+			}
+		});
 		return tags;
 	}
 
-	public void setTags(Set<Tag> tags) {
+	public void setTags(List<CoterieTag> tags) {
 		this.tags = tags;
-	}
-	
-	@JoinColumn(name = "fk_type_name_id")
-	@ManyToOne(fetch = FetchType.LAZY)
-	public TypeName getTypeName() {
-		return typeName;
-	}
-
-	public void setTypeName(TypeName typeName) {
-		this.typeName = typeName;
 	}
 
 	@Transient
-	public int getCoterieNextOrderNo() {
+	public int getCoterieGuyNextOrderNo() {
 		int next = 0;
 		for (CoterieGuy coterieGuy : this.getCoterieGuys()) {
 			if (next < coterieGuy.getOrderNo()) {
@@ -200,5 +172,5 @@ public class Coterie implements Serializable{
 		}
 		return false;
 	}
-	
+
 }

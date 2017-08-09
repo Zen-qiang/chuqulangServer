@@ -38,6 +38,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.comparator.UserInterestComparator;
+import com.dinglian.server.chuqulang.exception.UserException;
 import com.dinglian.server.chuqulang.model.Contact;
 import com.dinglian.server.chuqulang.model.Tag;
 import com.dinglian.server.chuqulang.model.User;
@@ -91,7 +92,7 @@ public class UserController {
 		try {
 			// 添加手机号格式验证
 			if (!isMobile(phoneNo)) {
-				throw new RuntimeException("请输入正确的手机号码");
+				throw new UserException(UserException.PHONE_NO_INVALID);
 			}
 
 			// 读取短信接口配置文件
@@ -179,12 +180,10 @@ public class UserController {
 		
 		try {
 			logger.info("=====> Start to check phoneno duplicate <=====");
-			
 			// 添加手机号格式验证
 			if (!isMobile(phoneNo)) {
 				throw new RuntimeException("请输入正确的手机号码");
 			}
-						
 			// 检查手机号码是否注册
 			SearchCriteria searchCriteria = new SearchCriteria();
 			searchCriteria.setPhoneNo(phoneNo);
@@ -204,8 +203,7 @@ public class UserController {
 				// 10分钟有效期
 				if (difference <= (10 * 60 * 1000) && verifyNo.equalsIgnoreCase(existVerifyNo.getVerifyNo())) {
 					User user = new User(phoneNo, EncryptHelper.encryptByMD5(phoneNo, password));
-					// 用户类型
-//					user.setTypeName("admin");
+					
 					userService.register(user);
 //					注册成功，删除旧验证码
 					existVerifyNo.setValid(false);
@@ -311,66 +309,61 @@ public class UserController {
 		
 		Subject currentUser = SecurityUtils.getSubject();
 		
-//		if (!currentUser.isAuthenticated()) {
-			CustomizedToken token = null;
-			String errorMsg = "";
-			if (type.equalsIgnoreCase(User.LOGIN_TYPE_USERNAME)) {
-				if (StringUtils.isBlank(phoneNo) || StringUtils.isBlank(password)) {
-					ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "手机号码或密码不能为空");
-					return resultMap;
-				}
-				
-				token = new CustomizedToken(phoneNo, password, User.REALM_USERNAME);
-				errorMsg = "用户名或密码错误";
-			} else if (type.equalsIgnoreCase(User.LOGIN_TYPE_CHECKCODE)){
-				if (StringUtils.isBlank(phoneNo) || StringUtils.isBlank(verifyNo)) {
-					ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "手机号码或验证码不能为空");
-					return resultMap;
-				}
-				
-				token = new CustomizedToken(phoneNo, verifyNo, User.REALM_CHECKCODE);
-				errorMsg = "验证码错误";
+		CustomizedToken token = null;
+		String errorMsg = "";
+		if (type.equalsIgnoreCase(User.LOGIN_TYPE_USERNAME)) {
+			if (StringUtils.isBlank(phoneNo) || StringUtils.isBlank(password)) {
+				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "手机号码或密码不能为空");
+				return resultMap;
 			}
 			
-			token.setRememberMe(true);
-			try{
-				currentUser.login(token);
-				User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-				logger.info("用户ID：" + user.getId() + "，用户昵称：" +  user.getNickName() + "，登录成功.");
-				
-				// IP不同提示登录地点
-				String ip = request.getRemoteAddr();
-				String address = AddressUtils.getLoginAddresses(ip);
-				String content = "";
-				if (!ip.equalsIgnoreCase(user.getLastLoginIp()) && StringUtils.isNotBlank(user.getLastLoginCity())) {
-					content = "最近一次登录地点：%s ,登录时间：%s ,IP地址：%s ";
-					content = String.format(content, user.getLastLoginCity(), DateUtils.format(user.getLastLoginDate(), DateUtils.yMdHms), user.getLastLoginIp());
-				}
-				Map<String, Object> result = new HashMap<String, Object>();
-				result.put("userid", user.getId());
-				result.put("info", content);
-				
-				// 保存当前登录地点
-				user.setLastLoginCity(address);
-				user.setLastLoginIp(ip);
-				user.setLastLoginDate(new Date());
-				userService.saveOrUpdateUser(user);
-				
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "登录成功", result);
-			} catch (IncorrectCredentialsException e) {
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "用户名或密码错误");
-				return resultMap;
-			} catch (UnknownAccountException e) {
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "用户不存在!");
-				return resultMap;
-			} catch (AuthenticationException e) {
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, errorMsg);
+			token = new CustomizedToken(phoneNo, password, User.REALM_USERNAME);
+			errorMsg = "用户名或密码错误";
+		} else if (type.equalsIgnoreCase(User.LOGIN_TYPE_CHECKCODE)){
+			if (StringUtils.isBlank(phoneNo) || StringUtils.isBlank(verifyNo)) {
+				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "手机号码或验证码不能为空");
 				return resultMap;
 			}
-		/*} else {
-			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "请勿重复登录。");
+			
+			token = new CustomizedToken(phoneNo, verifyNo, User.REALM_CHECKCODE);
+			errorMsg = "验证码错误";
+		}
+		
+		token.setRememberMe(true);
+		try{
+			currentUser.login(token);
+			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
+			logger.info("用户ID：" + user.getId() + "，用户昵称：" +  user.getNickName() + "，登录成功.");
+			
+			// IP不同提示登录地点
+			String ip = request.getRemoteAddr();
+			String address = AddressUtils.getLoginAddresses(ip);
+			String content = "";
+			if (!ip.equalsIgnoreCase(user.getLastLoginIp()) && StringUtils.isNotBlank(user.getLastLoginCity())) {
+				content = "最近一次登录地点：%s ,登录时间：%s ,IP地址：%s ";
+				content = String.format(content, user.getLastLoginCity(), DateUtils.format(user.getLastLoginDate(), DateUtils.yMdHms), user.getLastLoginIp());
+			}
+			Map<String, Object> result = new HashMap<String, Object>();
+			result.put("userid", user.getId());
+			result.put("info", content);
+			
+			// 保存当前登录地点
+			user.setLastLoginCity(address);
+			user.setLastLoginIp(ip);
+			user.setLastLoginDate(new Date());
+			userService.saveOrUpdateUser(user);
+			
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "登录成功", result);
+		} catch (IncorrectCredentialsException e) {
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "用户名或密码错误");
 			return resultMap;
-		}*/
+		} catch (UnknownAccountException e) {
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "用户不存在!");
+			return resultMap;
+		} catch (AuthenticationException e) {
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, errorMsg);
+			return resultMap;
+		}
 		
 		logger.info("=====> User login end <=====");
 		return resultMap;
@@ -396,7 +389,7 @@ public class UserController {
 			
 			user = userService.findUserById(userId);
 			if (user == null) {
-				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+				throw new UserException(UserException.NOT_EXISTING);
 			}
 				
 			Map<String, Object> result = new HashMap<String, Object>();
@@ -409,7 +402,6 @@ public class UserController {
 			result.put("lastLoginCity", user.getLastLoginCity());
 			result.put("lastLoginDate", user.getLastLoginDate());
 			result.put("lastLoginPhone", user.getLastLoginPhone());
-			result.put("typename", user.getTypeName() != null ? user.getTypeName().getName() : "");
 			result.put("accid", user.getAccid());
 			result.put("token", user.getToken());
 			
@@ -444,7 +436,6 @@ public class UserController {
 			result.put("lastLoginCity", user.getLastLoginCity());
 			result.put("lastLoginDate", user.getLastLoginDate());
 			result.put("lastLoginPhone", user.getLastLoginPhone());
-			result.put("typename", user.getTypeName() != null ? user.getTypeName().getName() : "");
 			result.put("accid", user.getAccid());
 			result.put("token", user.getToken());
 			
@@ -512,7 +503,6 @@ public class UserController {
 					map = new HashMap<String, Object>();
 					map.put("id", tag.getId());
 					map.put("name", tag.getName());
-					map.put("typename", tag.getTypeName() != null ? tag.getTypeName().getName() : "");
 					tags.add(map);
 				}
 			}
@@ -540,12 +530,6 @@ public class UserController {
 			logger.info("=====> Start to change signlog <=====");
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-
-			/*int userId = user.getId();
-			user = userService.findUserById(userId);
-			if (user == null) {
-				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}*/
 			
 			user.setSignLog(signLog);
 			userService.saveOrUpdateUser(user);
@@ -596,22 +580,6 @@ public class UserController {
 		return resultMap;
 	}
 	
-	/*@ResponseBody
-	@RequestMapping(value = "/updatePicture", method = RequestMethod.POST)
-	public Map<String, Object> updatePicture(@RequestParam(name = "file") String uploadFile) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		try {
-			BASE64Decoder decoder = new BASE64Decoder();
-			FileOutputStream write = new FileOutputStream(new File("d:/test.png"));
-			byte[] decoderBytes = decoder.decodeBuffer(uploadFile);
-			write.write(decoderBytes);
-			write.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return resultMap;
-	}*/
-	
 	/**
 	 * 修改密码
 	 * @param newPassword	新密码
@@ -625,12 +593,6 @@ public class UserController {
 			logger.info("=====> Start to change user password <=====");
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-			
-			/*int userId = user.getId();
-			user = userService.findUserById(userId);
-			if (user == null) {
-				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}*/
 			
 			// 密码MD5加密
 			user.setPassword(EncryptHelper.encryptByMD5(user.getPhoneNo(), newPassword));
@@ -720,7 +682,6 @@ public class UserController {
 					map = new HashMap<String, Object>();
 					map.put("id", tag.getId());
 					map.put("name", tag.getName());
-					map.put("typename", tag.getTypeName() != null ? tag.getTypeName().getName() : "");
 					resultList.add(map);
 				}
 			}
@@ -756,11 +717,6 @@ public class UserController {
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
 			
-			/*int userId = user.getId();
-			user = userService.findUserById(userId);
-			if (user == null) {
-				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}*/
 			// default value
 			if (startRow == null) {
 				startRow = 0;
@@ -827,12 +783,6 @@ public class UserController {
 		try {
 			logger.info("=====> Start to follow user <=====");
 			User currentUser = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
-			
-			/*int userId = currentUser.getId();
-			currentUser = userService.findUserById(userId);
-			if (currentUser == null) {
-				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}*/
 			
 			User followUser = userService.findUserById(followUserId);
 			if (followUser == null) {

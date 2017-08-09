@@ -5,27 +5,31 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 @Table(name = "user")
 @Entity
-public class User implements Serializable{
+public class User implements Serializable {
 
 	public static final String CURRENT_USER = "currentUser";
-	
+
 	public static final String LOGIN_TYPE_USERNAME = "username";
 	public static final String LOGIN_TYPE_CHECKCODE = "checkCode";
-	
+
 	public static final String REALM_USERNAME = "UserName";
 	public static final String REALM_CHECKCODE = "CheckCode";
 
 	private int id;
-
-	private Integer regNo;
-
-	private String regPhone;
-	
-//	private String userName;
 
 	private String password;
 
@@ -37,8 +41,6 @@ public class User implements Serializable{
 
 	private String signLog;
 
-//	private String verifyNo;
-
 	private String lastLoginIp;
 
 	private String lastLoginCity;
@@ -46,47 +48,30 @@ public class User implements Serializable{
 	private Date lastLoginDate;
 
 	private String lastLoginPhone;
+	// 是否可用
+	private boolean active; 
+	// 用户收藏
+	private Set<UserCollect> userCollects = new HashSet<UserCollect>(); 
 
-//	private double balance;
-
-	private TypeName typeName; // 个人 / 商家
-
-	private boolean active; //是否可用
-
-	private String description; //状态描述
-
-	private boolean vip; //会员
-	
-	private Set<Event> eventSet = new HashSet<Event>();
-	
-	private Set<UserCollect> userCollects = new HashSet<UserCollect>(); //用户收藏
-	
 	private Set<Contact> contacts = new HashSet<Contact>();
 
 	private Set<UserInterest> interests = new HashSet<UserInterest>();
-	
+
 	private Set<UserAttention> attentions = new HashSet<UserAttention>();
-	
+
 	private Set<UserAttention> followers = new HashSet<UserAttention>();
-	
+
 	// 网易ACCID
 	private String accid;
 	// 网易TOKEN
 	private String token;
-	
-	// 微信
+	// 微信OPENID
 	private String openId;
-	
-	private Integer gender;// 1时是男性，值为2时是女性，值为0时是未知
-	
+	// 性别：1时是男性，值为2时是女性，值为0时是未知
+	private Integer gender;
+	// 生日
 	private Date birthday;
-	
-	// 拥有的聊天室
-//	private Set<ChatRoom> ownedRooms = new HashSet<ChatRoom>();
-	// 参与的聊天室
-//	private Set<ChatGuy> joinedChatRooms = new HashSet<ChatGuy>();
-	
-	
+
 	@GeneratedValue
 	@Id
 	public int getId() {
@@ -97,33 +82,6 @@ public class User implements Serializable{
 		this.id = id;
 	}
 
-	@Column(name = "reg_no")
-	public Integer getRegNo() {
-		return regNo;
-	}
-
-	public void setRegNo(Integer regNo) {
-		this.regNo = regNo;
-	}
-
-	@Column(name = "reg_phone")
-	public String getRegPhone() {
-		return regPhone;
-	}
-
-	public void setRegPhone(String regPhone) {
-		this.regPhone = regPhone;
-	}
-
-	/*@Column(name = "user_name",unique = true)
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}*/
-	
 	public String getPassword() {
 		return password;
 	}
@@ -132,7 +90,7 @@ public class User implements Serializable{
 		this.password = password;
 	}
 
-	@Column(name = "phone_no",unique = true)
+	@Column(name = "phone_no", unique = true)
 	public String getPhoneNo() {
 		return phoneNo;
 	}
@@ -204,33 +162,6 @@ public class User implements Serializable{
 		this.lastLoginPhone = lastLoginPhone;
 	}
 
-	/*public double getBalance() {
-		return balance;
-	}
-
-	public void setBalance(double balance) {
-		this.balance = balance;
-	}
-
-	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, mappedBy = "user")
-	public Set<UserInterest> getInterestSet() {
-		return interestSet;
-	}
-
-	public void setInterestSet(Set<UserInterest> interestSet) {
-		this.interestSet = interestSet;
-	}*/
-
-	@JoinColumn(name = "fk_type_name_id")
-	@ManyToOne(fetch = FetchType.LAZY)
-	public TypeName getTypeName() {
-		return typeName;
-	}
-
-	public void setTypeName(TypeName typeName) {
-		this.typeName = typeName;
-	}
-
 	@Column(name = "is_active")
 	public boolean isActive() {
 		return active;
@@ -240,32 +171,6 @@ public class User implements Serializable{
 		this.active = active;
 	}
 
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	@Column(name = "is_vip")
-	public boolean isVip() {
-		return vip;
-	}
-
-	public void setVip(boolean vip) {
-		this.vip = vip;
-	}
-
-	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, mappedBy = "creator")
-	public Set<Event> getEventSet() {
-		return eventSet;
-	}
-
-	public void setEventSet(Set<Event> eventSet) {
-		this.eventSet = eventSet;
-	}
-	
 	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, mappedBy = "user")
 	public Set<UserCollect> getUserCollects() {
 		return userCollects;
@@ -274,7 +179,7 @@ public class User implements Serializable{
 	public void setUserCollects(Set<UserCollect> userCollects) {
 		this.userCollects = userCollects;
 	}
-	
+
 	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "user")
 	public Set<UserInterest> getInterests() {
 		return interests;
@@ -283,7 +188,7 @@ public class User implements Serializable{
 	public void setInterests(Set<UserInterest> interests) {
 		this.interests = interests;
 	}
-	
+
 	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "user")
 	public Set<Contact> getContacts() {
 		return contacts;
@@ -292,7 +197,7 @@ public class User implements Serializable{
 	public void setContacts(Set<Contact> contacts) {
 		this.contacts = contacts;
 	}
-	
+
 	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "user")
 	public Set<UserAttention> getAttentions() {
 		return attentions;
@@ -310,7 +215,7 @@ public class User implements Serializable{
 	public void setFollowers(Set<UserAttention> followers) {
 		this.followers = followers;
 	}
-	
+
 	@Column(name = "accid", unique = true)
 	public String getAccid() {
 		return accid;
@@ -327,7 +232,7 @@ public class User implements Serializable{
 	public void setToken(String token) {
 		this.token = token;
 	}
-	
+
 	@Column(name = "open_id", unique = true)
 	public String getOpenId() {
 		return openId;
@@ -336,7 +241,7 @@ public class User implements Serializable{
 	public void setOpenId(String openId) {
 		this.openId = openId;
 	}
-	
+
 	@Column(name = "gender", length = 1)
 	public Integer getGender() {
 		return gender;
@@ -345,7 +250,7 @@ public class User implements Serializable{
 	public void setGender(Integer gender) {
 		this.gender = gender;
 	}
-	
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "birthday")
 	public Date getBirthday() {
@@ -388,5 +293,4 @@ public class User implements Serializable{
 		return orderNo + 1;
 	}
 
-	
 }

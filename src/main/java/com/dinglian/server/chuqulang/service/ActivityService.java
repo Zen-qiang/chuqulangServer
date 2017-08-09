@@ -8,16 +8,11 @@ import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.EventPicture;
 import com.dinglian.server.chuqulang.model.EventUser;
 import com.dinglian.server.chuqulang.model.Tag;
-import com.dinglian.server.chuqulang.model.TypeName;
 import com.dinglian.server.chuqulang.model.UserCollect;
 
 public interface ActivityService {
 
-	TypeName getTypeNameByName(String typeNameStr) throws Exception;
-
 	void saveEvent(Event event) throws Exception;
-
-	void saveEventPicture(EventPicture eventPicture) throws Exception;
 
 	Event getEventById(int eventId) throws Exception;
 
@@ -33,10 +28,6 @@ public interface ActivityService {
 
 	void deleteUserCollect(UserCollect userCollect) throws Exception;
 
-	List<TypeName> getActivityTypes(String type);
-
-	List<Tag> getTagListByTypeNameId(Integer typeNameId);
-
 	void refresh(Event event);
 
 	Map<String, Object> getActivityList(SearchCriteria searchCriteria);
@@ -44,5 +35,9 @@ public interface ActivityService {
 	boolean checkFriendJoin(int id, int userId);
 
 	Map<String, Object> getUserActivityList(SearchCriteria searchCriteria);
+
+	List<Tag> getTags(String tagType);
+
+	List<Tag> getSecondLevelTags(Integer parentId);
 
 }

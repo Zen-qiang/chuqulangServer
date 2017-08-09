@@ -1,5 +1,7 @@
 package com.dinglian.server.chuqulang.base;
 
+import java.util.List;
+
 public class SearchCriteria {
 
 	// User
@@ -20,8 +22,18 @@ public class SearchCriteria {
 
 	private int coterieId;
 	private boolean isAttention;
-	
+
 	private String dataType;
+
+	private List<Integer> tags;
+
+	public List<Integer> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<Integer> tags) {
+		this.tags = tags;
+	}
 
 	public int getUserId() {
 		return userId;

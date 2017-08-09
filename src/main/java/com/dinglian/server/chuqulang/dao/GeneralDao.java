@@ -30,6 +30,7 @@ public interface GeneralDao {
 
 	void deleteContact(int userId, int contactUserId);
 
+	// WX
 	WxAccessToken findWxAccessTokenById(int accessTokenId);
 
 	void saveWxAccessToken(WxAccessToken token);

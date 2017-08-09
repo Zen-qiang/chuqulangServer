@@ -1,8 +1,12 @@
 package com.dinglian.server.chuqulang.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -54,34 +58,26 @@ public class Event implements Serializable {
 	public static final String DATATYPE_EXPIRE = "3";
 	
 	private int id;
-
-//	private String no; // 活动编号
+	
+	private Coterie coterie; // 所属圈子
 
 	private String name; // 活动名称
-
-	private String shortName; // 活动简称
 
 	private String address; // 地址
 
 	private String gps; // 活动经纬度
 
-	private int userCount; // 活动人数
+	private int minCount; // 最小人数
+	
+	private int maxCount; // 最大人数
 
 	private String description; // 活动介绍
 
-	private TypeName typeName; // 活动类型
-
 	private boolean open; // 是否公开
-
-//	private boolean friendOnly; // 仅限好友
 
 	private String password; // 活动密码
 
 	private User creator; // 创建人
-
-//	private Date rsTime; // 报名开始时间
-
-//	private Date reTime; // 报名结束时间
 
 	private Date startTime; // 活动开始时间
 
@@ -99,17 +95,11 @@ public class Event implements Serializable {
 
 	private ChatRoom chatRoom; // 活动聊天室
 
-	private Set<EventTag> tags = new HashSet<EventTag>(); // 活动标签
+	private List<EventTag> tags = new ArrayList<EventTag>(); // 活动标签
 
 	private Set<EventUser> eventUsers = new HashSet<EventUser>();
 
-	// private Set<EventVideo> eventVideos = new HashSet<EventVideo>();
-
 	private Set<EventPicture> eventPictures = new HashSet<EventPicture>();// 活动图片（第一张封面）
-
-	// private Set<EventLog> eventLogs = new HashSet<EventLog>();
-	
-	private Coterie coterie;
 
 	@GeneratedValue
 	@Id
@@ -129,15 +119,6 @@ public class Event implements Serializable {
 		this.name = name;
 	}
 
-	@Column(name = "short_name")
-	public String getShortName() {
-		return shortName;
-	}
-
-	public void setShortName(String shortName) {
-		this.shortName = shortName;
-	}
-
 	public String getAddress() {
 		return address;
 	}
@@ -154,13 +135,22 @@ public class Event implements Serializable {
 		this.gps = gps;
 	}
 
-	@Column(name = "user_count")
-	public int getUserCount() {
-		return userCount;
+	@Column(name = "min_count")
+	public int getMinCount() {
+		return minCount;
 	}
-
-	public void setUserCount(int userCount) {
-		this.userCount = userCount;
+	
+	public void setMinCount(int minCount) {
+		this.minCount = minCount;
+	}
+	
+	@Column(name = "max_count")
+	public int getMaxCount() {
+		return maxCount;
+	}
+	
+	public void setMaxCount(int maxCount) {
+		this.maxCount = maxCount;
 	}
 
 	public String getDescription() {
@@ -169,16 +159,6 @@ public class Event implements Serializable {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	@JoinColumn(name = "fk_type_name_id")
-	@ManyToOne(fetch = FetchType.LAZY)
-	public TypeName getTypeName() {
-		return typeName;
-	}
-
-	public void setTypeName(TypeName typeName) {
-		this.typeName = typeName;
 	}
 
 	public boolean isOpen() {
@@ -247,11 +227,17 @@ public class Event implements Serializable {
 	}
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "event")
-	public Set<EventTag> getTags() {
+	public List<EventTag> getTags() {
+		Collections.sort(tags, new Comparator<EventTag>() {
+			@Override
+			public int compare(EventTag o1, EventTag o2) {
+				return o1.getOrderNo() - o2.getOrderNo();
+			}
+		});
 		return tags;
 	}
 
-	public void setTags(Set<EventTag> tags) {
+	public void setTags(List<EventTag> tags) {
 		this.tags = tags;
 	}
 

@@ -1,50 +1,58 @@
 package com.dinglian.server.chuqulang.model;
 
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
 @Table(name = "event_tag")
 @Entity
-public class EventTag implements Serializable{
+public class EventTag implements Serializable {
 
-    private int id;
+	private static final long serialVersionUID = 1L;
 
-    private Event event;
-    
-    private Tag tag;
+	private int id;
 
-    private int treeNo; //层级序号
+	private Event event;
 
-    private int orderNo;
+	private Tag tag;
 
-//    private String name;//标签名称
+	private int orderNo;
 
-    private Date creationDate;
+	private Date creationDate;
 
-    @GeneratedValue
-    @Id
-    public int getId() {
-        return id;
-    }
+	@GeneratedValue
+	@Id
+	public int getId() {
+		return id;
+	}
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	public void setId(int id) {
+		this.id = id;
+	}
 
-    @JoinColumn(name = "fk_event_id")
-    @ManyToOne(fetch = FetchType.LAZY)
-    public Event getEvent() {
-        return event;
-    }
+	@JoinColumn(name = "fk_event_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	public Event getEvent() {
+		return event;
+	}
 
-    public void setEvent(Event event) {
-        this.event = event;
-    }
-    
-    @JoinColumn(name = "fk_tag_id")
-    @ManyToOne(fetch = FetchType.LAZY)
-    public Tag getTag() {
+	public void setEvent(Event event) {
+		this.event = event;
+	}
+
+	@JoinColumn(name = "fk_tag_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	public Tag getTag() {
 		return tag;
 	}
 
@@ -52,45 +60,35 @@ public class EventTag implements Serializable{
 		this.tag = tag;
 	}
 
-	@Column(name = "tree_no")
-    public int getTreeNo() {
-        return treeNo;
-    }
+	@Column(name = "order_no")
+	public int getOrderNo() {
+		return orderNo;
+	}
 
-    public void setTreeNo(int treeNo) {
-        this.treeNo = treeNo;
-    }
+	public void setOrderNo(int orderNo) {
+		this.orderNo = orderNo;
+	}
 
-    @Column(name = "order_no")
-    public int getOrderNo() {
-        return orderNo;
-    }
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "creation_date")
+	public Date getCreationDate() {
+		return creationDate;
+	}
 
-    public void setOrderNo(int orderNo) {
-        this.orderNo = orderNo;
-    }
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "creation_date")
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
-    
-    public EventTag() {
+	public EventTag() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public EventTag(Event event, Tag tag, int treeNo, int orderNo) {
+	public EventTag(Event event, Tag tag, int orderNo) {
 		super();
 		this.event = event;
 		this.tag = tag;
-		this.treeNo = treeNo;
 		this.orderNo = orderNo;
 		this.creationDate = new Date();
 	}
-    
+
 }

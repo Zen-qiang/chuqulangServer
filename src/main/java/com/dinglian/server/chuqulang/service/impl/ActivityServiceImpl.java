@@ -10,17 +10,12 @@ import org.springframework.stereotype.Service;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.dao.ActivityDao;
 import com.dinglian.server.chuqulang.dao.EventDao;
-import com.dinglian.server.chuqulang.dao.EventPictureDao;
-import com.dinglian.server.chuqulang.dao.EventTagDao;
 import com.dinglian.server.chuqulang.dao.EventUserDao;
 import com.dinglian.server.chuqulang.dao.TagDao;
-import com.dinglian.server.chuqulang.dao.TypeNameDao;
 import com.dinglian.server.chuqulang.dao.UserCollectDao;
 import com.dinglian.server.chuqulang.model.Event;
-import com.dinglian.server.chuqulang.model.EventPicture;
 import com.dinglian.server.chuqulang.model.EventUser;
 import com.dinglian.server.chuqulang.model.Tag;
-import com.dinglian.server.chuqulang.model.TypeName;
 import com.dinglian.server.chuqulang.model.UserCollect;
 import com.dinglian.server.chuqulang.service.ActivityService;
 
@@ -28,19 +23,10 @@ import com.dinglian.server.chuqulang.service.ActivityService;
 public class ActivityServiceImpl implements ActivityService {
 
     @Autowired
-    private TypeNameDao typeNameDao;
-
-    @Autowired
     private EventDao eventDao;
 
     @Autowired
-    private EventPictureDao eventPictureDao;
-
-    @Autowired
     private EventUserDao eventUserDao;
-
-    @Autowired
-    private EventTagDao eventTagDao;
     
     @Autowired
     private TagDao tagDao;
@@ -52,18 +38,8 @@ public class ActivityServiceImpl implements ActivityService {
     private ActivityDao activityDao;
 
     @Override
-    public TypeName getTypeNameByName(String typeNameStr) throws Exception {
-        return typeNameDao.getTypeNameByName(typeNameStr);
-    }
-
-    @Override
     public void saveEvent(Event event) throws Exception {
         eventDao.save(event);
-    }
-
-    @Override
-    public void saveEventPicture(EventPicture eventPicture) throws Exception {
-        eventPictureDao.saveOrUpdate(eventPicture);
     }
 
     @Override
@@ -102,20 +78,6 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	@Override
-	public List<TypeName> getActivityTypes(String type) {
-		return typeNameDao.getActivityTypes(type);
-	}
-
-	@Override
-	public List<Tag> getTagListByTypeNameId(Integer typeNameId) {
-		if (typeNameId == null) {
-			return tagDao.getAllTags();
-		} else {
-			return tagDao.getTagsByTypeNameId(typeNameId);
-		}
-	}
-
-	@Override
 	public void refresh(Event event) {
 		activityDao.refresh(event);
 	}
@@ -144,5 +106,18 @@ public class ActivityServiceImpl implements ActivityService {
 		map.put("resultList", events);
 		return map;
 	}
+
+	@Override
+	public List<Tag> getTags(String tagType) {
+		return tagDao.getTags(tagType);
+	}
 	
+	@Override
+	public List<Tag> getSecondLevelTags(Integer parentId) {
+		if (parentId == null) {
+			return tagDao.getTags(Tag.TYPE_SECOND_LEVEL);
+		} else {
+			return tagDao.getChildTags(parentId);
+		}
+	}
 }

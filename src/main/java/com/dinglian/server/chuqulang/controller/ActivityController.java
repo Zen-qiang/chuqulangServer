@@ -1,8 +1,5 @@
 package com.dinglian.server.chuqulang.controller;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -10,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.imageio.ImageIO;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -30,21 +25,22 @@ import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.comparator.EventPictureComparator;
 import com.dinglian.server.chuqulang.comparator.EventUserComparator;
 import com.dinglian.server.chuqulang.model.ChatRoom;
+import com.dinglian.server.chuqulang.model.Coterie;
+import com.dinglian.server.chuqulang.model.CoterieGuy;
+import com.dinglian.server.chuqulang.model.CoterieTag;
 import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.EventPicture;
 import com.dinglian.server.chuqulang.model.EventTag;
 import com.dinglian.server.chuqulang.model.EventUser;
 import com.dinglian.server.chuqulang.model.Tag;
-import com.dinglian.server.chuqulang.model.TypeName;
 import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.model.UserCollect;
 import com.dinglian.server.chuqulang.service.ActivityService;
+import com.dinglian.server.chuqulang.service.DiscoverService;
 import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
 import com.dinglian.server.chuqulang.utils.RequestHelper;
 import com.dinglian.server.chuqulang.utils.ResponseHelper;
-
-import sun.misc.BASE64Decoder;
 
 @Controller
 @RequestMapping("/activity")
@@ -54,6 +50,9 @@ public class ActivityController {
 
     @Autowired
     private ActivityService activityService;
+    
+    @Autowired
+	private DiscoverService discoverService;
 
     @Autowired
     private UserService userService;
@@ -72,20 +71,15 @@ public class ActivityController {
         	
             Subject currentUser = SecurityUtils.getSubject();
             User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-//          int userId = user.getId();
             int eventId = Integer.parseInt(eventIdStr);
 
-//          user = userService.findUserById(userId);
-//          if (user == null) {
-//				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-//			}
             Event event = activityService.getEventById(eventId);
             if (event == null) {
             	throw new NullPointerException("活动ID：" + eventId + " , 活动不存在。");
 			}
             // 检查满员
         	Set<EventUser> eventUsers = event.getEventUsers();
-        	if (eventUsers.size() == event.getUserCount()) {
+        	if (eventUsers.size() == event.getMaxCount()) {
         		ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "活动成员已满");
                 return resultMap;
 			}
@@ -125,39 +119,45 @@ public class ActivityController {
 
     /**
      * 发起活动
-     * @param typeNameStr	活动类型
+     * @param coterieId		所属圈子ID，为空则以活动创建圈子
+     * @param tags			活动标签，包含一级、二级标签
+     * @param name			活动名称
+     * @param startTime		开始时间		
+     * @param minCount		最小人数
+     * @param maxCount		最大人数
+     * @param charge		收费类型
+     * @param cost			费用
+     * @param gps			定位
+     * @param address		地址
+     * @param description	活动描述
      * @param isOpen		是否公开
-     * @param tags			标签
-     * @param shortName		活动简称
-     * @param retime		活动开始时间
-     * @param userCount		活动人数	
-     * @param charge		费用类型
-     * @param cost			费用费用
-     * @param gps			活动位置
-     * @param description	活动介绍
+     * @param password		密码
      * @param limiter		限定条件
-     * @param pictures		活动封面
-     * @param friends		邀请好友
-     * @param phoneNo		联系方式
+     * @param pictures		图片，BASE64字符串
+     * @param friends		好友ID
+     * @param phoneNo		手机号码
      * @return
      */
     @ResponseBody
     @RequestMapping(value = "/launchActivity", method = RequestMethod.POST)
-    public Map<String, Object> launchActivity(@RequestParam("isOpen") boolean isOpen
-            , @RequestParam(name = "password",required = false) String password
-            , @RequestParam("tags") int[] tags
-            , @RequestParam("name") String name
-            , @RequestParam("startTime") long retime
-            , @RequestParam("userCount") int userCount
-            , @RequestParam("charge") String charge
-            , @RequestParam("cost") double cost
-            , @RequestParam("gps") String gps
-            , @RequestParam("address") String address
-            , @RequestParam(name = "description", required = false) String description
-            , @RequestParam(name = "limiter", required = false) String limiter
-            , @RequestParam(name = "pictures", required = false) String[] pictures
-            , @RequestParam(name = "friends", required = false) int[] friends
-            , @RequestParam(name = "phoneNo", required = false) String phoneNo) {
+    public Map<String, Object> launchActivity(
+            @RequestParam(name = "coterieId",required = false) Integer coterieId,
+            @RequestParam("tags") int[] tags,
+            @RequestParam("name") String name,
+            @RequestParam("startTime") long startTimeMillisecond,
+            @RequestParam("minCount") int minCount,
+            @RequestParam("maxCount") int maxCount,
+            @RequestParam("charge") String charge,
+            @RequestParam("cost") double cost,
+            @RequestParam("gps") String gps,
+            @RequestParam("address") String address,
+            @RequestParam(name = "description", required = false) String description,
+            @RequestParam("isOpen") boolean isOpen,
+            @RequestParam(name = "password",required = false) String password,
+            @RequestParam(name = "limiter", required = false) String limiter,
+            @RequestParam(name = "pictures", required = false) String[] pictures,
+            @RequestParam(name = "friends", required = false) int[] friends,
+            @RequestParam(name = "phoneNo", required = false) String phoneNo) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         try {
         	logger.info("=====> Start to launch activity <=====");
@@ -166,29 +166,35 @@ public class ActivityController {
         	User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
         	
             Event event = new Event();
+            
+            if (coterieId != null) {
+            	Coterie coterie = discoverService.findCoterieById(coterieId);
+            	if (coterie == null) {
+            		throw new NullPointerException("圈子不存在");
+            	}
+            	event.setCoterie(coterie);
+			}
+            
             event.setOpen(isOpen);
             if (isOpen) {
 				event.setPassword(password);
 			}
             
-            int i = 1;
-            for (int tagId : tags) {
-            	Tag tag = activityService.findTagById(tagId);
+            for (int i = 1; i <= tags.length; i++) {
+            	Tag tag = activityService.findTagById(tags[i - 1]);
             	if (tag != null) {
-					EventTag eventTag = new EventTag(event, tag, 1, i);
-					event.getTags().add(eventTag);
-					if (event.getTypeName() == null) {
-						event.setTypeName(tag.getTypeName());
-					}
+            		List<Tag> secondLevelTags = activityService.getSecondLevelTags(tag.getId());
+            		EventTag eventTag = new EventTag(event, tag, secondLevelTags.size() > 0 ? -1 : i);
+            		event.getTags().add(eventTag);
 				}
-            	i++;
 			}
             
             event.setName(name);
             
-            Date startTime = new Date(retime);
+            Date startTime = new Date(startTimeMillisecond);
             event.setStartTime(startTime);
-            event.setUserCount(userCount);
+            event.setMinCount(minCount);
+            event.setMaxCount(maxCount);
             event.setCharge(charge);
 			event.setCost(cost);
             event.setGps(gps);
@@ -198,11 +204,11 @@ public class ActivityController {
             event.setCreator(user);
             event.setCreationDate(new Date());
             event.setStatus(Event.STATUS_SIGNUP);
-
+            
             activityService.saveEvent(event);
             
             if (pictures != null) {
-            	i = 1;
+            	int i = 1;
             	String basePicturePath = ApplicationConfig.getInstance().getActivityPicturePath();
             	for (String picBase64Str : pictures) {
             		if (picBase64Str.indexOf(",") > 0) {
@@ -228,6 +234,30 @@ public class ActivityController {
 				}
 			}
             
+            if (event.getCoterie() == null) {
+				// 创建圈子
+            	Coterie coterie = new Coterie();
+    			coterie.setName(name);
+    			coterie.setDescription(description);
+    			coterie.setCreationDate(new Date());
+    			coterie.setCreator(user);
+    			coterie.setHot(0);
+    			
+    			List<EventTag> eventTags = event.getTags();
+    			for (int i = 1; i <= eventTags.size(); i++) {
+    				Tag tag = eventTags.get(i - 1).getTag();
+    				if (tag != null) {
+    					List<Tag> secondLevelTags = activityService.getSecondLevelTags(tag.getId());
+                		CoterieTag coterieTag = new CoterieTag(coterie, tag, secondLevelTags.size() > 0 ? -1 : i);
+                		coterie.getTags().add(coterieTag);
+					}
+    			}
+    			coterie.getCoterieGuys().add(new CoterieGuy(coterie, 1, user, new Date(), true,	true));
+    			
+    			discoverService.saveCoterie(coterie);
+    			event.setCoterie(coterie);
+			}
+            
             activityService.saveEvent(event);
             
             Map<String, Object> result = new HashMap<String, Object>();
@@ -250,11 +280,10 @@ public class ActivityController {
 			result.put("gps", event.getGps());
 			result.put("address", event.getAddress());
 			result.put("isOpen", event.isOpen());
-			result.put("typename", event.getTypeName() != null ? event.getTypeName().getName() : "");
 			
+			// 活动标签
 			List<Map> tagList = new ArrayList<>();
-			Set<EventTag> eventTags = event.getTags();
-			for (EventTag eventTag : eventTags) {
+			for (EventTag eventTag : event.getTags()) {
 				Tag tag = eventTag.getTag();
 				Map<String, Object> tagsMap = new HashMap<String, Object>();
 				tagsMap.put("tagId", tag.getId());
@@ -264,7 +293,7 @@ public class ActivityController {
 			result.put("tags", tagList);
 			
 			Map<String, Object> numbersMap = new HashMap<String, Object>();
-			numbersMap.put("num", event.getUserCount());
+			numbersMap.put("num", event.getMaxCount());
 			numbersMap.put("enteringNum", event.getEventUsers().size());
 			result.put("numbers", numbersMap);
             
@@ -335,7 +364,7 @@ public class ActivityController {
     /**
      * 获取我的活动列表 (category、status不传值获取全部，暂未加入距离排序)
      * @param orderBy	排序
-     * @param category	分类
+     * @param category	分类(标签ID数组)
      * @param status	状态
      * @param keyword	关键字
      * @param startRow	开始行
@@ -351,20 +380,13 @@ public class ActivityController {
 			@RequestParam(name = "status", required = false) String status,
 			@RequestParam(name = "keyword", required = false) String keyword,
 			@RequestParam(name = "start", required = false) Integer startRow,
-			@RequestParam(name = "pagesize", required = false) Integer pageSize,
-			@RequestParam(name = "isOwnList", required = false) Boolean isOwnList) {
+			@RequestParam(name = "pagesize", required = false) Integer pageSize) {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
 			logger.info("=====> Start to get activity list <=====");
 			
 			Subject currentUser = SecurityUtils.getSubject();
 			User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
-			
-			/*int userId = user.getId();
-			user = userService.findUserById(userId);
-			if (user == null) {
-				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
-			}*/
 			
 			// default value
 			if (startRow == null) {
@@ -373,9 +395,6 @@ public class ActivityController {
 			if (pageSize == null) {
 				pageSize = ApplicationConfig.getInstance().getDefaultPageSize();
 			}
-			if (isOwnList == null) {
-				isOwnList = false;
-			}
 			
 			SearchCriteria searchCriteria = new SearchCriteria();
 			searchCriteria.setOrderBy(orderBy);
@@ -383,11 +402,8 @@ public class ActivityController {
 			searchCriteria.setStatus(status);
 			searchCriteria.setStartRow(startRow);
 			searchCriteria.setPageSize(pageSize);
-			searchCriteria.setOwnList(isOwnList);
 			searchCriteria.setKeyword(keyword);
-			if (isOwnList) {
-				searchCriteria.setUserId(user.getId());
-			}
+
 			Map<String, Object> eventListMap = activityService.getActivityList(searchCriteria);
 			List<Event> events = (List<Event>) eventListMap.get("resultList");
 			int total = (int) eventListMap.get("totalCount");
@@ -398,10 +414,7 @@ public class ActivityController {
 			List<Map> resultList = new ArrayList<Map>();
 			if (events != null) {
 				for (Event event : events) {
-//					System.out.println(event.getId());
 					Map<String, Object> result = new HashMap<String, Object>();
-					
-//					EventPicture cover = event.getCover();
 					result.put("eventId", event.getId());
 					
 					List<String> pictureList = new ArrayList<String>();
@@ -412,7 +425,6 @@ public class ActivityController {
 					}
 					result.put("pictures", pictureList);
 					
-//					result.put("picture", cover != null ? cover.getUrl() : "");
 					result.put("name", event.getName());
 					result.put("releaseTime", event.getCreationDate());
 					result.put("startTime", event.getStartTime());
@@ -427,14 +439,10 @@ public class ActivityController {
 					result.put("address", event.getAddress());
 					result.put("isOpen", event.isOpen());
 					
-					TypeName typeName = event.getTypeName();
-					result.put("typename", typeName != null ? typeName.getName() : "");
-					
 					result.put("chatroomId", event.getChatRoom() != null ? event.getChatRoom().getId() : "");
 					
 					List<Map> tagList = new ArrayList<>();
-					Set<EventTag> eventTags = event.getTags();
-					for (EventTag eventTag : eventTags) {
+					for (EventTag eventTag : event.getTags()) {
 						Tag tag = eventTag.getTag();
 						Map<String, Object> tagsMap = new HashMap<String, Object>();
 						tagsMap.put("tagId", tag.getId());
@@ -444,7 +452,7 @@ public class ActivityController {
 					result.put("tags", tagList);
 					
 					Map<String, Object> numbersMap = new HashMap<String, Object>();
-					numbersMap.put("num", event.getUserCount());
+					numbersMap.put("num", event.getMaxCount());
 					numbersMap.put("enteringNum", event.getEventUsers().size());
 					result.put("numbers", numbersMap);
 					
@@ -493,8 +501,6 @@ public class ActivityController {
 			Event event = activityService.findEventById(id);
 			Map<String, Object> result = new HashMap<String, Object>();
 			
-//			EventPicture cover = event.getCover();
-//			result.put("picture", cover != null ? cover.getUrl() : "");
 			List<String> pictureList = new ArrayList<String>();
 			List<EventPicture> eventPictures = new ArrayList<EventPicture>(event.getEventPictures());
 			Collections.sort(eventPictures, new EventPictureComparator());
@@ -519,9 +525,6 @@ public class ActivityController {
 				result.put("organizer", organizerMap);
 			}
 			
-			TypeName typeName = event.getTypeName();
-			result.put("typename", typeName!= null ? typeName.getName() : "");
-			
 			result.put("startTime", event.getStartTime());
 			result.put("gps", event.getGps());
 			result.put("address", event.getAddress());
@@ -532,8 +535,7 @@ public class ActivityController {
 			result.put("chatroomId", event.getChatRoom() != null ? event.getChatRoom().getId() : "");
 			
 			List<Map> tagList = new ArrayList<>();
-			Set<EventTag> eventTags = event.getTags();
-			for (EventTag eventTag : eventTags) {
+			for (EventTag eventTag : event.getTags()) {
 				Tag tag = eventTag.getTag();
 				if (tag != null) {
 					Map<String, Object> tagsMap = new HashMap<String, Object>();
@@ -561,7 +563,7 @@ public class ActivityController {
 			result.put("eventUserList", eventUserList);
 			
 			Map<String, Object> numbersMap = new HashMap<String, Object>();
-			numbersMap.put("num", event.getUserCount());
+			numbersMap.put("num", event.getMaxCount());
 			numbersMap.put("enteringNum", eventUsers.size());
 			result.put("numbers", numbersMap);
 			
@@ -577,25 +579,25 @@ public class ActivityController {
     
     /**
      * 获取标签列表
-     * @param typeName	标签类型
+     * @param parentId
      * @return
      */
     @ResponseBody
 	@RequestMapping(value = "/getTagList")
-	public Map<String, Object> getTagList(@RequestParam(name = "typeNameId", required = false) Integer typeNameId) {
+	public Map<String, Object> getTagList(@RequestParam(name = "parentId", required = false) Integer parentId) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try{
 			logger.info("=====> Start to get tag list <=====");
 			
-			List<Tag> tags = activityService.getTagListByTypeNameId(typeNameId);
+			List<Tag> secondLevelTags = activityService.getSecondLevelTags(parentId);
 			List<Map> resultList = new ArrayList<Map>();
 			Map<String, Object> map = null;
-			if (tags != null) {
-				for (Tag tag : tags) {
+			if (secondLevelTags != null) {
+				for (Tag tag : secondLevelTags) {
 					map = new HashMap<String, Object>();
-					map.put("tagId", tag.getId());
-					map.put("tagName", tag.getName());
-					map.put("tagTimes", tag.getTimes());
+					map.put("id", tag.getId());
+					map.put("name", tag.getName());
+					map.put("times", tag.getTimes());
 					resultList.add(map);
 				}
 			}
@@ -611,26 +613,25 @@ public class ActivityController {
 	}
     
     /**
-     * 获取活动类型,根据description字段获取所有typeName
-     * @param type	description
+     * 获取活动类型
      * @return
      */
     @ResponseBody
 	@RequestMapping(value = "/getActivityType")
-	public Map<String, Object> getActivityType(@RequestParam("type")String type) {
+	public Map<String, Object> getActivityType() {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try{
 			logger.info("=====> Start to get activity type <=====");
 			
-			List<TypeName> activityTypes = activityService.getActivityTypes(type);
+			List<Tag> firstLevelTags = activityService.getTags(Tag.TYPE_FIRST_LEVEL);
 			List<Map> resultList = new ArrayList<Map>();
 			Map<String, Object> map = null;
-			if (activityTypes != null) {
-				for (TypeName typeName : activityTypes) {
+			if (firstLevelTags != null) {
+				for (Tag tag : firstLevelTags) {
 					map = new HashMap<String, Object>();
-					map.put("typeNameId", typeName.getId());
-					map.put("typeName", typeName.getName());
-					map.put("typeNameDescription", typeName.getDescription());
+					map.put("id", tag.getId());
+					map.put("name", tag.getName());
+					map.put("times", tag.getTimes());
 					resultList.add(map);
 				}
 			}
@@ -692,7 +693,6 @@ public class ActivityController {
 				for (Event event : events) {
 					Map<String, Object> result = new HashMap<String, Object>();
 					
-//					EventPicture cover = event.getCover();
 					result.put("eventId", event.getId());
 					
 					List<String> pictureList = new ArrayList<String>();
@@ -703,7 +703,6 @@ public class ActivityController {
 					}
 					result.put("pictures", pictureList);
 					
-//					result.put("picture", cover != null ? cover.getUrl() : "");
 					result.put("name", event.getName());
 					result.put("releaseTime", event.getCreationDate());
 					result.put("startTime", event.getStartTime());
@@ -718,14 +717,10 @@ public class ActivityController {
 					result.put("address", event.getAddress());
 					result.put("isOpen", event.isOpen());
 					
-					TypeName typeName = event.getTypeName();
-					result.put("typename", typeName != null ? typeName.getName() : "");
-					
 					result.put("chatroomId", event.getChatRoom() != null ? event.getChatRoom().getId() : "");
 					
 					List<Map> tagList = new ArrayList<>();
-					Set<EventTag> eventTags = event.getTags();
-					for (EventTag eventTag : eventTags) {
+					for (EventTag eventTag : event.getTags()) {
 						Tag tag = eventTag.getTag();
 						Map<String, Object> tagsMap = new HashMap<String, Object>();
 						tagsMap.put("tagId", tag.getId());
@@ -735,7 +730,7 @@ public class ActivityController {
 					result.put("tags", tagList);
 					
 					Map<String, Object> numbersMap = new HashMap<String, Object>();
-					numbersMap.put("num", event.getUserCount());
+					numbersMap.put("num", event.getMaxCount());
 					numbersMap.put("enteringNum", event.getEventUsers().size());
 					result.put("numbers", numbersMap);
 					
