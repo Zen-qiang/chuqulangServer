@@ -8,6 +8,7 @@ import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.Topic;
 import com.dinglian.server.chuqulang.model.TopicPraise;
+import com.dinglian.server.chuqulang.model.TypeName;
 
 public interface DiscoverService {
 
@@ -32,5 +33,7 @@ public interface DiscoverService {
 	void saveCoterie(Coterie coterie) throws Exception;
 
 	List<Coterie> getMyCoteries(String dataType, int userId);
+
+	TypeName findTypeNameById(int typeNameId);
 
 }

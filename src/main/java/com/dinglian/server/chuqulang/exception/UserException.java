@@ -8,7 +8,8 @@ public class UserException extends Exception {
 	public final static int VERIFY_CODE_INVALID = 1003;
 	public final static int VERIFY_CODE_EXPIRE = 1004;
 	public final static int NOT_REGISTER = 1005;
-
+	public final static int NOT_EXISTING = 1006;
+	
 	private int code;
 
 	private static String getMessage(int code) {
@@ -23,6 +24,8 @@ public class UserException extends Exception {
 			return "验证码过期";
 		case NOT_REGISTER:
 			return "该用户未注册";
+		case NOT_EXISTING:
+			return "用户不存在";
 		default:
 			return null; // cannot be
 		}

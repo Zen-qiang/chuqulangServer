@@ -11,11 +11,13 @@ import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.dao.CoterieDao;
 import com.dinglian.server.chuqulang.dao.GeneralDao;
 import com.dinglian.server.chuqulang.dao.TopicDao;
+import com.dinglian.server.chuqulang.dao.TypeNameDao;
 import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.Topic;
 import com.dinglian.server.chuqulang.model.TopicPraise;
+import com.dinglian.server.chuqulang.model.TypeName;
 import com.dinglian.server.chuqulang.service.DiscoverService;
 
 @Service
@@ -29,6 +31,9 @@ public class DiscoverServiceImpl implements DiscoverService {
 	
 	@Autowired
 	private GeneralDao generalDao;
+	
+	@Autowired
+	private TypeNameDao typeNameDao;
 
 	@Override
 	public Coterie findCoterieById(int id) throws Exception {
@@ -98,6 +103,11 @@ public class DiscoverServiceImpl implements DiscoverService {
 	@Override
 	public List<Coterie> getMyCoteries(String dataType, int userId) {
 		return coterieDao.getMyCoteries(dataType, userId);
+	}
+
+	@Override
+	public TypeName findTypeNameById(int typeNameId) {
+		return typeNameDao.findById(typeNameId);
 	}
 
 }

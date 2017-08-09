@@ -7,13 +7,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.management.RuntimeErrorException;
+
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.Consts;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +25,16 @@ import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.exception.AesException;
 import com.dinglian.server.chuqulang.exception.UserException;
+import com.dinglian.server.chuqulang.model.Coterie;
+import com.dinglian.server.chuqulang.model.CoterieGuy;
+import com.dinglian.server.chuqulang.model.CoteriePicture;
+import com.dinglian.server.chuqulang.model.Tag;
+import com.dinglian.server.chuqulang.model.TypeName;
 import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.model.VerifyNo;
 import com.dinglian.server.chuqulang.model.WxOAuth2AccessToken;
+import com.dinglian.server.chuqulang.service.ActivityService;
+import com.dinglian.server.chuqulang.service.DiscoverService;
 import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.service.WxMpService;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
@@ -56,6 +59,12 @@ public class WechatController {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private DiscoverService discoverService;
+	
+	@Autowired
+    private ActivityService activityService;
 
 	@Autowired
 	private WxMpService wxMpService;
@@ -163,6 +172,8 @@ public class WechatController {
 
 				ResponseHelper.addResponseSuccessData(responseMap, userMap);
 			}
+		} catch (UserException e) {
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
@@ -303,7 +314,7 @@ public class WechatController {
 				userMap.put("birthday", user.getBirthday());
 
 				ResponseHelper.addResponseSuccessData(responseMap, userMap);
-				
+
 				// 注册云信ID
 				String userProfilePicturePath = ApplicationConfig.getInstance().getUserProfilePicturePath();
 				String response = NeteaseIMUtil.getInstance().create(user.getPhoneNo(), user.getPhoneNo(), "",
@@ -319,6 +330,8 @@ public class WechatController {
 							responseObj.getString("desc"));
 				}
 			}
+		} catch (UserException e) {
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
@@ -327,6 +340,156 @@ public class WechatController {
 		return responseMap;
 	}
 
+	/**
+	 * 创建圈子
+	 * @param userId
+	 * @param name
+	 * @param typeNameId
+	 * @param tags
+	 * @param description
+	 * @param picture
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/createCoterie", method = RequestMethod.POST)
+	public Map<String, Object> createCoterie(@RequestParam("userId") int userId, @RequestParam("name") String name,
+			@RequestParam("typeNameId") int typeNameId, @RequestParam(name = "tags", required = false) Integer[] tags,
+			@RequestParam(name = "description", required = false) String description,
+			@RequestParam(name = "picture", required = false) String picture) {
+		logger.info("=====> Start to create coterie <=====");
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			User user = userService.findUserById(userId);
+			if (user == null) {
+				throw new UserException(UserException.NOT_EXISTING);
+			}
+			
+			Coterie coterie = new Coterie();
+			coterie.setName(name);
+			coterie.setDescription(description);
+			coterie.setCreationDate(new Date());
+			coterie.setCreator(user);
+			coterie.setHot(0);
+			
+			TypeName typeName = discoverService.findTypeNameById(typeNameId);
+			if (typeName == null) {
+				throw new NullPointerException("TypeNameID : " + typeNameId + " 不存在");
+			}
+			coterie.setTypeName(typeName);
+			
+			if (tags != null) {
+				for (Integer tagId : tags) {
+					Tag tag = activityService.findTagById(tagId);
+	            	if (tag != null) {
+	            		coterie.getTags().add(tag);
+	            	}
+				}
+			}
+			
+			coterie.getCoterieGuys().add(new CoterieGuy(coterie, 1, user, new Date(), true,	true));
+			
+			discoverService.saveCoterie(coterie);
+			
+			if (StringUtils.isNotBlank(picture) && coterie.getId() != 0) {
+				String coverPath = ApplicationConfig.getInstance().getCoterieCoverPath();
+        		if (picture.indexOf(",") > 0) {
+        			String coverFolderPath = String.format(coverPath, coterie.getId());
+        			String picPath = FileUploadHelper.uploadPicture(coverFolderPath, picture, "cover.jpg");
+        			
+        			CoteriePicture coteriePicture = new CoteriePicture();
+        			coteriePicture.setCoterie(coterie);
+        			coteriePicture.setCreationDate(new Date());
+        			coteriePicture.setUser(user);
+        			coteriePicture.setUrl(picPath);
+        			coterie.setCoteriePicture(coteriePicture);
+				}
+        		discoverService.saveCoterie(coterie);
+			}
+			ResponseHelper.addResponseSuccessData(responseMap, null);
+		} catch (UserException e) {
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("=====> Create coterie end <=====");
+		return responseMap;
+	}
+
+	/**
+	 * 加入/退出圈子
+	 * @param userId
+	 * @param coterieId
+	 * @param isJoin
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/joinCoterie", method = RequestMethod.POST)
+	public Map<String, Object> joinCoterie(@RequestParam("userId") int userId, @RequestParam("coterieId") int coterieId,
+			@RequestParam("isJoin") boolean isJoin) {
+		logger.info("=====> Start to join coterie <=====");
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			User user = userService.findUserById(userId);
+			if (user == null) {
+				throw new UserException(UserException.NOT_EXISTING);
+			}
+			
+			Coterie coterie = discoverService.findCoterieById(coterieId);
+			if (coterie == null) {
+				throw new NullPointerException("圈子ID：" + coterie + " 不存在");
+			}
+			
+			if (isJoin) {
+				int nextOrderNo = coterie.getCoterieNextOrderNo();
+				CoterieGuy coterieGuy = new CoterieGuy(coterie, nextOrderNo, user, new Date(), false, true);
+				discoverService.saveCoterieGuy(coterieGuy);
+			} else {
+				discoverService.exitCoterie(coterieId, user.getId());
+			}
+			ResponseHelper.addResponseSuccessData(responseMap, null);
+		} catch (UserException e) {
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("=====> Join coterie end <=====");
+		return responseMap;
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/getCoterieList", method = RequestMethod.GET)
+	public Map<String, Object> getCoterieList(@RequestParam("userId") int userId, @RequestParam("coterieId") int coterieId,
+			@RequestParam("isJoin") boolean isJoin) {
+		logger.info("=====> Start to join coterie <=====");
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			User user = userService.findUserById(userId);
+			if (user == null) {
+				throw new UserException(UserException.NOT_EXISTING);
+			}
+			
+			Coterie coterie = discoverService.findCoterieById(coterieId);
+			if (coterie == null) {
+				throw new NullPointerException("圈子ID：" + coterie + " 不存在");
+			}
+			
+			if (isJoin) {
+				int nextOrderNo = coterie.getCoterieNextOrderNo();
+				CoterieGuy coterieGuy = new CoterieGuy(coterie, nextOrderNo, user, new Date(), false, true);
+				discoverService.saveCoterieGuy(coterieGuy);
+			} else {
+				discoverService.exitCoterie(coterieId, user.getId());
+			}
+			ResponseHelper.addResponseSuccessData(responseMap, null);
+		} catch (UserException e) {
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("=====> Join coterie end <=====");
+		return responseMap;
+	}
+	
 	private static boolean isMobile(String phoneNo) {
 		String regex = ApplicationConfig.getInstance().getPhoneNoRegex();
 		Pattern p = Pattern.compile(regex);

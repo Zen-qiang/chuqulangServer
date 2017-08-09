@@ -109,7 +109,7 @@ public class Event implements Serializable {
 
 	// private Set<EventLog> eventLogs = new HashSet<EventLog>();
 	
-//	private Coterie coterie;
+	private Coterie coterie;
 
 	@GeneratedValue
 	@Id
@@ -305,6 +305,16 @@ public class Event implements Serializable {
 
 	public void setChatRoom(ChatRoom chatRoom) {
 		this.chatRoom = chatRoom;
+	}
+	
+	@JoinColumn(name = "fk_coterie_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	public Coterie getCoterie() {
+		return coterie;
+	}
+
+	public void setCoterie(Coterie coterie) {
+		this.coterie = coterie;
 	}
 
 	@Transient
