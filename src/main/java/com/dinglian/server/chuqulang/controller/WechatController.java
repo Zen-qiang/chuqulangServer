@@ -296,6 +296,7 @@ public class WechatController {
 				user.setGender(Integer.parseInt(sex));
 				user.setNickName(nickName);
 				user.setBirthday(birthday);
+				user.setOpenId(openId);
 
 				if (StringUtils.isNotBlank(headimgurl)) {
 					user.setPicture(FileUploadHelper.saveNetProfilePicture(phoneNo, headimgurl));
