@@ -149,7 +149,7 @@ public class WechatController {
 				String openid = obj.getString("openid");
 				String scope = obj.getString("scope");
 				
-				dataMap.put("openid", openid);
+				dataMap.put("openId", openid);
 
 				WxOAuth2AccessToken wxOAuth2AccessToken = new WxOAuth2AccessToken();
 				wxOAuth2AccessToken.setAccessToken(accessToken);
