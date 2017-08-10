@@ -53,6 +53,8 @@ public class Coterie implements Serializable {
 	private Set<CoterieGuy> coterieGuys = new HashSet<CoterieGuy>(); // 圈子成员
 
 	private Set<Topic> topics = new HashSet<Topic>(); // 圈子话题
+	
+	private List<Event> events = new ArrayList<Event>(); //圈子活动
 
 	@GeneratedValue
 	@Id
@@ -149,6 +151,15 @@ public class Coterie implements Serializable {
 
 	public void setTags(List<CoterieTag> tags) {
 		this.tags = tags;
+	}
+	
+	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "coterie")
+	public List<Event> getEvents() {
+		return events;
+	}
+
+	public void setEvents(List<Event> events) {
+		this.events = events;
 	}
 
 	@Transient

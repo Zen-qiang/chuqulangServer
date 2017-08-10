@@ -112,13 +112,12 @@
 			
 			$('#getCoterieList').click(function(){
                 $.ajax({
-                    url: 'discover/getCoterieList',
-					type : 'POST',
+                    url: 'api/getCoterieList',
+					type : 'GET',
                     data: {
                         start : 0,
                         tags : [9,10],
-                        pagesize : 20,
-						orderby : 'new'
+                        pagesize : 20
                     },
                     success: function(response,status,xhr){
                         console.log(response);
@@ -140,7 +139,8 @@
 <button type="button" id="getCoterieList">圈子列表</button>
 
 <h2>我的圈子：</h2>
-<form action="discover/getMyCoteries" method="post">
+<form action="api/getMyCoteries" method="get">
+	userId：<input type="text" name="userId" value="1"/><br>
 	dataType：<input type="text" name="dataType" value=""/><br>
 	<button type="submit" >我的圈子</button>
 </form>
@@ -271,7 +271,7 @@ topicId : <input type="text" name="topicId" value=""/><br>
 </form>
 
 <h2>搜索圈子或者话题</h2>
-<form action="discover/searchActivityOrTopic" method="get">
+<form action="api/searchActivityOrTopic" method="get">
 keyword : <input type="text" name="keyword" value=""/><br>
 	<button type="submit" >搜索圈子或者话题</button>
 </form>

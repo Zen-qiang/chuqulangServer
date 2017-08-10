@@ -1,16 +1,21 @@
 package com.dinglian.server.chuqulang.controller;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.management.RuntimeErrorException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +36,7 @@ import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.CoteriePicture;
 import com.dinglian.server.chuqulang.model.CoterieTag;
 import com.dinglian.server.chuqulang.model.Tag;
+import com.dinglian.server.chuqulang.model.Topic;
 import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.model.VerifyNo;
 import com.dinglian.server.chuqulang.model.WxOAuth2AccessToken;
@@ -40,6 +46,7 @@ import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.service.WxMpService;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
 import com.dinglian.server.chuqulang.utils.NeteaseIMUtil;
+import com.dinglian.server.chuqulang.utils.RequestHelper;
 import com.dinglian.server.chuqulang.utils.ResponseHelper;
 import com.dinglian.server.chuqulang.utils.WXBizMsgCrypt;
 import com.dinglian.server.chuqulang.utils.WxRequestHelper;
@@ -148,7 +155,7 @@ public class WechatController {
 				String refreshToken = obj.getString("refresh_token");
 				String openid = obj.getString("openid");
 				String scope = obj.getString("scope");
-				
+
 				dataMap.put("openId", openid);
 
 				WxOAuth2AccessToken wxOAuth2AccessToken = new WxOAuth2AccessToken();
@@ -176,13 +183,13 @@ public class WechatController {
 
 				ResponseHelper.addResponseSuccessData(responseMap, userMap);
 			}
+			logger.info("=====> Get OAuth2 access token end <=====");
 		} catch (UserException e) {
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage(), dataMap);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
 		}
-		logger.info("=====> Get OAuth2 access token end <=====");
 		return responseMap;
 	}
 
@@ -224,10 +231,10 @@ public class WechatController {
 
 				wxMpService.updateWxOAuth2AccessToken(wxOAuth2AccessToken);
 			}
+			logger.info("=====> Get OAuth2 access token end <=====");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		logger.info("=====> Get OAuth2 access token end <=====");
 		return response;
 	}
 
@@ -243,7 +250,11 @@ public class WechatController {
 	@ResponseBody
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
 	public Map<String, Object> register(@RequestParam("openId") String openId, @RequestParam("phoneNo") String phoneNo,
-			@RequestParam("verifyNo") String verifyNo/*, @RequestParam("birthday") Date birthday*/) {
+			@RequestParam("verifyNo") String verifyNo/*
+														 * , @RequestParam(
+														 * "birthday") Date
+														 * birthday
+														 */) {
 		logger.info("=====> Start to register user <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
@@ -298,7 +309,7 @@ public class WechatController {
 				user.setPhoneNo(phoneNo);
 				user.setGender(Integer.parseInt(sex));
 				user.setNickName(nickName);
-//				user.setBirthday(birthday);
+				// user.setBirthday(birthday);
 				user.setOpenId(openId);
 
 				if (StringUtils.isNotBlank(headimgurl)) {
@@ -335,13 +346,13 @@ public class WechatController {
 							responseObj.getString("desc"));
 				}
 			}
+			logger.info("=====> Register user end <=====");
 		} catch (UserException e) {
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
 		}
-		logger.info("=====> Register user end <=====");
 		return responseMap;
 	}
 
@@ -405,12 +416,13 @@ public class WechatController {
 				discoverService.saveCoterie(coterie);
 			}
 			ResponseHelper.addResponseSuccessData(responseMap, null);
+			logger.info("=====> Create coterie end <=====");
 		} catch (UserException e) {
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
 		}
-		logger.info("=====> Create coterie end <=====");
 		return responseMap;
 	}
 
@@ -447,53 +459,170 @@ public class WechatController {
 				discoverService.exitCoterie(coterieId, user.getId());
 			}
 			ResponseHelper.addResponseSuccessData(responseMap, null);
+			logger.info("=====> Join coterie end <=====");
 		} catch (UserException e) {
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
 		}
-		logger.info("=====> Join coterie end <=====");
 		return responseMap;
 	}
 
 	/**
 	 * 获取圈子列表
-	 * @param userId
-	 * @param coterieId
-	 * @param isJoin
+	 * 
+	 * @param tags
+	 * @param pageSize
+	 * @param startRow
+	 * @param orderBy
 	 * @return
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/getCoterieList", method = RequestMethod.GET)
-	public Map<String, Object> getCoterieList(@RequestParam("userId") int userId,
-			@RequestParam("coterieId") int coterieId, @RequestParam("isJoin") boolean isJoin) {
+	public Map<String, Object> getCoterieList(@RequestParam(name = "tags[]", required = false) Integer[] tags,
+			@RequestParam(name = "pagesize", required = false) Integer pageSize,
+			@RequestParam(name = "start", required = false) Integer startRow) {
 		logger.info("=====> Start to join coterie <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
-			User user = userService.findUserById(userId);
-			if (user == null) {
-				throw new UserException(UserException.NOT_EXISTING);
+			logger.info("=====> Start to get coterie list <=====");
+			if (startRow == null) {
+				startRow = 0;
+			}
+			if (pageSize == null) {
+				pageSize = ApplicationConfig.getInstance().getDefaultPageSize();
+			}
+			SearchCriteria searchCriteria = new SearchCriteria();
+			if (tags != null) {
+				searchCriteria.setTags(Arrays.asList(tags));
+			}
+			searchCriteria.setStartRow(startRow);
+			searchCriteria.setPageSize(pageSize);
+			// 默认最热排序
+			searchCriteria.setOrderBy(Coterie.TYPE_HOT);
+
+			Map<String, Object> coterieMap = discoverService.getCoterieList(searchCriteria);
+			List<Coterie> coteries = (List<Coterie>) coterieMap.get("resultList");
+			List<Map> dataList = new ArrayList<Map>();
+			if (coteries != null) {
+				for (Coterie coterie : coteries) {
+					Map<String, Object> data = new HashMap<String, Object>();
+					data.put("coterieId", coterie.getId());
+					data.put("cover", coterie.getCoteriePicture() != null ? coterie.getCoteriePicture().getUrl() : "");
+					data.put("name", coterie.getName());
+					data.put("description", coterie.getDescription());
+					data.put("membersCnt", coterie.getCoterieGuys().size());
+					data.put("topicCnt", coterie.getTopics().size());
+					data.put("activityCnt", coterie.getEvents().size());
+					dataList.add(data);
+				}
 			}
 
-			Coterie coterie = discoverService.findCoterieById(coterieId);
-			if (coterie == null) {
-				throw new NullPointerException("圈子ID：" + coterie + " 不存在");
-			}
-
-			if (isJoin) {
-				int nextOrderNo = coterie.getCoterieGuyNextOrderNo();
-				CoterieGuy coterieGuy = new CoterieGuy(coterie, nextOrderNo, user, new Date(), false, true);
-				discoverService.saveCoterieGuy(coterieGuy);
-			} else {
-				discoverService.exitCoterie(coterieId, user.getId());
-			}
-			ResponseHelper.addResponseSuccessData(responseMap, null);
-		} catch (UserException e) {
-			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+			ResponseHelper.addResponseSuccessData(responseMap, dataList);
+			logger.info("=====> Get coterie list end <=====");
 		} catch (Exception e) {
 			e.printStackTrace();
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
 		}
-		logger.info("=====> Join coterie end <=====");
+		return responseMap;
+	}
+
+	/**
+	 * 搜索圈子/话题
+	 * 
+	 * @param keyword
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/searchActivityOrTopic", method = RequestMethod.GET)
+	public Map<String, Object> searchActivityOrTopic(@RequestParam("keyword") String keyword) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			logger.info("=====> Start to search activity or topic <=====");
+
+			Map<String, Object> resultMap = discoverService.searchActivityOrTopic(keyword);
+			List<Coterie> coteries = (List<Coterie>) resultMap.get("coterieList");
+			List<Topic> topics = (List<Topic>) resultMap.get("topicList");
+
+			Map<String, Object> result = new HashMap<String, Object>();
+			if (coteries != null) {
+				List<Map> coterieList = new ArrayList<Map>();
+				for (Coterie coterie : coteries) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("id", coterie.getId());
+					map.put("name", coterie.getName());
+					map.put("description", coterie.getDescription());
+					map.put("hot", coterie.getHot());
+
+					List<String> tags = new ArrayList<String>();
+					for (CoterieTag coterieTag : coterie.getTags()) {
+						if (coterieTag.getTag() != null) {
+							tags.add(coterieTag.getTag().getName());
+						}
+					}
+					map.put("tags", tags);
+					coterieList.add(map);
+				}
+				result.put("coteries", coterieList);
+				result.put("coterieCnt", coterieList.size());
+			}
+			if (topics != null) {
+				List<Map> topicList = new ArrayList<Map>();
+				for (Topic topic : topics) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("id", topic.getId());
+					map.put("coterieId", topic.getCoterie().getId());
+					map.put("description", topic.getDescription());
+					topicList.add(map);
+				}
+				result.put("topics", topicList);
+				result.put("topicCnt", topicList.size());
+			}
+
+			logger.info("=====> Search activity or topic type end <=====");
+			ResponseHelper.addResponseSuccessData(responseMap, result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		}
+		return responseMap;
+	}
+
+	/**
+	 * 我的圈子
+	 * 
+	 * @param dataType
+	 *            1：我创建的 2：我参与的
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/getMyCoteries", method = RequestMethod.GET)
+	public Map<String, Object> getMyCoteries(@RequestParam("userId") int userId,
+			@RequestParam(name = "dataType", required = false) String dataType) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			logger.info("=====> Start to get my coteries <=====");
+
+			List<Coterie> coteries = discoverService.getMyCoteries(dataType, userId);
+			List<Map> resultList = new ArrayList<Map>();
+			if (coteries != null) {
+				for (Coterie coterie : coteries) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("id", coterie.getId());
+					map.put("name", coterie.getName());
+					map.put("cover", coterie.getCoteriePicture() != null ? coterie.getCoteriePicture().getUrl() : "");
+					resultList.add(map);
+				}
+			}
+
+			logger.info("=====> Get my coteries end <=====");
+			ResponseHelper.addResponseSuccessData(responseMap, resultList);
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		}
+
 		return responseMap;
 	}
 
