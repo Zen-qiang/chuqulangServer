@@ -60,12 +60,12 @@ public class WechatController {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private DiscoverService discoverService;
-	
+
 	@Autowired
-    private ActivityService activityService;
+	private ActivityService activityService;
 
 	@Autowired
 	private WxMpService wxMpService;
@@ -128,6 +128,7 @@ public class WechatController {
 		logger.info("=====> Start to get OAuth2 access token <=====");
 		logger.info("code : " + code + ", state : " + state);
 		Map<String, Object> responseMap = new HashMap<String, Object>();
+		Map<String, Object> dataMap = new HashMap<String, Object>();
 		try {
 			String response = "";
 			// 通过code换取网页授权access_token
@@ -145,19 +146,21 @@ public class WechatController {
 				JSONObject obj = JSONObject.fromObject(response);
 				String accessToken = obj.getString("access_token");
 				String refreshToken = obj.getString("refresh_token");
-				String openId = obj.getString("openid");
+				String openid = obj.getString("openid");
 				String scope = obj.getString("scope");
+				
+				dataMap.put("openid", openid);
 
 				WxOAuth2AccessToken wxOAuth2AccessToken = new WxOAuth2AccessToken();
 				wxOAuth2AccessToken.setAccessToken(accessToken);
 				wxOAuth2AccessToken.setRefreshToken(refreshToken);
-				wxOAuth2AccessToken.setOpenId(openId);
+				wxOAuth2AccessToken.setOpenId(openid);
 				wxOAuth2AccessToken.setScope(scope);
 				wxOAuth2AccessToken.setModifiedDate(new Date());
 
 				wxMpService.updateWxOAuth2AccessToken(wxOAuth2AccessToken);
 
-				User user = userService.getUserByOpenId(openId);
+				User user = userService.getUserByOpenId(openid);
 				if (user == null) {
 					throw new UserException(UserException.NOT_REGISTER);
 				}
@@ -174,7 +177,7 @@ public class WechatController {
 				ResponseHelper.addResponseSuccessData(responseMap, userMap);
 			}
 		} catch (UserException e) {
-			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage(), dataMap);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
@@ -240,7 +243,7 @@ public class WechatController {
 	@ResponseBody
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
 	public Map<String, Object> register(@RequestParam("openId") String openId, @RequestParam("phoneNo") String phoneNo,
-			@RequestParam("verifyNo") String verifyNo, @RequestParam("birthday") Date birthday) {
+			@RequestParam("verifyNo") String verifyNo/*, @RequestParam("birthday") Date birthday*/) {
 		logger.info("=====> Start to register user <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
@@ -295,7 +298,7 @@ public class WechatController {
 				user.setPhoneNo(phoneNo);
 				user.setGender(Integer.parseInt(sex));
 				user.setNickName(nickName);
-				user.setBirthday(birthday);
+//				user.setBirthday(birthday);
 				user.setOpenId(openId);
 
 				if (StringUtils.isNotBlank(headimgurl)) {
@@ -344,6 +347,7 @@ public class WechatController {
 
 	/**
 	 * 创建圈子
+	 * 
 	 * @param userId
 	 * @param name
 	 * @param typeNameId
@@ -355,8 +359,7 @@ public class WechatController {
 	@ResponseBody
 	@RequestMapping(value = "/createCoterie", method = RequestMethod.POST)
 	public Map<String, Object> createCoterie(@RequestParam("userId") int userId, @RequestParam("name") String name,
-			@RequestParam("tags") int[] tags,
-			@RequestParam(name = "description", required = false) String description,
+			@RequestParam("tags") int[] tags, @RequestParam(name = "description", required = false) String description,
 			@RequestParam(name = "picture", required = false) String picture) {
 		logger.info("=====> Start to create coterie <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -365,41 +368,41 @@ public class WechatController {
 			if (user == null) {
 				throw new UserException(UserException.NOT_EXISTING);
 			}
-			
+
 			Coterie coterie = new Coterie();
 			coterie.setName(name);
 			coterie.setDescription(description);
 			coterie.setCreationDate(new Date());
 			coterie.setCreator(user);
 			coterie.setHot(0);
-			
+
 			for (int i = 1; i <= tags.length; i++) {
-            	Tag tag = activityService.findTagById(tags[i - 1]);
-            	if (tag != null) {
-            		List<Tag> secondLevelTags = activityService.getSecondLevelTags(tag.getId());
-            		CoterieTag coterieTag = new CoterieTag(coterie, tag, secondLevelTags.size() > 0 ? -1 : i);
-            		coterie.getTags().add(coterieTag);
+				Tag tag = activityService.findTagById(tags[i - 1]);
+				if (tag != null) {
+					List<Tag> secondLevelTags = activityService.getSecondLevelTags(tag.getId());
+					CoterieTag coterieTag = new CoterieTag(coterie, tag, secondLevelTags.size() > 0 ? -i : i);
+					coterie.getTags().add(coterieTag);
 				}
 			}
-			
-			coterie.getCoterieGuys().add(new CoterieGuy(coterie, 1, user, new Date(), true,	true));
-			
+
+			coterie.getCoterieGuys().add(new CoterieGuy(coterie, 1, user, new Date(), true, true));
+
 			discoverService.saveCoterie(coterie);
-			
+
 			if (StringUtils.isNotBlank(picture) && coterie.getId() != 0) {
 				String coverPath = ApplicationConfig.getInstance().getCoterieCoverPath();
-        		if (picture.indexOf(",") > 0) {
-        			String coverFolderPath = String.format(coverPath, coterie.getId());
-        			String picPath = FileUploadHelper.uploadPicture(coverFolderPath, picture, "cover.jpg");
-        			
-        			CoteriePicture coteriePicture = new CoteriePicture();
-        			coteriePicture.setCoterie(coterie);
-        			coteriePicture.setCreationDate(new Date());
-        			coteriePicture.setUser(user);
-        			coteriePicture.setUrl(picPath);
-        			coterie.setCoteriePicture(coteriePicture);
+				if (picture.indexOf(",") > 0) {
+					String coverFolderPath = String.format(coverPath, coterie.getId());
+					String picPath = FileUploadHelper.uploadPicture(coverFolderPath, picture, "cover.jpg");
+
+					CoteriePicture coteriePicture = new CoteriePicture();
+					coteriePicture.setCoterie(coterie);
+					coteriePicture.setCreationDate(new Date());
+					coteriePicture.setUser(user);
+					coteriePicture.setUrl(picPath);
+					coterie.setCoteriePicture(coteriePicture);
 				}
-        		discoverService.saveCoterie(coterie);
+				discoverService.saveCoterie(coterie);
 			}
 			ResponseHelper.addResponseSuccessData(responseMap, null);
 		} catch (UserException e) {
@@ -413,6 +416,7 @@ public class WechatController {
 
 	/**
 	 * 加入/退出圈子
+	 * 
 	 * @param userId
 	 * @param coterieId
 	 * @param isJoin
@@ -429,12 +433,12 @@ public class WechatController {
 			if (user == null) {
 				throw new UserException(UserException.NOT_EXISTING);
 			}
-			
+
 			Coterie coterie = discoverService.findCoterieById(coterieId);
 			if (coterie == null) {
 				throw new NullPointerException("圈子ID：" + coterie + " 不存在");
 			}
-			
+
 			if (isJoin) {
 				int nextOrderNo = coterie.getCoterieGuyNextOrderNo();
 				CoterieGuy coterieGuy = new CoterieGuy(coterie, nextOrderNo, user, new Date(), false, true);
@@ -451,11 +455,18 @@ public class WechatController {
 		logger.info("=====> Join coterie end <=====");
 		return responseMap;
 	}
-	
+
+	/**
+	 * 获取圈子列表
+	 * @param userId
+	 * @param coterieId
+	 * @param isJoin
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/getCoterieList", method = RequestMethod.GET)
-	public Map<String, Object> getCoterieList(@RequestParam("userId") int userId, @RequestParam("coterieId") int coterieId,
-			@RequestParam("isJoin") boolean isJoin) {
+	public Map<String, Object> getCoterieList(@RequestParam("userId") int userId,
+			@RequestParam("coterieId") int coterieId, @RequestParam("isJoin") boolean isJoin) {
 		logger.info("=====> Start to join coterie <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
@@ -463,12 +474,12 @@ public class WechatController {
 			if (user == null) {
 				throw new UserException(UserException.NOT_EXISTING);
 			}
-			
+
 			Coterie coterie = discoverService.findCoterieById(coterieId);
 			if (coterie == null) {
 				throw new NullPointerException("圈子ID：" + coterie + " 不存在");
 			}
-			
+
 			if (isJoin) {
 				int nextOrderNo = coterie.getCoterieGuyNextOrderNo();
 				CoterieGuy coterieGuy = new CoterieGuy(coterie, nextOrderNo, user, new Date(), false, true);
@@ -485,7 +496,7 @@ public class WechatController {
 		logger.info("=====> Join coterie end <=====");
 		return responseMap;
 	}
-	
+
 	private static boolean isMobile(String phoneNo) {
 		String regex = ApplicationConfig.getInstance().getPhoneNoRegex();
 		Pattern p = Pattern.compile(regex);

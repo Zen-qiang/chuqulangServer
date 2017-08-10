@@ -28,6 +28,14 @@ public class ResponseHelper {
 		resultMap.put("error", errorMap);
 	}
 	
+	public static void addResponseFailData(Map<String, Object> resultMap, String message, Object data) {
+		resultMap.put("success", RESPONSE_SUCCESS_FALSE);
+		Map<String, Object> errorMap = new HashMap<String, Object>();
+		errorMap.put("message", message);
+		resultMap.put("error", errorMap);
+		resultMap.put("data", data);
+	}
+	
 	public static void addResponseFailData(Map<String, Object> resultMap, Integer errorCode, String message) {
 		Map<String, Object> errorMap = new HashMap<String, Object>();
 		errorMap.put("message", message);
