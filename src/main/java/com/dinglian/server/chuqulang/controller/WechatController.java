@@ -99,7 +99,7 @@ public class WechatController {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/getUserAuthorization", method = RequestMethod.GET)
+	@RequestMapping(value = "/userAuthorization", method = RequestMethod.GET)
 	public ModelAndView userAuthorization() {
 		logger.info("=====> Start to user authorization <=====");
 		String url = "";

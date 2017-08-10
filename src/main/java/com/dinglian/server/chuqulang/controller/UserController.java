@@ -182,15 +182,14 @@ public class UserController {
 			logger.info("=====> Start to check phoneno duplicate <=====");
 			// 添加手机号格式验证
 			if (!isMobile(phoneNo)) {
-				throw new RuntimeException("请输入正确的手机号码");
+				throw new UserException(UserException.PHONE_NO_INVALID);
 			}
 			// 检查手机号码是否注册
 			SearchCriteria searchCriteria = new SearchCriteria();
 			searchCriteria.setPhoneNo(phoneNo);
 			User existUser = userService.getUser(searchCriteria);
 			if (existUser != null) {
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "该手机号已经注册。");
-				return resultMap;
+				throw new UserException(UserException.PHONE_NO_REGISTERED);
 			}
 			
 			logger.info("=====> Start to register user <=====");
@@ -228,13 +227,13 @@ public class UserController {
 						ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "",result);
 					}
 				} else {
-					ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "验证码无效，请重新获取。");
-					return resultMap;
+					throw new UserException(UserException.VERIFY_CODE_INVALID);
 				}
 			} else {
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "验证码无效，请重新获取。");
-				return resultMap;
+				throw new UserException(UserException.VERIFY_CODE_INVALID);
 			}
+		} catch (UserException e) {
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
@@ -259,15 +258,14 @@ public class UserController {
 		try {
 			logger.info("=====> Start to reset password <=====");
 			if (!isMobile(phoneNo)) {
-				throw new RuntimeException("请输入正确的手机号码");
+				throw new UserException(UserException.PHONE_NO_INVALID);
 			}
 						
 			SearchCriteria searchCriteria = new SearchCriteria();
 			searchCriteria.setPhoneNo(phoneNo);
 			User user = userService.getUser(searchCriteria);
 			if (user == null) {
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "用户不存在");
-				return resultMap;
+				throw new UserException(UserException.NOT_EXISTING);
 			}
 			
 			VerifyNo existVerifyNo = userService.getVerifyNo(phoneNo, VerifyNo.VERIFY_NO_TYPE_FORGOT);
@@ -275,12 +273,13 @@ public class UserController {
 				if (existVerifyNo.getVerifyNo().equalsIgnoreCase(verifyNo)) {
 					user.setPassword(EncryptHelper.encryptByMD5(phoneNo, newPassword));
 					userService.saveOrUpdateUser(user);
-					ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "", null);
+					ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_OK, "");
 				}
 			} else {
-				ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "验证码无效，请重新获取。");
-				return resultMap;
+				throw new UserException(UserException.VERIFY_CODE_INVALID);
 			}
+		} catch (UserException e) {
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
@@ -423,7 +422,7 @@ public class UserController {
 			
 			User user = userService.getUserByAccid(accid);
 			if (user == null) {
-				throw new NullPointerException("用户ACCID：" + accid + " , 用户不存在");
+				throw new UserException(UserException.NOT_EXISTING);
 			}
 				
 			Map<String, Object> result = new HashMap<String, Object>();
@@ -470,7 +469,7 @@ public class UserController {
 			}
 			
 			if (user == null) {
-				throw new NullPointerException("用户不存在");
+				throw new UserException(UserException.NOT_EXISTING);
 			}
 			
 			Map<String, Object> result = new HashMap<String, Object>();
@@ -624,7 +623,7 @@ public class UserController {
 			int userId = user.getId();
 			user = userService.findUserById(userId);
 			if (user == null) {
-				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+				throw new UserException(UserException.NOT_EXISTING);
 			}
 			
 			List<Map> resultList = new ArrayList<Map>();
@@ -637,7 +636,6 @@ public class UserController {
 					map.put("picture", contact.getContactUser().getPicture());
 					map.put("degree", contact.getDegree());
 					map.put("accid", contact.getContactUser().getAccid());
-//					map.put("description", contact.getDescription());
 					resultList.add(map);
 				}
 			}
@@ -668,7 +666,7 @@ public class UserController {
 			int userId = user.getId();
 			user = userService.findUserById(userId);
 			if (user == null) {
-				throw new NullPointerException("用户ID：" + userId + " , 用户不存在。");
+				throw new UserException(UserException.NOT_EXISTING);
 			}
 			
 			List<Map> resultList = new ArrayList<Map>();
