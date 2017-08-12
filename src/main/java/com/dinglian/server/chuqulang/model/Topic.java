@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -29,15 +30,23 @@ import javax.persistence.UniqueConstraint;
 @Entity
 public class Topic implements Serializable {
 	
+	public static final int TYPE_IMAGE_TEXT = 1;
+	public static final int TYPE_VIDEO = 2;
+	public static final int TYPE_ATIVITY = 3;
+	
 	private int id;
 	
 	private Coterie coterie;
 	
 	private User creator; //话题发起者
 	
-	private String description;
+	private Integer topicType;
 	
-	private Set<TopicPicture> pictures = new HashSet<TopicPicture>();
+	private String description;// 文字
+	
+	private Set<TopicPicture> pictures = new HashSet<TopicPicture>(); // 图片
+	
+	private Event event;
 
 	private Set<TopicComment> comments = new HashSet<TopicComment>();
 	
@@ -120,6 +129,25 @@ public class Topic implements Serializable {
 		this.creationDate = creationDate;
 	}
 	
+	@JoinColumn(name = "fk_event_id")
+	@OneToOne(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+	public Event getEvent() {
+		return event;
+	}
+
+	public void setEvent(Event event) {
+		this.event = event;
+	}
+	
+	@Column(name = "topic_type")
+	public Integer getTopicType() {
+		return topicType;
+	}
+
+	public void setTopicType(Integer topicType) {
+		this.topicType = topicType;
+	}
+
 	public Topic() {
 		// TODO Auto-generated constructor stub
 	}

@@ -20,7 +20,7 @@ public class TagDaoImpl extends AbstractHibernateDao<Tag> implements TagDao {
 
 	@Override
 	public List<Tag> getTags(String type) {
-		String hql = "FROM Tag WHERE type = :type ";
+		String hql = "FROM Tag WHERE type = :type ORDER BY times DESC";
 		return getCurrentSession().createQuery(hql).setString("type", type).list();
 	}
 

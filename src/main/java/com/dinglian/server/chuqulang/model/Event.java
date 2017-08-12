@@ -89,7 +89,7 @@ public class Event implements Serializable {
 
 	private String charge; // 费用类型
 	
-	private double cost; //活动费用
+	private Double cost; //活动费用
 
 	private String limiter; // 限定条件
 
@@ -101,6 +101,9 @@ public class Event implements Serializable {
 
 	private Set<EventPicture> eventPictures = new HashSet<EventPicture>();// 活动图片（第一张封面）
 
+	//微信端独有
+	private Topic activityTopic;
+	
 	@GeneratedValue
 	@Id
 	public int getId() {
@@ -267,11 +270,11 @@ public class Event implements Serializable {
 		this.charge = charge;
 	}
 
-	public double getCost() {
+	public Double getCost() {
 		return cost;
 	}
 
-	public void setCost(double cost) {
+	public void setCost(Double cost) {
 		this.cost = cost;
 	}
 
@@ -302,6 +305,15 @@ public class Event implements Serializable {
 	public void setCoterie(Coterie coterie) {
 		this.coterie = coterie;
 	}
+	
+	@OneToOne(mappedBy="event")
+	public Topic getActivityTopic() {
+		return activityTopic;
+	}
+
+	public void setActivityTopic(Topic activityTopic) {
+		this.activityTopic = activityTopic;
+	}
 
 	@Transient
 	public EventPicture getCover() {
@@ -316,6 +328,9 @@ public class Event implements Serializable {
 	@Transient
 	public boolean haveSignUp(int userId) {
 		for (EventUser eventUser : this.eventUsers) {
+			if(eventUser.getUser()==null){
+				continue;
+			}
 			if (eventUser.getUser().getId() == userId) {
 				return true;
 			}

@@ -46,7 +46,7 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 		}*/
 		
 		// 开始时间升序排列
-		String orderBy = "ORDER BY e.startTime ";
+		String orderBy = "ORDER BY e.startTime DESC ";
 		
 //		String orderBy = "ORDER BY e.creationDate DESC ";
 		/*if (StringUtils.isNotBlank(searchCriteria.getOrderBy())) {
@@ -104,7 +104,7 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 		} else if (searchCriteria.getDataType().equals(Event.DATATYPE_EXPIRE)) {
 			sql += "AND eu.fk_user_id = :userId AND e.status = '" + Event.STATUS_OVER + "' ";
 		}
-		sql += "ORDER BY e.creation_date DESC";
+		sql += "ORDER BY e.start_time DESC";
 		Query query = getCurrentSession().createSQLQuery(sql).addEntity(Event.class);
 		query.setInteger("userId", searchCriteria.getUserId());
 		if (searchCriteria.getPageSize() != 0) {

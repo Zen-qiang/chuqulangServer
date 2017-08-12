@@ -141,22 +141,22 @@ public class ActivityController {
     @ResponseBody
     @RequestMapping(value = "/launchActivity", method = RequestMethod.POST)
     public Map<String, Object> launchActivity(
-            @RequestParam(name = "coterieId",required = false) Integer coterieId,
             @RequestParam("tags") int[] tags,
             @RequestParam("name") String name,
             @RequestParam("startTime") long startTimeMillisecond,
             @RequestParam("minCount") int minCount,
             @RequestParam("maxCount") int maxCount,
             @RequestParam("charge") String charge,
-            @RequestParam("cost") double cost,
+            @RequestParam("cost") Double cost,
             @RequestParam("gps") String gps,
             @RequestParam("address") String address,
-            @RequestParam(name = "description", required = false) String description,
             @RequestParam("isOpen") boolean isOpen,
+            @RequestParam(name = "coterieId",required = false) Integer coterieId,
+            @RequestParam(name = "description", required = false) String description,
             @RequestParam(name = "password",required = false) String password,
             @RequestParam(name = "limiter", required = false) String limiter,
             @RequestParam(name = "pictures", required = false) String[] pictures,
-            @RequestParam(name = "friends", required = false) int[] friends,
+            @RequestParam(name = "friends", required = false) Integer[] friends,
             @RequestParam(name = "phoneNo", required = false) String phoneNo) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         try {
