@@ -33,7 +33,15 @@ public class WxMpServiceImpl implements WxMpService {
 
 	@Override
 	public void updateWxOAuth2AccessToken(WxOAuth2AccessToken wxOAuth2AccessToken) {
-		generalDao.saveWxOAuth2AccessToken(wxOAuth2AccessToken);
+		WxOAuth2AccessToken token = generalDao.findWxOAuth2AccessTokenByOpenId(wxOAuth2AccessToken.getOpenId());
+		if (token == null) {
+			generalDao.saveWxOAuth2AccessToken(wxOAuth2AccessToken);
+		} else {
+			token.setAccessToken(wxOAuth2AccessToken.getAccessToken());
+			token.setModifiedDate(new Date());
+			token.setRefreshToken(wxOAuth2AccessToken.getRefreshToken());
+			token.setScope(wxOAuth2AccessToken.getScope());
+		}
 	}
 
 	@Override
