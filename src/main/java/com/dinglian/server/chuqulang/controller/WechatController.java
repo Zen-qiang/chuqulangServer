@@ -144,10 +144,9 @@ public class WechatController {
 	 * @return
 	 */
 	@ResponseBody
-	@RequestMapping(value = "/getUserInfo", method = RequestMethod.GET)
-	public Map<String, Object> getUserInfo(@RequestParam("code") String code, @RequestParam("state") String state) {
+	@RequestMapping(value = "/getAccessToken", method = RequestMethod.GET)
+	public Map<String, Object> getAccessToken(@RequestParam("code") String code, @RequestParam("state") String state) {
 		logger.info("=====> Start to get OAuth2 access token <=====");
-		logger.info("code : " + code + ", state : " + state);
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		Map<String, Object> dataMap = new HashMap<String, Object>();
 		try {
@@ -170,8 +169,6 @@ public class WechatController {
 				String openid = obj.getString("openid");
 				String scope = obj.getString("scope");
 
-				dataMap.put("openId", openid);
-
 				WxOAuth2AccessToken wxOAuth2AccessToken = new WxOAuth2AccessToken();
 				wxOAuth2AccessToken.setAccessToken(accessToken);
 				wxOAuth2AccessToken.setRefreshToken(refreshToken);
@@ -181,7 +178,12 @@ public class WechatController {
 
 				wxMpService.updateWxOAuth2AccessToken(wxOAuth2AccessToken);
 
-				User user = userService.getUserByOpenId(openid);
+				dataMap.put("openId", openid);
+				dataMap.put("accessToken", accessToken);
+				dataMap.put("refreshToken", refreshToken);
+				dataMap.put("scope", scope);
+				
+				/*User user = userService.getUserByOpenId(openid);
 				if (user == null) {
 					throw new UserException(UserException.NOT_REGISTER);
 				}
@@ -193,13 +195,47 @@ public class WechatController {
 				userMap.put("nickName", user.getNickName());
 				userMap.put("picture", user.getPicture());
 				userMap.put("gender", user.getGender());
-				userMap.put("birthday", user.getBirthday());
+				userMap.put("birthday", user.getBirthday());*/
 
-				ResponseHelper.addResponseSuccessData(responseMap, userMap);
+				ResponseHelper.addResponseSuccessData(responseMap, dataMap);
 			}
 			logger.info("=====> Get OAuth2 access token end <=====");
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		}
+		return responseMap;
+	}
+	
+	/**
+	 * 
+	 * @param code
+	 * @param state
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/getUser", method = RequestMethod.GET)
+	public Map<String, Object> getUser(@RequestParam("openId") String openId) {
+		logger.info("=====> Start to get user <=====");
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			User user = userService.getUserByOpenId(openId);
+			if (user == null) {
+				throw new UserException(UserException.NOT_REGISTER);
+			}
+
+			Map<String, Object> userMap = new HashMap<String, Object>();
+			userMap.put("openId", user.getOpenId());
+			userMap.put("userId", user.getId());
+			userMap.put("phoneNo", user.getPhoneNo());
+			userMap.put("nickName", user.getNickName());
+			userMap.put("picture", user.getPicture());
+			userMap.put("gender", user.getGender());
+
+			ResponseHelper.addResponseSuccessData(responseMap, userMap);
+			logger.info("=====> Get user end <=====");
 		} catch (UserException e) {
-			ResponseHelper.addResponseFailData(responseMap, e.getMessage(), dataMap);
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());

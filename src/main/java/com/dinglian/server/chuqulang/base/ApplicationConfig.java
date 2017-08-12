@@ -109,7 +109,7 @@ public class ApplicationConfig {
 	}
 	
 	public String getWxMpAuthorizeRedirectUrl () {
-		return System.getProperty("wx.mp.oauth2.redirect.url", "http://www.dingliantech.com/api/getUserInfo");
+		return System.getProperty("wx.mp.oauth2.redirect.url", "http://www.dingliantech.com/api/getAccessToken");
 	}
 	
 	public String getWxMpAuthorizeRefreshAccessTokenUrl () {
