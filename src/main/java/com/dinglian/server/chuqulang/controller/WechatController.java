@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -21,6 +22,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -90,6 +93,11 @@ public class WechatController {
 
 	@Autowired
 	private WxMpService wxMpService;
+	
+	@RequestMapping("/authorization")
+	public String authorization() {
+		return "authorization";
+	}
 
 	/**
 	 * 验证微信服务号服务器
@@ -121,12 +129,12 @@ public class WechatController {
 
 	@ResponseBody
 	@RequestMapping(value = "/userAuthorization", method = RequestMethod.GET)
-	public ModelAndView userAuthorization() {
+	public ModelAndView userAuthorization(@RequestParam("callbackUrl") String callbackUrl) {
 		logger.info("=====> Start to user authorization <=====");
 		String url = "";
 		try {
 			ApplicationConfig config = ApplicationConfig.getInstance();
-			String redirectUrl = URLEncoder.encode(config.getWxMpAuthorizeRedirectUrl());
+			String redirectUrl = URLEncoder.encode(config.getWxMpAuthorizeRedirectUrl() + "?redirectUrl=" + callbackUrl);
 			url = String.format(config.getWxMpAuthorizeCodeUrl(), config.getWxMpAppId(), redirectUrl);
 			logger.info("url : " + url);
 		} catch (Exception e) {
