@@ -549,7 +549,7 @@ public class WechatController {
 				for (String tagId : tag2Ids) {
 					tags.add(Integer.parseInt(tagId));
 				}
-			} else {
+			} else if (firstLevelTagId != null) {
 				tags.add(firstLevelTagId);
 			}
 			
