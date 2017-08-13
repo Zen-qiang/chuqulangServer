@@ -7,23 +7,17 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.subject.Subject;
-import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,7 +34,6 @@ import com.dinglian.server.chuqulang.comparator.TopicPraiseComparator;
 import com.dinglian.server.chuqulang.exception.ActivityException;
 import com.dinglian.server.chuqulang.exception.AesException;
 import com.dinglian.server.chuqulang.exception.UserException;
-import com.dinglian.server.chuqulang.model.ChatRoom;
 import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.CoteriePicture;
@@ -534,7 +527,9 @@ public class WechatController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/getCoterieList", method = RequestMethod.GET)
-	public Map<String, Object> getCoterieList(@RequestParam(name = "tags", required = false) Integer[] tags,
+	public Map<String, Object> getCoterieList(//@RequestParam(name = "tags", required = false) Integer[] tags,
+			@RequestParam(name = "firstLevelTagId", required = false) Integer firstLevelTagId,
+			@RequestParam(name = "secondLevelTagIds", required = false) String secondLevelTagIds,
 			@RequestParam(name = "pagesize", required = false) Integer pageSize,
 			@RequestParam(name = "start", required = false) Integer startRow) {
 		logger.info("=====> Start to join coterie <=====");
@@ -547,9 +542,20 @@ public class WechatController {
 			if (pageSize == null) {
 				pageSize = ApplicationConfig.getInstance().getDefaultPageSize();
 			}
+			
+			List<Integer> tags = new ArrayList<Integer>();
+			if (StringUtils.isNotBlank(secondLevelTagIds) && secondLevelTagIds.indexOf(",") > 0) {
+				String[] tag2Ids = secondLevelTagIds.split(",");
+				for (String tagId : tag2Ids) {
+					tags.add(Integer.parseInt(tagId));
+				}
+			} else {
+				tags.add(firstLevelTagId);
+			}
+			
 			SearchCriteria searchCriteria = new SearchCriteria();
 			if (tags != null) {
-				searchCriteria.setTags(Arrays.asList(tags));
+				searchCriteria.setTags(tags);
 			}
 			searchCriteria.setStartRow(startRow);
 			searchCriteria.setPageSize(pageSize);
