@@ -32,7 +32,7 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 	@Override
 	public List<Coterie> getCoterieList(SearchCriteria searchCriteria) {
 		String hql = "SELECT distinct c FROM Coterie c LEFT JOIN c.tags tag WHERE 1=1 ";
-		if (searchCriteria.getTags() != null) {
+		if (searchCriteria.getTags() != null && searchCriteria.getTags().size() > 0) {
 			hql += "AND tag.tag.id IN (:tagList) ";
 		}
 		String orderBy = "ORDER BY c.creationDate DESC";
@@ -41,7 +41,7 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 		}
 		hql += orderBy;
 		Query query = getCurrentSession().createQuery(hql);
-		if (searchCriteria.getTags() != null) {
+		if (searchCriteria.getTags() != null && searchCriteria.getTags().size() > 0) {
 			query.setParameterList("tagList", searchCriteria.getTags());
 		}
 		if (searchCriteria.getPageSize() != 0) {
