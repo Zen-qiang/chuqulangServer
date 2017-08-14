@@ -2,7 +2,6 @@ package com.dinglian.server.chuqulang.controller;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;

@@ -1,7 +1,9 @@
 package com.dinglian.server.chuqulang.controller;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -45,7 +47,7 @@ public class ChatController {
 	private ActivityService activityService;
 
 	@Autowired
-	private ChatService ChatService;
+	private ChatService chatService;
 
 	@Autowired
 	private HttpServletResponse response;
@@ -175,12 +177,12 @@ public class ChatController {
 					null);
 			JSONObject responseObj = JSONObject.fromObject(responseStr);
 			if (responseObj.getInt("code") == 200) {
-				ChatRoom chatRoom = ChatService.findChatRoomByRoomId(roomid);
+				ChatRoom chatRoom = chatService.findChatRoomByRoomId(roomid);
 				if (StringUtils.isNotBlank(name)) {
 					chatRoom.setName(name);
 				}
 				chatRoom.setAnnouncement(announcement);
-				ChatService.saveChatRoom(chatRoom);
+				chatService.saveChatRoom(chatRoom);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -207,13 +209,13 @@ public class ChatController {
 			logger.info("=====> Start to toggle chatroom closed <=====");
 			User user = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
 
-			ChatRoom chatRoom = ChatService.findChatRoomByRoomId(roomid);
+			ChatRoom chatRoom = chatService.findChatRoomByRoomId(roomid);
 			if (chatRoom != null && chatRoom.getCreator().getAccid().equalsIgnoreCase(user.getAccid())) {
 				responseStr = NeteaseIMUtil.getInstance().toggleCloseStat(roomid, user.getAccid(), valid);
 				JSONObject responseObj = JSONObject.fromObject(responseStr);
 				if (responseObj.getInt("code") == 200) {
 					chatRoom.setValid(valid);
-					ChatService.saveChatRoom(chatRoom);
+					chatService.saveChatRoom(chatRoom);
 				}
 			}
 		} catch (Exception e) {
@@ -412,6 +414,48 @@ public class ChatController {
 		}
 		logger.info("=====> Delete friends end <=====");
 		return responseStr;
+	}
+	
+	
+	@ResponseBody
+	@RequestMapping(value = "/getChatrooms", method = RequestMethod.GET)
+	public Map<String, Object> getUserChatRooms() {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		String responseStr = "";
+		try {
+			logger.info("=====> Start to get chatrooms <=====");
+			User user = (User) SecurityUtils.getSubject().getSession().getAttribute(User.CURRENT_USER);
+
+			List<ChatRoom> chatRooms = chatService.getUserChatRooms(user.getId());
+			if (chatRooms != null) {
+				List<Map> resultList = new ArrayList<>();
+				for (ChatRoom chatRoom : chatRooms) {
+					responseStr = NeteaseIMUtil.getInstance().getChatroom(chatRoom.getChatRoomId(), true);
+					JSONObject responseObj = JSONObject.fromObject(responseStr);
+					if (responseObj.getInt("code") == 200) {
+						JSONObject roomInfo = responseObj.getJSONObject("chatroom");
+						Map<String, Object> map = new HashMap<String, Object>();
+						map.put("roomid", roomInfo.getInt("roomid"));
+						map.put("valid", roomInfo.getBoolean("valid"));
+						map.put("muted", roomInfo.getBoolean("muted"));
+						map.put("announcement", roomInfo.getString("announcement"));
+						map.put("name", roomInfo.getString("name"));
+						map.put("broadcasturl", roomInfo.getString("broadcasturl"));
+						map.put("onlineusercount", roomInfo.getInt("onlineusercount"));
+						map.put("ext", roomInfo.getString("ext"));
+						map.put("creator", roomInfo.getString("creator"));
+						resultList.add(map);
+					}
+				}
+				resultMap.put("chatrooms", resultList);
+				resultMap.put("code", 200);
+			}
+			logger.info("=====> Get chatrooms end <=====");
+		} catch (Exception e) {
+			e.printStackTrace();
+//			responseStr = e.getMessage();
+		}
+		return resultMap;
 	}
 
 	@ResponseBody

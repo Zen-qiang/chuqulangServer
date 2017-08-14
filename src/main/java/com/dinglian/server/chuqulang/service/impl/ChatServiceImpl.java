@@ -1,5 +1,7 @@
 package com.dinglian.server.chuqulang.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,11 @@ public class ChatServiceImpl implements ChatService {
 	@Override
 	public ChatRoom findChatRoomByRoomId(int roomid) {
 		return chatDao.findChatRoomByRoomId(roomid);
+	}
+
+	@Override
+	public List<ChatRoom> getUserChatRooms(int userId) {
+		return chatDao.getUserChatRooms(userId);
 	}
 
 }

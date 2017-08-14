@@ -22,7 +22,7 @@
 			},
 			success : function(response, status, xhr) {
 				console.log(response.data.openId);
-				window.location.href=redirectUrl + "?openId=" + response.data.openId;
+				window.location.href = redirectUrl + "?openId=" + response.data.openId;
 			},
 			dataType : 'json'
 		});

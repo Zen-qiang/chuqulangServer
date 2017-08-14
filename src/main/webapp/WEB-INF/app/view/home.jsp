@@ -111,19 +111,33 @@
             });
 			
 			$('#getCoterieList').click(function(){
-                $.ajax({
-                    url: 'api/getCoterieList',
-					type : 'GET',
-                    data: {
-                        start : 0,
-                        tags : [9,10],
-                        pagesize : 20
-                    },
-                    success: function(response,status,xhr){
-                        console.log(response);
-                    },
-                    dataType: 'json'
+               X
+            });
+			
+			$('#wxLaunchActivity').click(function(){
+				var obj = {
+						url : $('#pic').val()
+				}
+                var pictures = [];
+                pictures.push(obj.url);
+                
+                $.post("api/launchActivity",{
+                	userId : 1,
+                    isOpen : false,
+                    tags : [7,8,4,9,10],
+                    name : '金桥街舞大赛',
+                    startTime : '2017/05/01',
+                    minCount : 10,
+                    maxCount : 20,
+                    gps : 'gps',
+                    address: 'address',
+                    description : '室内三国杀',
+                    pictures : pictures,
+                    phoneNo : '18270790997'
+                },function(result){
+                	console.log(result);
                 });
+                
             });
 			
 		});
@@ -133,7 +147,33 @@
 <h2>测试页面</h2>
 <P>  The time on the server is ${serverTime}. </P>
 
-<img src="resources/dllogo.svg" onerror="" />
+<!-- <img src="resources/dllogo.svg" onerror="" /> -->
+
+<h2>账号登录：</h2>
+<form action="user/login" method="post">
+	<input type="hidden" value="username" name="type">
+	用户名：<input type="text" name="phoneno" value="18270790997"/><br>
+	密码：<input type="text" name="password" value="xxh131420"/><br>
+	<button type="submit" >登录</button>
+</form>
+
+<h2>我的聊天室：</h2>
+<form action="chat/getChatrooms" method="get">
+	<button type="submit" >我的聊天室</button>
+</form>
+
+<h2>创建聊天话题：</h2>
+<form action="api/createActivityTopic" method="post">
+	userId：<input type="text" name="userId" value="1"/><br>
+	activityId：<input type="text" name="activityId" value="10"/><br>
+	content：<input type="text" name="content" value="TTTTTTTT"/><br>
+	<button type="submit" >创建聊天话题</button>
+</form>
+
+<h2>WX发起活动：</h2>
+pic：<input type="text" name="pic" id="pic"/><br>
+<button id="wxLaunchActivity">WX发起活动</button>
+
 
 <h2>圈子列表</h2>
 <button type="button" id="getCoterieList">圈子列表</button>
@@ -147,14 +187,6 @@
 
 <h2>创建圈子：</h2>
 <button type="button" id="createCoterie">创建圈子</button>
-
-<h2>账号登录：</h2>
-<form action="user/login" method="post">
-	<input type="hidden" value="username" name="type">
-	用户名：<input type="text" name="phoneno" value="18270790997"/><br>
-	密码：<input type="text" name="password" value="xxh131420"/><br>
-	<button type="submit" >登录</button>
-</form>
 
 <h2>获取用户名片：</h2>
 <form action="user/getUserInfo" method="get">
@@ -265,7 +297,8 @@ coterieId : <input type="text" name="coterieId" value=""/><br>
 </form>
 
 <h2>话题点赞</h2>
-<form action="discover/praiseTopic" method="get">
+<form action="api/praiseTopic" method="get">
+userId：<input type="text" name="userId"/><br>
 topicId : <input type="text" name="topicId" value=""/><br>
 	<button type="submit" >话题点赞</button>
 </form>
@@ -319,7 +352,8 @@ pagesize : <input type="text" name="pagesize" value="1"/><br>
 </form>
 
 <h2>评论话题</h2>
-<form action="discover/commentTopic" method="post">
+<form action="api/commentTopic" method="post">
+userId：<input type="text" name="userId"/><br>
 	topicId：<input type="text" name="topicId"/><br>
 	comment：<input type="text" name="comment"/><br>
 	<button type="submit" >评论话题</button>
@@ -366,7 +400,7 @@ pagesize : <input type="text" name="pagesize" value="1"/><br>
 </form>
 
 <h2>获取我的活动列表</h2>
-<form action="activity/getActivityList" method="post">
+<form action="api/getActivityList" method="get">
 category：<input type="text" name="category" value=""/><br>
 status：<input type="text" name="status" value=""/><br>
 orderby：<input type="text" name="orderby" value=""/><br>
