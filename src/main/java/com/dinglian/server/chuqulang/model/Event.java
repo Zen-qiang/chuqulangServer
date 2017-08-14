@@ -57,6 +57,8 @@ public class Event implements Serializable {
 	// 历史活动
 	public static final String DATATYPE_EXPIRE = "3";
 	
+	public static final String ORDER_BY_START_TIME = "startTime";
+	
 	private int id;
 	
 	private Coterie coterie; // 所属圈子

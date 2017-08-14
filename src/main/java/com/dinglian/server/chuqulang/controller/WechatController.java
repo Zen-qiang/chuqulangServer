@@ -32,6 +32,7 @@ import com.dinglian.server.chuqulang.comparator.TopicCommentComparator;
 import com.dinglian.server.chuqulang.comparator.TopicPraiseComparator;
 import com.dinglian.server.chuqulang.exception.ActivityException;
 import com.dinglian.server.chuqulang.exception.AesException;
+import com.dinglian.server.chuqulang.exception.ApplicationServiceException;
 import com.dinglian.server.chuqulang.exception.UserException;
 import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
@@ -526,15 +527,15 @@ public class WechatController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/getCoterieList", method = RequestMethod.GET)
-	public Map<String, Object> getCoterieList(//@RequestParam(name = "tags", required = false) Integer[] tags,
+	public Map<String, Object> getCoterieList(
 			@RequestParam(name = "firstLevelTagId", required = false) Integer firstLevelTagId,
 			@RequestParam(name = "secondLevelTagIds", required = false) String secondLevelTagIds,
+			@RequestParam(name = "start", required = false) Integer startRow,
 			@RequestParam(name = "pagesize", required = false) Integer pageSize,
-			@RequestParam(name = "start", required = false) Integer startRow) {
-		logger.info("=====> Start to join coterie <=====");
+			@RequestParam(name = "keyword", required = false) String keyword) {
+		logger.info("=====> Start to get coterie list <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
-			logger.info("=====> Start to get coterie list <=====");
 			if (startRow == null) {
 				startRow = 0;
 			}
@@ -560,6 +561,9 @@ public class WechatController {
 			searchCriteria.setPageSize(pageSize);
 			// 默认最热排序
 			searchCriteria.setOrderBy(Coterie.TYPE_HOT);
+			if (StringUtils.isNotBlank(keyword)) {
+				searchCriteria.setKeyword(keyword);
+			}
 
 			Map<String, Object> coterieMap = discoverService.getCoterieList(searchCriteria);
 			List<Coterie> coteries = (List<Coterie>) coterieMap.get("resultList");
@@ -580,6 +584,146 @@ public class WechatController {
 
 			ResponseHelper.addResponseSuccessData(responseMap, dataList);
 			logger.info("=====> Get coterie list end <=====");
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		}
+		return responseMap;
+	}
+	
+	/**
+	 * 获取圈子详情
+	 * @param coterieId
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/getCoterieInfo", method = RequestMethod.GET)
+	public Map<String, Object> getCoterieInfo(@RequestParam("userId") int userId, @RequestParam("coterieId") int coterieId) {
+		logger.info("=====> Start to get coterie info <=====");
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			Coterie coterie = discoverService.findCoterieById(coterieId);
+			if (coterie == null) {
+				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_EXIST);
+			}
+			
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("coterieId", coterie.getId());
+			data.put("cover", coterie.getCoteriePicture() != null ? coterie.getCoteriePicture().getUrl() : "");
+			data.put("name", coterie.getName());
+			data.put("description", coterie.getDescription());
+			data.put("membersCnt", coterie.getCoterieGuys().size());
+			data.put("isJoined", coterie.isJoined(userId));
+			
+			ResponseHelper.addResponseSuccessData(responseMap, data);
+			logger.info("=====> Get coterie info end <=====");
+		} catch (ApplicationServiceException e) {
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		}
+		return responseMap;
+	}
+	
+	/**
+	 * 获取话题列表
+	 * @param coterieId
+	 * @param pageSize
+	 * @param startRow
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/getTopicList", method = RequestMethod.GET)
+	public Map<String, Object> getTopicList(@RequestParam("coterieId") int coterieId,
+			@RequestParam(name = "pagesize", required = false) Integer pageSize,
+			@RequestParam(name = "start", required = false) Integer startRow,
+			@RequestParam(name = "dataType", required = false) String dataType) {
+		logger.info("=====> Start to get topic list <=====");
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			if (startRow == null) {
+				startRow = 0;
+			}
+			if (pageSize == null) {
+				pageSize = ApplicationConfig.getInstance().getDefaultPageSize();
+			}
+			
+			SearchCriteria searchCriteria = new SearchCriteria();
+			searchCriteria.setCoterieId(coterieId);
+			searchCriteria.setStartRow(startRow);
+			searchCriteria.setPageSize(pageSize);
+			// 默认活动开始时间排序
+			searchCriteria.setOrderBy(Event.ORDER_BY_START_TIME);
+			searchCriteria.setTopicDataType(Topic.TYPE_ATIVITY);
+			if (dataType.equals(Topic.DATATYPE_HISTROY)) {
+				searchCriteria.setDataType(dataType);
+			}
+			
+			Map<String, Object> topicMap = discoverService.getTopicList(searchCriteria);
+			List<Topic> topics = (List<Topic>) topicMap.get("resultList");
+			
+			List<Map> resultList= new ArrayList<>();
+			if (topics != null) {
+				for (Topic topic : topics) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("topicId", topic.getId());
+					map.put("description", topic.getDescription());
+					map.put("topicCreateTime", topic.getCreationDate());
+					map.put("commentCnt", topic.getComments().size());
+					map.put("praiseCnt", topic.getPraises().size());
+					
+					// 用户相关
+					User topicUser = topic.getCreator();
+					if (topicUser != null) {
+						Map<String, Object> userMap = new HashMap<String, Object>();
+						userMap.put("userId", topicUser.getId());
+						userMap.put("nickName", topicUser.getNickName());
+						userMap.put("picture", topicUser.getPicture());
+						map.put("user", userMap);
+					}
+					
+					// 活动相关
+					Event event = topic.getEvent();
+					if (event != null) {
+						Map<String, Object> eventMap = new HashMap<String, Object>();
+						eventMap.put("activityId", event.getId());
+						List<EventPicture> eventPictures = new ArrayList<EventPicture>(event.getEventPictures());
+						EventPicture eventPicture = null;
+						if (eventPictures != null && eventPictures.size() > 0) {
+							Collections.sort(eventPictures, new EventPictureComparator());
+							eventPicture = eventPictures.get(0);
+						}
+						eventMap.put("cover", eventPicture != null ? eventPicture.getUrl() : "");
+
+						eventMap.put("name", event.getName());
+						eventMap.put("releaseTime", event.getCreationDate());
+						eventMap.put("startTime", event.getStartTime());
+						eventMap.put("status", event.getStatus());
+						eventMap.put("gps", event.getGps());
+						eventMap.put("address", event.getAddress());
+						eventMap.put("isOpen", event.isOpen());
+
+						List<String> tagList = new ArrayList<>();
+						for (EventTag eventTag : event.getTags()) {
+							Tag tag = eventTag.getTag();
+							tagList.add(tag.getName());
+						}
+						eventMap.put("tags", tagList);
+
+						Map<String, Object> numbersMap = new HashMap<String, Object>();
+						numbersMap.put("totalCount", event.getMaxCount());
+						numbersMap.put("currentCount", event.getEventUsers().size());
+						eventMap.put("userCount", numbersMap);
+						
+						map.put("activity", eventMap);
+					}
+					resultList.add(map);
+				}
+			}
+
+			ResponseHelper.addResponseSuccessData(responseMap, resultList);
+			logger.info("=====> Get topic list end <=====");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());

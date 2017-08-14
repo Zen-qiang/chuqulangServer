@@ -24,8 +24,17 @@ public class SearchCriteria {
 	private boolean isAttention;
 
 	private String dataType;
+	private Integer topicDataType;
 
 	private List<Integer> tags;
+
+	public Integer getTopicDataType() {
+		return topicDataType;
+	}
+
+	public void setTopicDataType(Integer topicDataType) {
+		this.topicDataType = topicDataType;
+	}
 
 	public List<Integer> getTags() {
 		return tags;

@@ -111,7 +111,19 @@
             });
 			
 			$('#getCoterieList').click(function(){
-               X
+				$.ajax({
+                    url: 'api/getCoterieList',
+					type : 'GET',
+                    data: {
+                    	//firstLevelTagId : 1,
+                    	//secondLevelTagIds : '10,11'
+                    	keyword : '街舞'
+                    },
+                    success: function(response,status,xhr){
+                        console.log(response);
+                    },
+                    dataType: 'json'
+                });
             });
 			
 			$('#wxLaunchActivity').click(function(){

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.dao.CoterieDao;
 import com.dinglian.server.chuqulang.model.Coterie;
+import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.Topic;
 
 @Repository
@@ -35,6 +36,9 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 		if (searchCriteria.getTags() != null && searchCriteria.getTags().size() > 0) {
 			hql += "AND tag.tag.id IN (:tagList) ";
 		}
+		if (StringUtils.isNotBlank(searchCriteria.getKeyword())) {
+			hql += "AND c.name like :keyword ";
+		}
 		String orderBy = "ORDER BY c.creationDate DESC";
 		if (StringUtils.isNotBlank(searchCriteria.getOrderBy()) && searchCriteria.getOrderBy().equalsIgnoreCase(Coterie.TYPE_HOT)) {
 			orderBy = "ORDER BY c.hot DESC";
@@ -44,6 +48,10 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 		if (searchCriteria.getTags() != null && searchCriteria.getTags().size() > 0) {
 			query.setParameterList("tagList", searchCriteria.getTags());
 		}
+		if (StringUtils.isNotBlank(searchCriteria.getKeyword())) {
+			query.setString("keyword", "%" + searchCriteria.getKeyword() + "%");
+		}
+		
 		if (searchCriteria.getPageSize() != 0) {
 			query.setFirstResult(searchCriteria.getStartRow());
 			query.setMaxResults(searchCriteria.getPageSize());
@@ -62,14 +70,26 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 	@Override
 	public List<Topic> getTopicList(SearchCriteria searchCriteria) {
 		String hql = "FROM Topic WHERE coterie.id = :coterieId ";
+		if (searchCriteria.getTopicDataType() != null) {
+			hql += "AND topicType = :topicType ";
+		}
+		if (StringUtils.isNotBlank(searchCriteria.getDataType())) {
+			if (searchCriteria.getDataType().equals(Topic.DATATYPE_HISTROY)) {
+				hql += "AND event.status = '" + Event.STATUS_OVER + "' ";
+			}
+		}
 		String orderBy = "ORDER BY creationDate DESC ";
 		if (StringUtils.isNotBlank(searchCriteria.getOrderBy())) {
-			// 时间顺序倒序
-			// 热门顺序倒序
+			if (searchCriteria.getOrderBy().equals(Event.ORDER_BY_START_TIME)) {
+				orderBy = "ORDER BY event.startTime ";
+			}
 		}
 		hql += orderBy;
 		Query query = getCurrentSession().createQuery(hql);
 		query.setInteger("coterieId", searchCriteria.getCoterieId());
+		if (searchCriteria.getTopicDataType() != null) {
+			query.setInteger("topicType", searchCriteria.getTopicDataType());
+		}
 		if (searchCriteria.getPageSize() != 0) {
 			query.setFirstResult(searchCriteria.getStartRow());
 			query.setMaxResults(searchCriteria.getPageSize());

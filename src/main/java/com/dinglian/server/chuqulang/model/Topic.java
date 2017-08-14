@@ -34,6 +34,8 @@ public class Topic implements Serializable {
 	public static final int TYPE_VIDEO = 2;
 	public static final int TYPE_ATIVITY = 3;
 	
+	public static final String DATATYPE_HISTROY = "histroy";
+	
 	private int id;
 	
 	private Coterie coterie;
