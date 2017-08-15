@@ -15,6 +15,10 @@ public class Tag implements Serializable {
 	
 	public static final String TYPE_FIRST_LEVEL = "FIRST_LEVEL";
 	public static final String TYPE_SECOND_LEVEL = "SECOND_LEVEL";
+	
+	public static final String TAG_STREET_DANCE = "街舞";
+	public static final String TAG_BOARD_GAME = "桌游";
+	public static final String TAG_OTHER = "其他";
 
 	private int id;
 	

@@ -3,6 +3,7 @@ package com.dinglian.server.chuqulang.controller;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -835,12 +836,28 @@ public class WechatController {
      */
     @ResponseBody
 	@RequestMapping(value = "/getActivityType")
-	public Map<String, Object> getActivityType() {
+	public Map<String, Object> getActivityType(@RequestParam(name = "fixed", required = false) Boolean fixed) {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try{
 			logger.info("=====> Start to get activity type <=====");
 			
 			List<Tag> firstLevelTags = activityService.getTags(Tag.TYPE_FIRST_LEVEL);
+			
+			if (fixed != null && fixed) {
+				Collections.sort(firstLevelTags, new Comparator<Tag>() {
+					@Override
+					public int compare(Tag o1, Tag o2) {
+						if (o1.getName().equalsIgnoreCase(Tag.TAG_STREET_DANCE)) {
+							return -1;
+						} else if (o1.getName().equalsIgnoreCase(Tag.TAG_STREET_DANCE)) {
+							return 0;
+						} else {
+							return 1;
+						}
+					}
+				});
+			}
+			
 			List<Map> resultList = new ArrayList<Map>();
 			Map<String, Object> map = null;
 			if (firstLevelTags != null) {
