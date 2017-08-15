@@ -418,7 +418,7 @@ public class WechatController {
 	@ResponseBody
 	@RequestMapping(value = "/createCoterie", method = RequestMethod.POST)
 	public Map<String, Object> createCoterie(@RequestParam("userId") int userId, @RequestParam("name") String name,
-			@RequestParam("tags") int[] tags, @RequestParam(name = "description", required = false) String description,
+			@RequestParam("tags") String tags, @RequestParam(name = "description", required = false) String description,
 			@RequestParam(name = "picture", required = false) String picture) {
 		logger.info("=====> Start to create coterie <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -434,15 +434,27 @@ public class WechatController {
 			coterie.setCreationDate(new Date());
 			coterie.setCreator(user);
 			coterie.setHot(0);
+			
+			if (StringUtils.isNotBlank(tags) && tags.indexOf(",") > 0) {
+				String[] tagsSplit = tags.split(",");
+				for (int j = 1; j <= tagsSplit.length; j++) {
+					Tag tag = activityService.findTagById(Integer.parseInt(tagsSplit[j - 1]));
+					if (tag != null) {
+						List<Tag> secondLevelTags = activityService.getSecondLevelTags(tag.getId());
+						CoterieTag coterieTag = new CoterieTag(coterie, tag, secondLevelTags.size() > 0 ? -1 : j);
+						coterie.getTags().add(coterieTag);
+					}
+				}
+			}
 
-			for (int i = 1; i <= tags.length; i++) {
+			/*for (int i = 1; i <= tags.length; i++) {
 				Tag tag = activityService.findTagById(tags[i - 1]);
 				if (tag != null) {
 					List<Tag> secondLevelTags = activityService.getSecondLevelTags(tag.getId());
 					CoterieTag coterieTag = new CoterieTag(coterie, tag, secondLevelTags.size() > 0 ? -i : i);
 					coterie.getTags().add(coterieTag);
 				}
-			}
+			}*/
 
 			coterie.getCoterieGuys().add(new CoterieGuy(coterie, 1, user, new Date(), true, true));
 
@@ -935,7 +947,7 @@ public class WechatController {
     @RequestMapping(value = "/launchActivity", method = RequestMethod.POST)
     public Map<String, Object> launchActivity(
     		@RequestParam("userId") int userId,
-            @RequestParam("tags") int[] tags,
+            @RequestParam("tags") String tags,
             @RequestParam("name") String name,
             @RequestParam(name = "startTime",required = false) Date startTime,
             @RequestParam("minCount") int minCount,
@@ -973,14 +985,26 @@ public class WechatController {
 				event.setPassword(password);
 			}
             
-            for (int i = 1; i <= tags.length; i++) {
+            if (StringUtils.isNotBlank(tags) && tags.indexOf(",") > 0) {
+				String[] tagsSplit = tags.split(",");
+				for (int j = 1; j <= tagsSplit.length; j++) {
+					Tag tag = activityService.findTagById(Integer.parseInt(tagsSplit[j - 1]));
+					if (tag != null) {
+						List<Tag> secondLevelTags = activityService.getSecondLevelTags(tag.getId());
+	            		EventTag eventTag = new EventTag(event, tag, secondLevelTags.size() > 0 ? -1 : j);
+	            		event.getTags().add(eventTag);
+					}
+				}
+			}
+            
+            /*for (int i = 1; i <= tags.length; i++) {
             	Tag tag = activityService.findTagById(tags[i - 1]);
             	if (tag != null) {
             		List<Tag> secondLevelTags = activityService.getSecondLevelTags(tag.getId());
             		EventTag eventTag = new EventTag(event, tag, secondLevelTags.size() > 0 ? -1 : i);
             		event.getTags().add(eventTag);
 				}
-			}
+			}*/
             
             event.setName(name);
             
