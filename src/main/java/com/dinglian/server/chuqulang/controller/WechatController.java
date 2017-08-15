@@ -1171,6 +1171,15 @@ public class WechatController {
 					numbersMap.put("currentCount", event.getEventUsers().size());
 					result.put("userCount", numbersMap);
 					
+					// 圈子
+					Coterie coterie = event.getCoterie();
+					if (coterie != null) {
+						Map<String, Object> coterieMap = new HashMap<String, Object>();
+						coterieMap.put("id", coterie.getId());
+						coterieMap.put("name", coterie.getName());
+						result.put("coterie", coterieMap);
+					}
+					
 					resultList.add(result);
 				}
 			}
