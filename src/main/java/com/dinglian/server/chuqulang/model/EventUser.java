@@ -36,6 +36,8 @@ public class EventUser implements Serializable{
 	private String phoneNo;
 	
 	private Integer gender;//1时是男性，值为2时是女性，值为0时是未知
+	
+	private User inviter;// 邀请者
 
 	@GeneratedValue
 	@Id
@@ -113,6 +115,16 @@ public class EventUser implements Serializable{
 
 	public void setGender(Integer gender) {
 		this.gender = gender;
+	}
+	
+	@JoinColumn(name = "fk_inviter_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	public User getInviter() {
+		return inviter;
+	}
+
+	public void setInviter(User inviter) {
+		this.inviter = inviter;
 	}
 
 	public EventUser() {

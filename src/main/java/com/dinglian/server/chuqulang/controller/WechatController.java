@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -210,9 +211,8 @@ public class WechatController {
 	}
 	
 	/**
-	 * 
-	 * @param code
-	 * @param state
+	 * 获取用户信息，自动注册
+	 * @param openId
 	 * @return
 	 */
 	@ResponseBody
@@ -223,7 +223,38 @@ public class WechatController {
 		try {
 			User user = userService.getUserByOpenId(openId);
 			if (user == null) {
-				throw new UserException(UserException.NOT_REGISTER);
+//				throw new UserException(UserException.NOT_REGISTER);
+				WxOAuth2AccessToken wxOAuth2AccessToken = wxMpService.findWxOAuth2AccessTokenByOpenId(openId);
+				if (wxOAuth2AccessToken == null) {
+					throw new ApplicationServiceException(ApplicationServiceException.ACCESS_TOKEN_NOT_EXIST);
+				}
+				String responseStr = WxRequestHelper.getWxMpUserInfo(wxOAuth2AccessToken);
+
+				if (responseStr.indexOf("errcode") != -1) {
+					logger.warn(responseStr);
+					JSONObject obj = JSONObject.fromObject(responseStr);
+					ResponseHelper.addResponseFailData(responseMap, obj.getInt("errcode"), obj.getString("errmsg"));
+					return responseMap;
+				} else {
+					logger.info(responseStr);
+					JSONObject obj = JSONObject.fromObject(responseStr);
+					String headimgurl = obj.getString("headimgurl");
+					String sex = obj.getString("sex");
+					String nickName = obj.getString("nickname");
+
+					user = new User();
+					user.setGender(Integer.parseInt(sex));
+					user.setNickName(nickName);
+					user.setOpenId(openId);
+
+					if (StringUtils.isNotBlank(headimgurl)) {
+						UUID uuid = UUID.randomUUID();
+						String folder = uuid.toString().replaceAll("-", "");
+						user.setPicture(FileUploadHelper.saveNetProfilePicture(folder, headimgurl));
+					}
+
+					userService.register(user);
+				}
 			}
 
 			Map<String, Object> userMap = new HashMap<String, Object>();
@@ -245,6 +276,67 @@ public class WechatController {
 		return responseMap;
 	}
 
+	/**
+	 * 绑定手机号
+	 * @param userId
+	 * @param phoneNo
+	 * @param verifyNo
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/bindPhoneNo", method = RequestMethod.GET)
+	public Map<String, Object> bindPhoneNo(@RequestParam("userId") int userId, @RequestParam("phoneNo") String phoneNo, 
+			@RequestParam("verifyNo") String verifyNo) {
+		logger.info("=====> Start to get user <=====");
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			User user = userService.findUserById(userId);
+			if (user == null) {
+				throw new ApplicationServiceException(ApplicationServiceException.USER_NOT_EXIST);
+			}
+			
+			if (!isMobile(phoneNo)) {
+				throw new ApplicationServiceException(ApplicationServiceException.PHONE_NO_INVALID);
+			}
+			
+			// 检查手机号码是否注册
+			SearchCriteria searchCriteria = new SearchCriteria();
+			searchCriteria.setPhoneNo(phoneNo);
+			User existUser = userService.getUser(searchCriteria);
+			if (existUser != null) {
+				throw new ApplicationServiceException(ApplicationServiceException.PHONE_REGISTERED);
+			}
+
+			VerifyNo existVerifyNo = userService.getVerifyNo(phoneNo, VerifyNo.VERIFY_NO_TYPE_REGISTER);
+			if (existVerifyNo == null) {
+				throw new ApplicationServiceException(ApplicationServiceException.VERIFY_CODE_NOT_EXIST);
+			}
+			
+			Date currentTime = new Date();
+			Date createTime = existVerifyNo.getCreationTime();
+			long difference = currentTime.getTime() - createTime.getTime();
+
+			if (difference > (10 * 60 * 1000)) {
+				throw new ApplicationServiceException(ApplicationServiceException.VERIFY_CODE_EXPIRE);
+			}
+			if (!verifyNo.equalsIgnoreCase(existVerifyNo.getVerifyNo())) {
+				throw new ApplicationServiceException(ApplicationServiceException.VERIFY_CODE_INVALID);
+			}
+
+			user.setPhoneNo(phoneNo);
+			userService.saveOrUpdateUser(user);
+			
+			ResponseHelper.addResponseSuccessData(responseMap, null);
+			logger.info("=====> Get user end <=====");
+		} catch (ApplicationServiceException e) {
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		}
+		return responseMap;
+	}
+	
 	/**
 	 * 刷新网页授权AccessToken
 	 * 
@@ -299,7 +391,7 @@ public class WechatController {
 	 * @param birthday
 	 * @return
 	 */
-	@ResponseBody
+	/*@ResponseBody
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
 	public Map<String, Object> register(@RequestParam("openId") String openId, @RequestParam("phoneNo") String phoneNo,
 			@RequestParam("verifyNo") String verifyNo) {
@@ -357,7 +449,6 @@ public class WechatController {
 				user.setPhoneNo(phoneNo);
 				user.setGender(Integer.parseInt(sex));
 				user.setNickName(nickName);
-				// user.setBirthday(birthday);
 				user.setOpenId(openId);
 
 				if (StringUtils.isNotBlank(headimgurl)) {
@@ -378,21 +469,6 @@ public class WechatController {
 				userMap.put("birthday", user.getBirthday());
 
 				ResponseHelper.addResponseSuccessData(responseMap, userMap);
-
-				// 注册云信ID
-				String userProfilePicturePath = ApplicationConfig.getInstance().getUserProfilePicturePath();
-				String response = NeteaseIMUtil.getInstance().create(user.getPhoneNo(), user.getPhoneNo(), "",
-						String.format(userProfilePicturePath, user.getPhoneNo()), "");
-				JSONObject responseObj = JSONObject.fromObject(response);
-				if (responseObj.getInt("code") == 200) {
-					JSONObject info = responseObj.getJSONObject("info");
-					user.setAccid(info.getString("accid"));
-					user.setToken(info.getString("token"));
-					userService.saveOrUpdateUser(user);
-				} else {
-					ResponseHelper.addResponseFailData(responseMap, responseObj.getInt("code"),
-							responseObj.getString("desc"));
-				}
 			}
 			logger.info("=====> Register user end <=====");
 		} catch (UserException e) {
@@ -402,7 +478,7 @@ public class WechatController {
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
 		}
 		return responseMap;
-	}
+	}*/
 
 	/**
 	 * 创建圈子
@@ -970,6 +1046,7 @@ public class WechatController {
 			}
         	
             Event event = new Event();
+            event.setAllowSignUp(true);
             
             if (coterieId != null) {
             	Coterie coterie = discoverService.findCoterieById(coterieId);
@@ -1116,8 +1193,8 @@ public class WechatController {
     @ResponseBody
 	@RequestMapping(value = "/getActivityList", method = RequestMethod.GET)
 	public Map<String, Object> getActivityList(
-			@RequestParam(name = "start", required = false) Integer startRow,
 			@RequestParam(name = "keyword", required = false) String keyword,
+			@RequestParam(name = "start", required = false) Integer startRow,
 			@RequestParam(name = "pagesize", required = false) Integer pageSize) {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
@@ -1149,26 +1226,35 @@ public class WechatController {
 						Collections.sort(eventPictures, new EventPictureComparator());
 						eventPicture = eventPictures.get(0);
 					}
+					// 封面
 					result.put("cover", eventPicture != null ? eventPicture.getUrl() : "");
-					
+					// 活动名称
 					result.put("name", event.getName());
-					result.put("releaseTime", event.getCreationDate());
+//					result.put("releaseTime", event.getCreationDate());
+					// 开始时间
 					result.put("startTime", event.getStartTime());
+					// 状态
 					result.put("status", event.getStatus());
+					// 地址定位
 					result.put("gps", event.getGps());
 					result.put("address", event.getAddress());
-					result.put("isOpen", event.isOpen());
+//					result.put("isOpen", event.isOpen());
+					// 费用类型
+					result.put("charge", event.getCharge());
 					
 					List<String> tagList = new ArrayList<>();
 					for (EventTag eventTag : event.getTags()) {
 						Tag tag = eventTag.getTag();
 						tagList.add(tag.getName());
 					}
+					// 标签
 					result.put("tags", tagList);
 					
 					Map<String, Object> numbersMap = new HashMap<String, Object>();
-					numbersMap.put("totalCount", event.getMaxCount());
+					numbersMap.put("maxCount", event.getMaxCount());
+					numbersMap.put("minCount", event.getMinCount());
 					numbersMap.put("currentCount", event.getEventUsers().size());
+					// 人数情况
 					result.put("userCount", numbersMap);
 					
 					// 圈子
@@ -1202,14 +1288,14 @@ public class WechatController {
      */
     @ResponseBody
 	@RequestMapping(value = "/getActivityInfo", method = RequestMethod.GET)
-	public Map<String, Object> getActivityInfo(@RequestParam(name = "activityId") int activityId) {
+	public Map<String, Object> getActivityInfo(@RequestParam(name = "userId") int userId, @RequestParam(name = "activityId") int activityId) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
 			logger.info("=====> Start to get activity info <=====");
 			
 			Event event = activityService.findEventById(activityId);
 			if (event == null) {
-				throw new ActivityException(ActivityException.NOT_EXISTING);
+				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_EXIST);
 			}
 			Map<String, Object> result = new HashMap<String, Object>();
 			result.put("activityId", activityId);
@@ -1220,7 +1306,27 @@ public class WechatController {
 			result.put("address", event.getAddress());
 			result.put("isOpen", event.isOpen());
 			result.put("description", event.getDescription());
-			result.put("topicId", event.getActivityTopic().getId());
+			result.put("charge", event.getCharge());
+			result.put("isCreator", event.isCreator(userId));
+			result.put("allowSignUp", event.isAllowSignUp());
+			
+			// 活动留言
+			Topic topic = event.getActivityTopic();
+			if (topic != null) {
+				Map<String, Object> topicMap = new HashMap<String, Object>();
+				topicMap.put("topicId", topic.getId());
+				
+				List<TopicComment> comments = new ArrayList<TopicComment>(topic.getComments());
+				Collections.sort(comments, new TopicCommentComparator());
+				topicMap.put("commentCount", comments.size());
+				
+				TopicComment lastComment = comments.get(0);
+				if (lastComment != null) {
+					topicMap.put("lastComment", lastComment.getContent());
+					topicMap.put("lastCommentTime", lastComment.getCreationDate());
+				}
+				result.put("topic", topicMap);
+			}
 			
 			// 活动图片
 			List<String> pictureList = new ArrayList<String>();
@@ -1238,6 +1344,7 @@ public class WechatController {
 				organizerMap.put("userId", organizer.getId());
 				organizerMap.put("nickName", organizer.getNickName());
 				organizerMap.put("picture", organizer.getPicture());
+				organizerMap.put("phoneNo", organizer.getPhoneNo());
 				result.put("organizer", organizerMap);
 			}
 			
@@ -1268,7 +1375,8 @@ public class WechatController {
 			result.put("activityMembers", eventUserList);
 			
 			Map<String, Object> numbersMap = new HashMap<String, Object>();
-			numbersMap.put("totalCount", event.getMaxCount());
+			numbersMap.put("maxCount", event.getMaxCount());
+			numbersMap.put("minCount", event.getMinCount());
 			numbersMap.put("currentCount", eventUsers.size());
 			result.put("userCount", numbersMap);
 			
@@ -1283,6 +1391,87 @@ public class WechatController {
 
 		return resultMap;
 	}
+    
+    /**
+     * 修改活动信息
+     * @param activityId
+     * @param minCount
+     * @param maxCount
+     * @param allowSignUp
+     * @return
+     */
+    @ResponseBody
+   	@RequestMapping(value = "/updateActivityInfo", method = RequestMethod.POST)
+   	public Map<String, Object> updateActivityInfo(@RequestParam("activityId") int activityId, 
+   			@RequestParam(name = "minCount", required = false) Integer minCount, 
+   			@RequestParam(name = "maxCount", required = false) Integer maxCount,
+   			@RequestParam(name = "description", required = false) String description,
+   			@RequestParam(name = "allowSignUp", required = false) Boolean allowSignUp) {
+   		Map<String, Object> resultMap = new HashMap<String, Object>();
+   		try {
+   			logger.info("=====> Start to update activity info <=====");
+   			
+   			Event event = activityService.findEventById(activityId);
+   			if (event == null) {
+   				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_EXIST);
+   			}
+   			if (minCount != null) {
+   				event.setMinCount(minCount);
+			}
+   			if (maxCount != null) {
+   				event.setMaxCount(maxCount);
+			}
+   			if (allowSignUp != null) {
+   				event.setAllowSignUp(allowSignUp);
+			}
+   			if (description != null) {
+				event.setDescription(description);
+			}
+   			activityService.saveEvent(event);
+   			
+   			logger.info("=====> Update activity info end <=====");
+   			ResponseHelper.addResponseSuccessData(resultMap, null);
+   		} catch (ApplicationServiceException e) {
+   			ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+   		} catch (Exception e) {
+   			e.printStackTrace();
+   			ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+   		}
+
+   		return resultMap;
+   	}
+    
+    /**
+     * 关闭活动
+     * @param activityId
+     * @return
+     */
+    @ResponseBody
+   	@RequestMapping(value = "/closeActivity", method = RequestMethod.GET)
+   	public Map<String, Object> closeActivity(@RequestParam("activityId") int activityId) {
+   		Map<String, Object> resultMap = new HashMap<String, Object>();
+   		try {
+   			logger.info("=====> Start to close activity <=====");
+   			
+   			Event event = activityService.findEventById(activityId);
+   			if (event == null) {
+   				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_EXIST);
+   			}
+   			event.setStatus(Event.STATUS_OVER);
+   			event.setAllowSignUp(false);
+   			activityService.saveEvent(event);
+   			
+   			logger.info("=====> Close activity end <=====");
+   			ResponseHelper.addResponseSuccessData(resultMap, null);
+   		} catch (ApplicationServiceException e) {
+   			ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+   		} catch (Exception e) {
+   			e.printStackTrace();
+   			ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+   		}
+
+   		return resultMap;
+   	}
     
     @ResponseBody
 	@RequestMapping(value = "/getMyActivityList", method = RequestMethod.GET)
@@ -1630,7 +1819,7 @@ public class WechatController {
      */
     @ResponseBody
     @RequestMapping(value = "/signUp", method = RequestMethod.POST)
-    public Map<String, Object> signUp(@RequestParam(name = "eventId") int eventId,
+    public Map<String, Object> signUp(@RequestParam(name = "activityId") int activityId,
     		@RequestParam("userId") int userId,
     		@RequestParam(name="realName",required = false) String realName,
     		@RequestParam(name="phoneNo",required = false) String phoneNo,
@@ -1643,31 +1832,33 @@ public class WechatController {
         	logger.info("=====> Start to event signup <=====");
         	//获取当前用户报名信息
         	User user = userService.findUserById(userId);
-            Event event = activityService.getEventById(eventId);
+            Event event = activityService.getEventById(activityId);
             if (event == null) {
-            	throw new NullPointerException("活动ID：" + eventId + " , 活动不存在。");
+            	throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_EXIST);
 			}
             
             if (!event.isOpen() && !password.equals(event.getPassword())) {
-				throw new RuntimeException("请输入正确的密码");
+				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_INCORRECT_CREDENTIALS);
+			}
+            
+            if (!event.isAllowSignUp()) {
+            	throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_DONT_ALLOW_SINGNUP);
 			}
             
             //检查活动是否满员，满员返回错误信息，否则继续
             Set<EventUser> eventUsers = event.getEventUsers();
             if (eventUsers.size() == event.getMaxCount()) {
-        		ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "活动成员已满");
-                return resultMap;
+            	throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_USER_FULL);
 			}
             if (friends != null && (event.getMaxCount() - eventUsers.size()) <= (friends.length + 1)) {
-        		throw new RuntimeException("活动剩余位置不足");
+        		throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_SPACE_INSUFFICIENT);
 			}
             //检查重复报名
             boolean haveSignUp = event.haveSignUp(user.getId());
             if (haveSignUp){
-                ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, "您已经报名");
-                return resultMap;
+                throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_HAS_SIGNUPED);
             }
-            int maxOrderNo = event.getEventUserMaxOrderNo()+1;
+            int maxOrderNo = event.getEventUserMaxOrderNo() + 1;
             EventUser fristeventUser = new EventUser(event, user, maxOrderNo++);
             fristeventUser.setRealName(realName);
             fristeventUser.setPhoneNo(phoneNo);
@@ -1684,33 +1875,138 @@ public class WechatController {
 						friend.setCreationDate(new Date());
 						friend.setEvent(event);
 						friend.setOrderNo(maxOrderNo++);
-						
+						friend.setInviter(user);
 						event.getEventUsers().add(friend);
 					}
 				}
 			}
             
+            // 关闭允许报名
+            if (event.getEventUsers().size() == event.getMaxCount()) {
+				event.setAllowSignUp(false);
+			}
+            
             activityService.saveEvent(event);
             activityService.refresh(event);
-            List<Map> resultList = new ArrayList<Map>();
-            for (EventUser eu : event.getEventUsers()) {
+            
+            Map<String, Object> result = new HashMap<String, Object>();
+            result.put("activityId", activityId);
+            
+            List<Map> activityMembers = new ArrayList<Map>();
+            List<EventUser> list = new ArrayList<>(event.getEventUsers());
+            Collections.sort(list, new Comparator<EventUser>() {
+				@Override
+				public int compare(EventUser o1, EventUser o2) {
+					return o2.getOrderNo() - o1.getOrderNo();
+				}
+			});
+            
+            for (EventUser eu : list) {
             	if (eu.getUser() != null) {
-            		Map<String, Object> result = new HashMap<String, Object>();
-            		result.put("userId", eu.getUser().getId());
-            		result.put("nickName", eu.getUser().getNickName());
-            		result.put("picture", eu.getUser().getPicture());
-            		resultList.add(result);
+            		Map<String, Object> memberMap = new HashMap<String, Object>();
+            		memberMap.put("userId", eu.getUser().getId());
+            		memberMap.put("nickName", eu.getUser().getNickName());
+            		memberMap.put("picture", eu.getUser().getPicture());
+            		activityMembers.add(memberMap);
 				}
 			}
-            Map<String, Object> result = new HashMap<String, Object>();
-            result.put("activityMembers", resultList);
+            result.put("activityMembers", activityMembers);
+            
+            Coterie coterie = event.getCoterie();
+            if (coterie != null) {
+            	Map<String, Object> coterieMap = new HashMap<String, Object>();
+            	coterieMap.put("id", coterie.getId());
+            	coterieMap.put("cover", coterie.getCoteriePicture() != null ? coterie.getCoteriePicture().getUrl() : "");
+            	coterieMap.put("name", coterie.getName());
+            	result.put("coterie", coterieMap);
+			}
+            
             ResponseHelper.addResponseSuccessData(resultMap, result);
             logger.info("=====> Event signup end <=====");
+        } catch (ApplicationServiceException e) {
+        	ResponseHelper.addResponseFailData(resultMap, e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             ResponseHelper.addResponseFailData(resultMap, e.getMessage());
         }
+        return resultMap;
+    }
+    
+    /**
+     * 获取活动成员信息
+     * @param activityId
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/getActivityMembers", method = RequestMethod.GET)
+    public Map<String, Object> getActivityMembers(@RequestParam(name = "userId") int userId, @RequestParam(name = "activityId") int activityId) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        try {
+        	logger.info("=====> Start to get activity members <=====");
+        	//获取当前用户报名信息
+            Event event = activityService.getEventById(activityId);
+            if (event == null) {
+            	throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_EXIST);
+			}
+            
+            boolean isCreator = event.isCreator(userId);
+            // 所有随从人员
+            Map<String, List<EventUser>> retinueMap = new HashMap<String, List<EventUser>>();
+            for (EventUser eu : event.getEventUsers()) {
+            	User inviter = eu.getInviter();
+            	if (inviter != null) {
+            		List<EventUser> retinueList =  retinueMap.get(String.valueOf(inviter.getId()));
+            		if (retinueList != null) {
+            			retinueList.add(eu);
+					} else {
+						retinueList = new ArrayList<EventUser>();
+						retinueList.add(eu);
+						retinueMap.put(String.valueOf(inviter.getId()), retinueList);
+					}
+				}
+            }
+            
+            List<EventUser> userList =  new ArrayList<EventUser>(event.getEventUsers());
+            Collections.sort(userList, new EventUserComparator());
+            
+            List<Map> resultList = new ArrayList<Map>();
+            for (EventUser eventUser : userList) {
+            	User user = eventUser.getUser();
+				if (user != null) {
+					Map<String, Object> data = new HashMap<String, Object>();
+					data.put("userId", user.getId());
+					data.put("gender", eventUser.getGender());
+					data.put("signUpTime", eventUser.getCreationDate());
+					data.put("name", eventUser.getRealName());
+					data.put("picture", user.getPicture());
+					if (isCreator) {
+						data.put("phoneNo", eventUser.getPhoneNo());
+					}
+					
+					List<EventUser> retinueList = retinueMap.get(String.valueOf(user.getId()));
+					if (retinueList != null) {
+						List<Map> list = new ArrayList<Map>();
+						for (EventUser eu2 : retinueList) {
+							Map<String, Object> retinue = new HashMap<String, Object>();
+							retinue.put("name", eu2.getRealName());
+							retinue.put("gender", eu2.getGender());
+							list.add(retinue);
+						}
+						data.put("retinues", list);
+					}
+					
+					resultList.add(data);
+				}
+			}
 
+            ResponseHelper.addResponseSuccessData(resultMap, resultList);
+            logger.info("=====> Event signup end <=====");
+        } catch (ApplicationServiceException e) {
+        	ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+        }
         return resultMap;
     }
     

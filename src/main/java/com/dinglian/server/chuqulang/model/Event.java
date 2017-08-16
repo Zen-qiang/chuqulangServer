@@ -94,6 +94,8 @@ public class Event implements Serializable {
 	private Double cost; //活动费用
 
 	private String limiter; // 限定条件
+	
+	private boolean allowSignUp; // 允许报名
 
 	private ChatRoom chatRoom; // 活动聊天室
 
@@ -287,6 +289,15 @@ public class Event implements Serializable {
 	public void setLimiter(String limiter) {
 		this.limiter = limiter;
 	}
+	
+	@Column(name = "allow_sign_up")
+	public boolean isAllowSignUp() {
+		return allowSignUp;
+	}
+	
+	public void setAllowSignUp(boolean allowSignUp) {
+		this.allowSignUp = allowSignUp;
+	}
 
 	@JoinColumn(name = "fk_chatroom_id", unique = true)
 	@OneToOne(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
@@ -349,6 +360,14 @@ public class Event implements Serializable {
 			}
 		}
 		return orderNo;
+	}
+	
+	@Transient
+	public boolean isCreator(int userId) {
+		if (userId == this.getCreator().getId()) {
+			return true;
+		}
+		return false;
 	}
 
 }
