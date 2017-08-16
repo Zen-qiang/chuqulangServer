@@ -95,12 +95,13 @@
 			
 			$('#createCoterie').click(function(){
                 $.ajax({
-                    url: 'discover/createCoterie',
+                    url: 'api/createCoterie',
 					type : 'POST',
                     data: {
-                        description : 'admin',
-                        tags : [7,8,4,9,10],
-                        name : '金桥广场舞',
+                    	userId : 1,
+                        description : 'desc',
+                        tags : '7,8,4,9,10',
+                        name : '金桥街舞',
                         picture : ''
                     },
                     success: function(response,status,xhr){
@@ -112,12 +113,12 @@
 			
 			$('#getCoterieList').click(function(){
 				$.ajax({
-                    url: 'api/getCoterieList',
-					type : 'GET',
+                    url: 'discover/getCoterieList',
+					type : 'post',
                     data: {
                     	//firstLevelTagId : 1,
                     	//secondLevelTagIds : '10,11'
-                    	keyword : '街舞'
+                    	//keyword : '街舞'
                     },
                     success: function(response,status,xhr){
                         console.log(response);
@@ -136,7 +137,7 @@
                 $.post("api/launchActivity",{
                 	userId : 1,
                     isOpen : false,
-                    tags : [7,8,4,9,10],
+                    tags : '7,8,4,9,10',
                     name : '金桥街舞大赛',
                     startTime : '2017/05/01',
                     minCount : 10,
@@ -169,6 +170,9 @@
 	<button type="submit" >登录</button>
 </form>
 
+<h2>圈子列表</h2>
+<button type="button" id="getCoterieList">圈子列表</button>
+
 <h2>我的聊天室：</h2>
 <form action="chat/getChatrooms" method="get">
 	<button type="submit" >我的聊天室</button>
@@ -186,9 +190,6 @@
 pic：<input type="text" name="pic" id="pic"/><br>
 <button id="wxLaunchActivity">WX发起活动</button>
 
-
-<h2>圈子列表</h2>
-<button type="button" id="getCoterieList">圈子列表</button>
 
 <h2>我的圈子：</h2>
 <form action="api/getMyCoteries" method="get">
