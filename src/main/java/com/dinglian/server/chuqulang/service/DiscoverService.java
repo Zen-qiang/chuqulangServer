@@ -33,4 +33,6 @@ public interface DiscoverService {
 
 	List<Coterie> getMyCoteries(String dataType, int userId);
 
+	Coterie getLastCoterie(int userId);
+
 }

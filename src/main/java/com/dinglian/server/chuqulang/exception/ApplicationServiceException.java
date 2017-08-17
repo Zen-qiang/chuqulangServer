@@ -23,6 +23,7 @@ public class ApplicationServiceException extends RuntimeException {
 	public final static int ACTIVITY_DONT_ALLOW_SINGNUP = 2004;
 	public final static int ACTIVITY_SPACE_INSUFFICIENT = 2005;
 	public final static int ACTIVITY_HAS_SIGNUPED = 2006;
+	public final static int ACTIVITY_NOT_CREATOR = 2007;
 	
 	public final static int ACTIVITY_TOPIC_EXIST = 2101;
 	public final static int ACTIVITY_TOPIC_NOT_EXIST = 2102;
@@ -64,10 +65,12 @@ public class ApplicationServiceException extends RuntimeException {
 			return "当前活动剩余报名位置不足";
 		case ACTIVITY_HAS_SIGNUPED:
 			return "您已经报名";
+		case ACTIVITY_NOT_CREATOR:
+			return "您不是活动创建者";
 		case ACTIVITY_TOPIC_EXIST:
-			return "活动群聊已存在";
+			return "活动留言已存在";
 		case ACTIVITY_TOPIC_NOT_EXIST:
-			return "活动群聊不存在";
+			return "活动留言不存在";
 		case COTERIE_NOT_EXIST:
 			return "圈子不存在";
 		case ACCESS_TOKEN_NOT_EXIST:

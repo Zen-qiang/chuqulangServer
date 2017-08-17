@@ -1,5 +1,6 @@
 package com.dinglian.server.chuqulang.controller;
 
+import java.io.File;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,10 +56,7 @@ import com.dinglian.server.chuqulang.service.ActivityService;
 import com.dinglian.server.chuqulang.service.DiscoverService;
 import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.service.WxMpService;
-import com.dinglian.server.chuqulang.utils.DateUtils;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
-import com.dinglian.server.chuqulang.utils.NeteaseIMUtil;
-import com.dinglian.server.chuqulang.utils.RequestHelper;
 import com.dinglian.server.chuqulang.utils.ResponseHelper;
 import com.dinglian.server.chuqulang.utils.WXBizMsgCrypt;
 import com.dinglian.server.chuqulang.utils.WxRequestHelper;
@@ -620,7 +618,7 @@ public class WechatController {
 			@RequestParam(name = "firstLevelTagId", required = false) Integer firstLevelTagId,
 			@RequestParam(name = "secondLevelTagIds", required = false) String secondLevelTagIds,
 			@RequestParam(name = "start", required = false) Integer startRow,
-			@RequestParam(name = "pagesize", required = false) Integer pageSize,
+			@RequestParam(name = "pageSize", required = false) Integer pageSize,
 			@RequestParam(name = "keyword", required = false) String keyword) {
 		logger.info("=====> Start to get coterie list <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -725,7 +723,7 @@ public class WechatController {
 	@ResponseBody
 	@RequestMapping(value = "/getTopicList", method = RequestMethod.GET)
 	public Map<String, Object> getTopicList(@RequestParam("coterieId") int coterieId,
-			@RequestParam(name = "pagesize", required = false) Integer pageSize,
+			@RequestParam(name = "pageSize", required = false) Integer pageSize,
 			@RequestParam(name = "start", required = false) Integer startRow,
 			@RequestParam(name = "dataType", required = false) String dataType) {
 		logger.info("=====> Start to get topic list <=====");
@@ -891,12 +889,20 @@ public class WechatController {
 	@ResponseBody
 	@RequestMapping(value = "/getMyCoteries", method = RequestMethod.GET)
 	public Map<String, Object> getMyCoteries(@RequestParam("userId") int userId,
-			@RequestParam(name = "dataType", required = false) String dataType) {
+			@RequestParam(name = "dataType", required = false) String dataType,
+			@RequestParam(name = "showLastCoterie", required = false) Boolean showLastCoterie) {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
 			logger.info("=====> Start to get my coteries <=====");
 
 			List<Coterie> coteries = discoverService.getMyCoteries(dataType, userId);
+			
+			// 显示最近参与
+			Coterie lastCoterie = null;
+			if (showLastCoterie != null && showLastCoterie) {
+				lastCoterie = discoverService.getLastCoterie(userId);
+			}
+			
 			List<Map> resultList = new ArrayList<Map>();
 			if (coteries != null) {
 				for (Coterie coterie : coteries) {
@@ -904,6 +910,13 @@ public class WechatController {
 					map.put("id", coterie.getId());
 					map.put("name", coterie.getName());
 					map.put("cover", coterie.getCoteriePicture() != null ? coterie.getCoteriePicture().getUrl() : "");
+					if (lastCoterie != null) {
+						if (coterie.getId() == lastCoterie.getId()) {
+							map.put("isLastCoterie", true);
+						} else {
+							map.put("isLastCoterie", false);
+						}
+					}
 					resultList.add(map);
 				}
 			}
@@ -1023,18 +1036,19 @@ public class WechatController {
     @RequestMapping(value = "/launchActivity", method = RequestMethod.POST)
     public Map<String, Object> launchActivity(
     		@RequestParam("userId") int userId,
-            @RequestParam("tags") String tags,
-            @RequestParam("name") String name,
-            @RequestParam(name = "startTime",required = false) Date startTime,
+    		@RequestParam(name = "coterieId",required = false) Integer coterieId,
+    		@RequestParam("tags") String tags,
+    		@RequestParam("name") String name,
+    		@RequestParam(name = "pictures", required = false) String[] pictures,
+    		@RequestParam(name = "startTime",required = false) Date startTime,
+    		@RequestParam("gps") String gps,
+    		@RequestParam("address") String address,
             @RequestParam("minCount") int minCount,
             @RequestParam("maxCount") int maxCount,
-            @RequestParam("gps") String gps,
-            @RequestParam("address") String address,
+            @RequestParam("charge") String charge,
             @RequestParam("isOpen") boolean isOpen,
             @RequestParam(name = "password",required = false) String password,
-            @RequestParam(name = "coterieId",required = false) Integer coterieId,
             @RequestParam(name = "description", required = false) String description,
-            @RequestParam(name = "pictures", required = false) String[] pictures,
             @RequestParam(name = "phoneNo", required = false) String phoneNo) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         try {
@@ -1047,11 +1061,12 @@ public class WechatController {
         	
             Event event = new Event();
             event.setAllowSignUp(true);
+            event.setCharge(charge);
             
             if (coterieId != null) {
             	Coterie coterie = discoverService.findCoterieById(coterieId);
             	if (coterie == null) {
-            		throw new NullPointerException("圈子不存在");
+            		throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_EXIST);
             	}
             	event.setCoterie(coterie);
 			}
@@ -1074,15 +1089,6 @@ public class WechatController {
 				}
 			}
             
-            /*for (int i = 1; i <= tags.length; i++) {
-            	Tag tag = activityService.findTagById(tags[i - 1]);
-            	if (tag != null) {
-            		List<Tag> secondLevelTags = activityService.getSecondLevelTags(tag.getId());
-            		EventTag eventTag = new EventTag(event, tag, secondLevelTags.size() > 0 ? -1 : i);
-            		event.getTags().add(eventTag);
-				}
-			}*/
-            
             event.setName(name);
             
             event.setStartTime(startTime);
@@ -1094,6 +1100,7 @@ public class WechatController {
             event.setCreator(user);
             event.setCreationDate(new Date());
             event.setStatus(Event.STATUS_SIGNUP);
+            event.setPhoneNo(phoneNo);
             
             activityService.saveEvent(event);
             
@@ -1141,40 +1148,173 @@ public class WechatController {
             activityService.saveEvent(event);
             
             Map<String, Object> result = new HashMap<String, Object>();
-			result.put("eventId", event.getId());
+			result.put("activityId", event.getId());
+			result.put("coterieId", event.getCoterie().getId());
 			
-			List<String> pictureList = new ArrayList<String>();
-			List<EventPicture> eventPictures = new ArrayList<EventPicture>(event.getEventPictures());
-			Collections.sort(eventPictures, new EventPictureComparator());
-			for (EventPicture eventPicture : eventPictures) {
-				pictureList.add(eventPicture.getUrl());
+            logger.info("=====> Launch activity end <=====");
+            ResponseHelper.addResponseSuccessData(resultMap, result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+        }
+        return resultMap;
+    }
+    
+    /**
+     * 编辑活动
+     * @param userId
+     * @param activityId
+     * @param coterieId
+     * @param tags
+     * @param name
+     * @param pictures
+     * @param startTime
+     * @param gps
+     * @param address
+     * @param minCount
+     * @param maxCount
+     * @param charge
+     * @param isOpen
+     * @param password
+     * @param description
+     * @param phoneNo
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/editActivity", method = RequestMethod.POST)
+    public Map<String, Object> editActivity(
+    		@RequestParam("userId") int userId,
+    		@RequestParam("activityId") int activityId,
+    		@RequestParam(name = "coterieId",required = false) Integer coterieId,
+    		@RequestParam(name = "tags",required = false) String tags,
+    		@RequestParam(name = "name",required = false) String name,
+    		@RequestParam(name = "pictures", required = false) String[] pictures,
+    		@RequestParam(name = "startTime",required = false) Date startTime,
+    		@RequestParam(name = "gps",required = false) String gps,
+    		@RequestParam(name = "address",required = false) String address,
+            @RequestParam(name = "minCount",required = false) Integer minCount,
+            @RequestParam(name = "maxCount",required = false) Integer maxCount,
+            @RequestParam(name = "charge",required = false) String charge,
+            @RequestParam(name = "isOpen",required = false) Boolean isOpen,
+            @RequestParam(name = "password",required = false) String password,
+            @RequestParam(name = "description", required = false) String description,
+            @RequestParam(name = "phoneNo", required = false) String phoneNo) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        try {
+        	logger.info("=====> Start to edit activity <=====");
+        	
+        	Event event = activityService.findEventById(activityId);
+        	if (event == null) {
+				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_EXIST);
 			}
-			result.put("pictures", pictureList);
-			
-			result.put("name", event.getName());
-			result.put("releaseTime", event.getCreationDate());
-			result.put("startTime", event.getStartTime());
-			result.put("status", event.getStatus());
-			result.put("gps", event.getGps());
-			result.put("address", event.getAddress());
-			result.put("isOpen", event.isOpen());
-			
-			// 活动标签
-			List<String> tagList = new ArrayList<>();
-			for (EventTag eventTag : event.getTags()) {
-				Tag tag = eventTag.getTag();
-				if (tag != null) {
-					tagList.add(tag.getName());
+        	
+        	if (event.getCreator() != null && event.getCreator().getId() != userId) {
+        		throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_CREATOR);
+			}
+        	
+        	User user = userService.findUserById(userId);
+        	if (user == null) {
+        		throw new UserException(UserException.NOT_EXISTING);
+        	}
+        	
+        	if (coterieId != null) {
+				Coterie coterie = discoverService.findCoterieById(coterieId);
+				if (coterie == null) {
+					throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_EXIST);
+				}
+				event.setCoterie(coterie);
+			}
+        	
+        	if (StringUtils.isNotBlank(name)) {
+				event.setName(name);
+			}
+        	
+        	if (startTime != null) {
+        		event.setStartTime(startTime);
+			}
+        	
+        	if (gps != null) {
+				event.setGps(gps);
+			}
+        	
+        	if (address != null) {
+				event.setAddress(address);
+			}
+        	
+        	if (minCount != null) {
+				event.setMinCount(minCount);
+			}
+        	
+        	if (maxCount != null) {
+				event.setMaxCount(maxCount);
+			}
+        	
+        	if (charge != null) {
+				event.setCharge(charge);
+			}
+        	
+        	if (isOpen != null) {
+				event.setOpen(isOpen);
+				if (!isOpen) {
+					event.setPassword(password);
 				}
 			}
-			result.put("tags", tagList);
-			
-			Map<String, Object> numbersMap = new HashMap<String, Object>();
-			numbersMap.put("totalCount", event.getMaxCount());
-			numbersMap.put("currentCount", event.getEventUsers().size());
-			result.put("userCount", numbersMap);
+        	
+        	if (description != null) {
+				event.setDescription(description);
+			}
+        	
+        	if (phoneNo != null) {
+				event.setPhoneNo(phoneNo);
+			}
+        	
+        	event.setAllowSignUp(true);
+        	event.setStatus(Event.STATUS_SIGNUP);
+        	
+        	if (StringUtils.isNotBlank(tags) && tags.indexOf(",") > 0) {
+				String[] tagsSplit = tags.split(",");
+				event.getTags().clear();
+				int i = 1;
+				for (String tagIdstr : tagsSplit) {
+					Tag tag = activityService.findTagById(Integer.parseInt(tagIdstr));
+					if (tag != null) {
+						List<Tag> secondLevelTags = activityService.getSecondLevelTags(tag.getId());
+	            		EventTag eventTag = new EventTag(event, tag, secondLevelTags.size() > 0 ? -1 : i++);
+	            		event.getTags().add(eventTag);
+					}
+				}
+			}
+        	
+        	if (pictures != null) {
+        		event.getEventPictures().clear();
+        		String basePicturePath = ApplicationConfig.getInstance().getActivityPicturePath();
+        		String pictureFolderPath = String.format(basePicturePath, event.getId());
+        		File folder = new File(pictureFolderPath);
+        		for (File file : folder.listFiles()) {
+					if (file.exists()) {
+						file.delete();
+					}
+				}
+        		
+            	int i = 1;
+            	for (String picBase64Str : pictures) {
+            		if (picBase64Str.indexOf(",") > 0) {
+            			String picPath = FileUploadHelper.uploadPicture(pictureFolderPath, picBase64Str, i + ".jpg");
+            			
+            			EventPicture eventPicture = new EventPicture(event, picPath, i, user);
+            			event.getEventPictures().add(eventPicture);
+            			i++;
+					}
+				}
+			}
+         	
+            activityService.saveEvent(event);
             
-            logger.info("=====> Launch activity end <=====");
+            Map<String, Object> result = new HashMap<String, Object>();
+			result.put("activityId", event.getId());
+			result.put("coterieId", event.getCoterie().getId());
+			
+            logger.info("=====> Edit activity end <=====");
             ResponseHelper.addResponseSuccessData(resultMap, result);
         } catch (Exception e) {
             e.printStackTrace();
@@ -1195,7 +1335,7 @@ public class WechatController {
 	public Map<String, Object> getActivityList(
 			@RequestParam(name = "keyword", required = false) String keyword,
 			@RequestParam(name = "start", required = false) Integer startRow,
-			@RequestParam(name = "pagesize", required = false) Integer pageSize) {
+			@RequestParam(name = "pageSize", required = false) Integer pageSize) {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
 			logger.info("=====> Start to get activity list <=====");
@@ -1479,7 +1619,7 @@ public class WechatController {
 			@RequestParam("userId") int userId, 
 			@RequestParam(name = "dataType", required = false) String dataType, 
 			@RequestParam(name = "start", required = false) Integer startRow,
-			@RequestParam(name = "pagesize", required = false) Integer pageSize) {
+			@RequestParam(name = "pageSize", required = false) Integer pageSize) {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
 			logger.info("=====> Start to get user activity list <=====");
@@ -1609,7 +1749,7 @@ public class WechatController {
 	}
     
     /**
-     * 获取活动群聊话题
+     * 1.9	获取活动留言详情
      * @param topicId
      * @return
      */
@@ -1621,16 +1761,16 @@ public class WechatController {
    		try {
    			Topic topic = discoverService.findTopicById(topicId);
    			if (topic == null) {
-   				throw new ActivityException(ActivityException.TOPIC_NOT_EXISTING);
+   				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_TOPIC_NOT_EXIST);
    			}
    			Event event = topic.getEvent();
    			if (event == null) {
-   				throw new ActivityException(ActivityException.NOT_EXISTING);
+   				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_EXIST);
 			}
    			
    			User user = topic.getCreator();
    			if (user == null) {
-   				throw new UserException(UserException.NOT_EXISTING);
+   				throw new ApplicationServiceException(ApplicationServiceException.USER_NOT_EXIST);
 			}
    			
    			Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -1646,43 +1786,95 @@ public class WechatController {
    			resultMap.put("user", userMap);
    			
    			// 活动相关
-   			resultMap.put("activityId", event.getId());
+   			Map<String, Object> activityMap = new HashMap<String, Object>();
+   			activityMap.put("activityId", event.getId());
+   			activityMap.put("name", event.getName());
+   			activityMap.put("startTime", event.getStartTime());
+   			activityMap.put("status", event.getStatus());
+   			activityMap.put("gps", event.getGps());
+   			activityMap.put("address", event.getAddress());
+   			activityMap.put("charge", event.getCharge());
+   			
    			List<EventPicture> eventPictures = new ArrayList<EventPicture>(event.getEventPictures());
    			EventPicture eventPicture = null;
    			if (eventPictures != null && eventPictures.size() > 0) {
    				Collections.sort(eventPictures, new EventPictureComparator());
    				eventPicture = eventPictures.get(0);
    			}
-   			resultMap.put("cover", eventPicture != null ? eventPicture.getUrl() : "");
-
-   			resultMap.put("name", event.getName());
-   			resultMap.put("releaseTime", event.getCreationDate());
-   			resultMap.put("startTime", event.getStartTime());
-   			resultMap.put("status", event.getStatus());
-   			resultMap.put("gps", event.getGps());
-   			resultMap.put("address", event.getAddress());
-   			resultMap.put("isOpen", event.isOpen());
-
+   			activityMap.put("cover", eventPicture != null ? eventPicture.getUrl() : "");
+   			
    			List<String> tagList = new ArrayList<>();
    			for (EventTag eventTag : event.getTags()) {
    				Tag tag = eventTag.getTag();
    				tagList.add(tag.getName());
    			}
-   			resultMap.put("tags", tagList);
-
-   			Map<String, Object> numbersMap = new HashMap<String, Object>();
-   			numbersMap.put("totalCount", event.getMaxCount());
-   			numbersMap.put("currentCount", event.getEventUsers().size());
-   			resultMap.put("userCount", numbersMap);
+   			activityMap.put("tags", tagList);
    			
-   			// 话题评论
+   			Map<String, Object> countMap = new HashMap<String, Object>();
+   			countMap.put("maxCount", event.getMaxCount());
+   			countMap.put("minCount", event.getMinCount());
+   			countMap.put("currentCount", event.getEventUsers().size());
+   			activityMap.put("userCount", countMap);
+   			
+   			if (event.getCoterie() != null) {
+   				Map<String, Object> coterieMap = new HashMap<String, Object>();
+   				coterieMap.put("id", event.getCoterie().getId());
+   				coterieMap.put("name", event.getCoterie().getName());
+   				activityMap.put("coterie", coterieMap);
+			}
+   			
+   			resultMap.put("activity", activityMap);
+   			
+   			List<Map> praiseList = new ArrayList<Map>();
+   			List<TopicPraise> topicPraises = new ArrayList<>(topic.getPraises());
+   			Collections.sort(topicPraises, new TopicPraiseComparator());
+   			for (TopicPraise topicPraise : topicPraises) {
+   				if (topicPraise.getUser() != null) {
+   					Map<String, Object> praiseMap = new HashMap<String, Object>();
+   					praiseMap.put("userId", topicPraise.getUser().getId());
+   					praiseMap.put("nickName", topicPraise.getUser().getNickName());
+   					praiseMap.put("picture", topicPraise.getUser().getPicture());
+   					praiseList.add(praiseMap);
+				}
+   				
+			}
+   			resultMap.put("praise", praiseList);
+   			resultMap.put("commentCnt", topic.getComments().size());
+   			resultMap.put("praiseCnt", topic.getPraises().size());
+   			
+   			ResponseHelper.addResponseSuccessData(responseMap, resultMap);
+   			logger.info("=====> Get avtivity topic end <=====");
+   		} catch (ApplicationServiceException e) {
+   			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+   		} catch (Exception e) {
+   			e.printStackTrace();
+   			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+   		}
+   		return responseMap;
+   	}
+    
+    /**
+     * 获取留言评论列表
+     * @param topicId
+     * @return
+     */
+    @ResponseBody
+   	@RequestMapping(value = "/getTopicCommentList", method = RequestMethod.GET)
+   	public Map<String, Object> getTopicCommentList(@RequestParam("topicId") int topicId) {
+   		logger.info("=====> Start to get topic comment list <=====");
+   		Map<String, Object> responseMap = new HashMap<String, Object>();
+   		try {
+   			Topic topic = discoverService.findTopicById(topicId);
+   			if (topic == null) {
+   				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_TOPIC_NOT_EXIST);
+   			}
+   			
    			List<TopicComment> topicComments = new ArrayList<TopicComment>(topic.getComments());
 			Collections.sort(topicComments, new TopicCommentComparator());
 
 			List<Map> comments = new ArrayList<Map>();
-			Map<String, Object> comment = null;
 			for (TopicComment topicComment : topicComments) {
-				comment = new HashMap<String, Object>();
+				Map<String, Object> comment = new HashMap<String, Object>();
 				User commentUser = topicComment.getUser();
 				Map<String, Object> commentMap = new HashMap<String, Object>();
 				if (commentUser != null) {
@@ -1692,12 +1884,32 @@ public class WechatController {
 				}
 				comment.put("user", commentMap);
 				comment.put("comment", topicComment.getContent());
-				comment.put("commentTime", DateUtils.format(topicComment.getCreationDate(), DateUtils.yMdHms));
+				comment.put("commentTime", topicComment.getCreationDate());
 				comments.add(comment);
 			}
-			resultMap.put("comments", comments);
    			
-   			// 话题点赞
+   			ResponseHelper.addResponseSuccessData(responseMap, comments);
+   			logger.info("=====> Get topic comment list end <=====");
+   		} catch (ApplicationServiceException e) {
+   			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+   		} catch (Exception e) {
+   			e.printStackTrace();
+   			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+   		}
+   		return responseMap;
+   	}
+    
+    @ResponseBody
+   	@RequestMapping(value = "/getTopicPraiseList", method = RequestMethod.GET)
+   	public Map<String, Object> getTopicPraiseList(@RequestParam("topicId") int topicId) {
+   		logger.info("=====> Start to get topic parise list <=====");
+   		Map<String, Object> responseMap = new HashMap<String, Object>();
+   		try {
+   			Topic topic = discoverService.findTopicById(topicId);
+   			if (topic == null) {
+   				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_TOPIC_NOT_EXIST);
+   			}
+   			
 			List<TopicPraise> topicPraises = new ArrayList<TopicPraise>(topic.getPraises());
 			Collections.sort(topicPraises, new TopicPraiseComparator());
 			List<Map> praises = new ArrayList<Map>();
@@ -1709,16 +1921,14 @@ public class WechatController {
 					praise.put("userId", praiseUser.getId());
 					praise.put("nickName", praiseUser.getNickName());
 					praise.put("picture", praiseUser.getPicture());
+					praise.put("gender", praiseUser.getGender());
 				}
 				praises.add(praise);
 			}
-			resultMap.put("praises", praises);
    			
-   			ResponseHelper.addResponseSuccessData(responseMap, resultMap);
-   			logger.info("=====> Get avtivity topic end <=====");
-   		} catch (UserException e) {
-   			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
-   		} catch (ActivityException e) {
+   			ResponseHelper.addResponseSuccessData(responseMap, praises);
+   			logger.info("=====> Get topic parise list end <=====");
+   		} catch (ApplicationServiceException e) {
    			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
    		} catch (Exception e) {
    			e.printStackTrace();

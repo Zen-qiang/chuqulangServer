@@ -99,4 +99,9 @@ public class DiscoverServiceImpl implements DiscoverService {
 		return coterieDao.getMyCoteries(dataType, userId);
 	}
 
+	@Override
+	public Coterie getLastCoterie(int userId) {
+		return coterieDao.getLastCoterie(userId);
+	}
+
 }

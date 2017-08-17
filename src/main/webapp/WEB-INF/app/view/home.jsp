@@ -153,6 +153,78 @@
                 
             });
 			
+			$('#commonRequestSubmit').click(function(){
+				var url = $('#url').val();
+				url = 'api/' + url;
+				
+				var method = $('#method').val();
+				var paramName1 = $('#paramName1').val();
+				var paramValue1 = $('#paramValue1').val();
+				var paramName2 = $('#paramName2').val();
+				var paramValue2 = $('#paramValue2').val();
+				var paramName3 = $('#paramName3').val();
+				var paramValue3 = $('#paramValue3').val();
+				var paramName4 = $('#paramName4').val();
+				var paramValue4 = $('#paramValue4').val();
+				var paramName5 = $('#paramName5').val();
+				var paramValue5 = $('#paramValue5').val();
+				var paramName6 = $('#paramName6').val();
+				var paramValue6 = $('#paramValue6').val();
+				var paramName7 = $('#paramName7').val();
+				var paramValue7 = $('#paramValue7').val();
+				var paramName8 = $('#paramName8').val();
+				var paramValue8 = $('#paramValue8').val();
+				var paramName9 = $('#paramName9').val();
+				var paramValue9 = $('#paramValue9').val();
+				var paramName10 = $('#paramName10').val();
+				var paramValue10 = $('#paramValue10').val();
+				
+				var data = {};
+				if (paramName1) {
+					data[paramName1] = paramValue1;
+				}
+				if (paramName2) {
+					data[paramName2] = paramValue2;
+				}
+				if (paramName3) {
+					data[paramName3] = paramValue3;
+				}
+				if (paramName4) {
+					data[paramName4] = paramValue4;
+				}
+				if (paramName5) {
+					data[paramName5] = paramValue5;
+				}
+				if (paramName6) {
+					data[paramName6] = paramValue6;
+				}
+				if (paramName7) {
+					data[paramName7] = paramValue7;
+				}
+				if (paramName8) {
+					data[paramName8] = paramValue8;
+				}
+				if (paramName9) {
+					data[paramName9] = paramValue9;
+				}
+				if (paramName10) {
+					data[paramName10] = paramValue10;
+				}
+				
+				console.log(data);
+				
+				if (method == 'get') {
+					$.get(url, data, function(result) {
+						console.log(result);
+					});
+				} else {
+					$.post(url, data, function(result){
+	                	console.log(result);
+	                });
+				}
+            });
+			
+			
 		});
 	</script>
 </head>
@@ -169,6 +241,22 @@
 	密码：<input type="text" name="password" value="xxh131420"/><br>
 	<button type="submit" >登录</button>
 </form>
+
+<h2>接口测试</h2>
+URL：<input type="text" id="url" value=""/><br>
+METHOD：<input type="text" id="method" value="get"/><br>
+NAME：<input type="text" id="paramName1" value=""/>VALUE：<input type="text" id="paramValue1" value=""/><br>
+NAME：<input type="text" id="paramName2" value=""/>VALUE：<input type="text" id="paramValue2" value=""/><br>
+NAME：<input type="text" id="paramName3" value=""/>VALUE：<input type="text" id="paramValue3" value=""/><br>
+NAME：<input type="text" id="paramName4" value=""/>VALUE：<input type="text" id="paramValue4" value=""/><br>
+NAME：<input type="text" id="paramName5" value=""/>VALUE：<input type="text" id="paramValue5" value=""/><br>
+NAME：<input type="text" id="paramName6" value=""/>VALUE：<input type="text" id="paramValue6" value=""/><br>
+NAME：<input type="text" id="paramName7" value=""/>VALUE：<input type="text" id="paramValue7" value=""/><br>
+NAME：<input type="text" id="paramName8" value=""/>VALUE：<input type="text" id="paramValue8" value=""/><br>
+NAME：<input type="text" id="paramName9" value=""/>VALUE：<input type="text" id="paramValue9" value=""/><br>
+NAME：<input type="text" id="paramName10" value=""/>VALUE：<input type="text" id="paramValue10" value=""/><br>
+<button type="button" id="commonRequestSubmit" >发送请求</button>
+
 
 <h2>圈子列表</h2>
 <button type="button" id="getCoterieList">圈子列表</button>
@@ -424,8 +512,10 @@ keyword：<input type="text" name="keyword" value="浦东"/><br>
 </form>
 
 <h2>活动报名</h2>
-<form action="activity/signUp" method="post">
-	eventId：<input type="text" name="eventId"/><br>
+<form action="api/signUp" method="post">
+	activityId：<input type="text" name="activityId"/><br>
+	userId：<input type="text" name="userId"/><br>
+	gender：<input type="text" name="gender"/><br>
 	<button type="submit" >活动报名</button>
 </form>
 

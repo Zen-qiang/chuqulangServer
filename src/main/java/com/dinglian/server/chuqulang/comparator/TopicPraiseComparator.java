@@ -8,7 +8,7 @@ public class TopicPraiseComparator implements Comparator<TopicPraise>{
 
 	@Override
 	public int compare(TopicPraise o1, TopicPraise o2) {
-		return o1.getOrderNo() - o2.getOrderNo();
+		return o2.getOrderNo() - o1.getOrderNo();
 	}
 
 }

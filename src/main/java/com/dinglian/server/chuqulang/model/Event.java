@@ -96,6 +96,8 @@ public class Event implements Serializable {
 	private String limiter; // 限定条件
 	
 	private boolean allowSignUp; // 允许报名
+	
+	private String phoneNo;
 
 	private ChatRoom chatRoom; // 活动聊天室
 
@@ -297,6 +299,15 @@ public class Event implements Serializable {
 	
 	public void setAllowSignUp(boolean allowSignUp) {
 		this.allowSignUp = allowSignUp;
+	}
+	
+	@Column(name = "phone_no")
+	public String getPhoneNo() {
+		return phoneNo;
+	}
+
+	public void setPhoneNo(String phoneNo) {
+		this.phoneNo = phoneNo;
 	}
 
 	@JoinColumn(name = "fk_chatroom_id", unique = true)
