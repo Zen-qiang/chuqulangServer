@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.model.Event;
-import com.dinglian.server.chuqulang.model.EventPicture;
+import com.dinglian.server.chuqulang.model.EventTag;
 import com.dinglian.server.chuqulang.model.EventUser;
 import com.dinglian.server.chuqulang.model.Tag;
 import com.dinglian.server.chuqulang.model.UserCollect;

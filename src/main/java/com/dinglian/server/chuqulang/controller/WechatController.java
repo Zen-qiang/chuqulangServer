@@ -663,8 +663,15 @@ public class WechatController {
 					data.put("name", coterie.getName());
 					data.put("description", coterie.getDescription());
 					data.put("membersCnt", coterie.getCoterieGuys().size());
-					data.put("topicCnt", coterie.getTopics().size());
 					data.put("activityCnt", coterie.getEvents().size());
+					
+					List<String> tagList = new ArrayList<>();
+					for (CoterieTag coterieTag : coterie.getTags()) {
+						if (coterieTag.getTag() != null) {
+							tagList.add(coterieTag.getTag().getName());
+						}
+					}
+					data.put("tags", tagList);
 					dataList.add(data);
 				}
 			}
@@ -743,7 +750,7 @@ public class WechatController {
 			// 默认活动开始时间排序
 			searchCriteria.setOrderBy(Event.ORDER_BY_START_TIME);
 			searchCriteria.setTopicDataType(Topic.TYPE_ATIVITY);
-			if (dataType.equals(Topic.DATATYPE_HISTROY)) {
+			if (StringUtils.isNotBlank(dataType) && dataType.equals(Topic.DATATYPE_HISTROY)) {
 				searchCriteria.setDataType(dataType);
 			}
 			
@@ -755,20 +762,20 @@ public class WechatController {
 				for (Topic topic : topics) {
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("topicId", topic.getId());
-					map.put("description", topic.getDescription());
-					map.put("topicCreateTime", topic.getCreationDate());
+//					map.put("description", topic.getDescription());
+//					map.put("topicCreateTime", topic.getCreationDate());
 					map.put("commentCnt", topic.getComments().size());
 					map.put("praiseCnt", topic.getPraises().size());
 					
 					// 用户相关
-					User topicUser = topic.getCreator();
+					/*User topicUser = topic.getCreator();
 					if (topicUser != null) {
 						Map<String, Object> userMap = new HashMap<String, Object>();
 						userMap.put("userId", topicUser.getId());
 						userMap.put("nickName", topicUser.getNickName());
 						userMap.put("picture", topicUser.getPicture());
 						map.put("user", userMap);
-					}
+					}*/
 					
 					// 活动相关
 					Event event = topic.getEvent();
@@ -784,12 +791,11 @@ public class WechatController {
 						eventMap.put("cover", eventPicture != null ? eventPicture.getUrl() : "");
 
 						eventMap.put("name", event.getName());
-						eventMap.put("releaseTime", event.getCreationDate());
 						eventMap.put("startTime", event.getStartTime());
 						eventMap.put("status", event.getStatus());
 						eventMap.put("gps", event.getGps());
 						eventMap.put("address", event.getAddress());
-						eventMap.put("isOpen", event.isOpen());
+						eventMap.put("charge", event.getCharge());
 
 						List<String> tagList = new ArrayList<>();
 						for (EventTag eventTag : event.getTags()) {
@@ -797,11 +803,19 @@ public class WechatController {
 							tagList.add(tag.getName());
 						}
 						eventMap.put("tags", tagList);
+						
+						if (event.getCoterie() != null) {
+							Map<String, Object> coterieMap = new HashMap<String, Object>();
+							coterieMap.put("id", event.getCoterie().getId());
+							coterieMap.put("name", event.getCoterie().getName());
+							eventMap.put("coterie", coterieMap);
+						}
 
-						Map<String, Object> numbersMap = new HashMap<String, Object>();
-						numbersMap.put("totalCount", event.getMaxCount());
-						numbersMap.put("currentCount", event.getEventUsers().size());
-						eventMap.put("userCount", numbersMap);
+						Map<String, Object> countMap = new HashMap<String, Object>();
+						countMap.put("maxCount", event.getMaxCount());
+						countMap.put("minCount", event.getMinCount());
+						countMap.put("currentCount", event.getEventUsers().size());
+						eventMap.put("userCount", countMap);
 						
 						map.put("activity", eventMap);
 					}
@@ -1118,8 +1132,11 @@ public class WechatController {
 					}
 				}
 			}
-            
-            event.getEventUsers().add(new EventUser(event, user, 1));
+            EventUser eventUser = new EventUser(event, user, 1);
+            eventUser.setRealName(user.getNickName());
+            eventUser.setPhoneNo(phoneNo);
+            eventUser.setGender(user.getGender());
+            event.getEventUsers().add(eventUser);
             
             if (event.getCoterie() == null) {
 				// 创建圈子
@@ -1188,7 +1205,7 @@ public class WechatController {
     		@RequestParam(name = "coterieId",required = false) Integer coterieId,
     		@RequestParam(name = "tags",required = false) String tags,
     		@RequestParam(name = "name",required = false) String name,
-    		@RequestParam(name = "pictures", required = false) String[] pictures,
+    		@RequestParam(name = "pictures", required = false) String[] pictures,// 传参方式还需再对
     		@RequestParam(name = "startTime",required = false) Date startTime,
     		@RequestParam(name = "gps",required = false) String gps,
     		@RequestParam(name = "address",required = false) String address,
@@ -1273,6 +1290,7 @@ public class WechatController {
         	
         	if (StringUtils.isNotBlank(tags) && tags.indexOf(",") > 0) {
 				String[] tagsSplit = tags.split(",");
+				
 				event.getTags().clear();
 				int i = 1;
 				for (String tagIdstr : tagsSplit) {
@@ -1287,13 +1305,16 @@ public class WechatController {
         	
         	if (pictures != null) {
         		event.getEventPictures().clear();
+        		
         		String basePicturePath = ApplicationConfig.getInstance().getActivityPicturePath();
         		String pictureFolderPath = String.format(basePicturePath, event.getId());
         		File folder = new File(pictureFolderPath);
-        		for (File file : folder.listFiles()) {
-					if (file.exists()) {
-						file.delete();
-					}
+        		if (folder.exists()) {
+        			for (File file : folder.listFiles()) {
+        				if (file.exists()) {
+        					file.delete();
+        				}
+        			}
 				}
         		
             	int i = 1;
@@ -1615,7 +1636,7 @@ public class WechatController {
     
     @ResponseBody
 	@RequestMapping(value = "/getMyActivityList", method = RequestMethod.GET)
-	public Map<String, Object> getUserActivityList(
+	public Map<String, Object> getMyActivityList(
 			@RequestParam("userId") int userId, 
 			@RequestParam(name = "dataType", required = false) String dataType, 
 			@RequestParam(name = "start", required = false) Integer startRow,
@@ -1651,12 +1672,11 @@ public class WechatController {
 					Map<String, Object> result = new HashMap<String, Object>();
 					result.put("activityId", event.getId());
 					result.put("name", event.getName());
-					result.put("releaseTime", event.getCreationDate());
+					result.put("charge", event.getCharge());
 					result.put("startTime", event.getStartTime());
 					result.put("status", event.getStatus());
 					result.put("gps", event.getGps());
 					result.put("address", event.getAddress());
-					result.put("isOpen", event.isOpen());
 					
 					// 封面
 					List<EventPicture> eventPictures = new ArrayList<EventPicture>(event.getEventPictures());
@@ -1675,9 +1695,18 @@ public class WechatController {
 					}
 					result.put("tags", tagList);
 					
+					// 圈子
+					if (event.getCoterie() != null) {
+						Map<String, Object> coterieMap = new HashMap<String, Object>();
+						coterieMap.put("id", event.getCoterie().getId());
+						coterieMap.put("name", event.getCoterie().getName());
+						result.put("coterie", coterieMap);
+					}
+					
 					// 活动人数情况
 					Map<String, Object> numbersMap = new HashMap<String, Object>();
-					numbersMap.put("totalCount", event.getMaxCount());
+					numbersMap.put("maxCount", event.getMaxCount());
+					numbersMap.put("minCount", event.getMinCount());
 					numbersMap.put("currentCount", event.getEventUsers().size());
 					result.put("userCount", numbersMap);
 					
@@ -2176,11 +2205,11 @@ public class WechatController {
 				}
             }
             
-            List<EventUser> userList =  new ArrayList<EventUser>(event.getEventUsers());
-            Collections.sort(userList, new EventUserComparator());
+//            List<EventUser> userList =  new ArrayList<EventUser>(event.getEventUsers());
+//            Collections.sort(userList, new EventUserComparator());
             
             List<Map> resultList = new ArrayList<Map>();
-            for (EventUser eventUser : userList) {
+            for (EventUser eventUser : event.getEffectiveMembers()) {
             	User user = eventUser.getUser();
 				if (user != null) {
 					Map<String, Object> data = new HashMap<String, Object>();
@@ -2197,10 +2226,12 @@ public class WechatController {
 					if (retinueList != null) {
 						List<Map> list = new ArrayList<Map>();
 						for (EventUser eu2 : retinueList) {
-							Map<String, Object> retinue = new HashMap<String, Object>();
-							retinue.put("name", eu2.getRealName());
-							retinue.put("gender", eu2.getGender());
-							list.add(retinue);
+							if (eu2.isEffective()) {
+								Map<String, Object> retinue = new HashMap<String, Object>();
+								retinue.put("name", eu2.getRealName());
+								retinue.put("gender", eu2.getGender());
+								list.add(retinue);
+							}
 						}
 						data.put("retinues", list);
 					}

@@ -14,6 +14,7 @@ import com.dinglian.server.chuqulang.dao.EventUserDao;
 import com.dinglian.server.chuqulang.dao.TagDao;
 import com.dinglian.server.chuqulang.dao.UserCollectDao;
 import com.dinglian.server.chuqulang.model.Event;
+import com.dinglian.server.chuqulang.model.EventTag;
 import com.dinglian.server.chuqulang.model.EventUser;
 import com.dinglian.server.chuqulang.model.Tag;
 import com.dinglian.server.chuqulang.model.UserCollect;
@@ -120,4 +121,5 @@ public class ActivityServiceImpl implements ActivityService {
 			return tagDao.getChildTags(parentId);
 		}
 	}
+
 }

@@ -11,148 +11,19 @@
 	<script type="text/javascript" src="resources/jquery-3.2.1.js"></script>
 	
 	<script type="text/javascript">
+		var pictures = [];
+		var pic = "";
+		function gotoBase (e) {
+	        console.log(e.target.files[0])
+	        var file = e.target.files[0]
+	        var reader = new FileReader()
+	        reader.readAsDataURL(file)
+	        reader.onload = function () {
+	            //pictures.push(this.result);
+	            pic = this.result;
+	        }
+	    }
 		$(function(){
-			$('#verifynoBtn').click(function(){
-				$.ajax({
-				  url: 'user/sendCode',
-				  data: {
-					  phoneno : $('#phoneno').val(),
-					  dataType : 'register'
-				  },
-				  success: function(response,status,xhr){
-					  if (response.message) {
-						alert(response.message);
-					  }
-					  console.log(response);
-				  },
-				  dataType: 'json'
-				});
-			});
-			
-			$('#verifynoBtn2').click(function(){
-				$.ajax({
-				  url: 'user/sendCode',
-				  data: {
-					  phoneno : $('#phoneno2').val(),
-					  dateType : 'login'
-				  },
-				  success: function(response,status,xhr){
-					  console.log(response);
-				  },
-				  dataType: 'json'
-				});
-			});
-			
-			$('#getUser').click(function(){
-				$.ajax({
-				  url: 'user/getUser',
-				  data: {
-					  userId : '3'
-				  },
-				  success: function(response,status,xhr){
-					  console.log(response);
-				  },
-				  dataType: 'json'
-				});
-			});
-			
-			$('#launchActivity').click(function(){
-                var tags = [];
-                tags.push(2);
-                tags.push(5);
-                
-                var friends = [];
-                friends.push(1);
-                friends.push(2);
-                
-                var pictures = [];
-                
-                $.ajax({
-                    url: 'activity/launchActivity',
-					type : 'POST',
-                    data: {
-                        isOpen : true,
-                        tags : [7,8,4,9,10],
-                        name : '金桥广场舞',
-                        startTime : 1499124171120,
-                        minCount : 10,
-                        maxCount : 20,
-                        charge : 'dutch',
-                        cost : 100,
-                        gps : 'gps',
-                        address: 'address',
-                        description : '室内三国杀',
-                        limiter : '限男性',
-                        pictures : pictures,
-                        phoneNo : '18270790997'
-                    },
-                    success: function(response,status,xhr){
-                        console.log(response);
-                    },
-                    dataType: 'json'
-                });
-            });
-			
-			$('#createCoterie').click(function(){
-                $.ajax({
-                    url: 'api/createCoterie',
-					type : 'POST',
-                    data: {
-                    	userId : 1,
-                        description : 'desc',
-                        tags : '7,8,4,9,10',
-                        name : '金桥街舞',
-                        picture : ''
-                    },
-                    success: function(response,status,xhr){
-                        console.log(response);
-                    },
-                    dataType: 'json'
-                });
-            });
-			
-			$('#getCoterieList').click(function(){
-				$.ajax({
-                    url: 'discover/getCoterieList',
-					type : 'post',
-                    data: {
-                    	//firstLevelTagId : 1,
-                    	//secondLevelTagIds : '10,11'
-                    	//keyword : '街舞'
-                    },
-                    success: function(response,status,xhr){
-                        console.log(response);
-                    },
-                    dataType: 'json'
-                });
-            });
-			
-			$('#wxLaunchActivity').click(function(){
-				var obj = {
-						url : $('#pic').val()
-				}
-                var pictures = [];
-                pictures.push(obj.url);
-                
-                $.post("api/launchActivity",{
-                	userId : 1,
-                    isOpen : false,
-                    tags : '7,8,4,9,10',
-                    name : '金桥街舞大赛',
-                    startTime : '2017/05/01',
-                    minCount : 10,
-                    maxCount : 20,
-                    gps : 'gps',
-                    address: 'address',
-                    description : '室内三国杀',
-                    pictures : pictures,
-                    phoneNo : '18270790997'
-                },function(result){
-                	console.log(result);
-                });
-                
-            });
-			
 			$('#commonRequestSubmit').click(function(){
 				var url = $('#url').val();
 				url = 'api/' + url;
@@ -224,7 +95,16 @@
 				}
             });
 			
-			
+			$('#test').click(function(){
+                $.post("api/editActivity",{
+                	userId : $('#userId').val(),
+                	activityId : $('#activityId').val(),
+                	pictures : pic
+                },function(result){
+                	console.log(result);
+                });
+                
+            });
 		});
 	</script>
 </head>
@@ -257,6 +137,11 @@ NAME：<input type="text" id="paramName9" value=""/>VALUE：<input type="text" i
 NAME：<input type="text" id="paramName10" value=""/>VALUE：<input type="text" id="paramValue10" value=""/><br>
 <button type="button" id="commonRequestSubmit" >发送请求</button>
 
+<h2>TEST：</h2>
+userId：<input type="text" value="2" id="userId"/><br>
+activityId：<input type="text" value="1" id="activityId"/><br>
+<input type="file" value="转base64" id="input" onchange="gotoBase(event)"><br>
+<button id="test">TEST</button>
 
 <h2>圈子列表</h2>
 <button type="button" id="getCoterieList">圈子列表</button>
@@ -273,11 +158,6 @@ NAME：<input type="text" id="paramName10" value=""/>VALUE：<input type="text" 
 	content：<input type="text" name="content" value="TTTTTTTT"/><br>
 	<button type="submit" >创建聊天话题</button>
 </form>
-
-<h2>WX发起活动：</h2>
-pic：<input type="text" name="pic" id="pic"/><br>
-<button id="wxLaunchActivity">WX发起活动</button>
-
 
 <h2>我的圈子：</h2>
 <form action="api/getMyCoteries" method="get">

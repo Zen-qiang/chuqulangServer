@@ -38,6 +38,8 @@ public class EventUser implements Serializable{
 	private Integer gender;//1时是男性，值为2时是女性，值为0时是未知
 	
 	private User inviter;// 邀请者
+	
+	private boolean effective;
 
 	@GeneratedValue
 	@Id
@@ -125,6 +127,14 @@ public class EventUser implements Serializable{
 
 	public void setInviter(User inviter) {
 		this.inviter = inviter;
+	}
+	
+	public boolean isEffective() {
+		return effective;
+	}
+
+	public void setEffective(boolean effective) {
+		this.effective = effective;
 	}
 
 	public EventUser() {

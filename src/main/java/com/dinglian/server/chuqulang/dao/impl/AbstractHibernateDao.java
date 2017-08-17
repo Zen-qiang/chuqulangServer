@@ -42,6 +42,10 @@ public abstract class AbstractHibernateDao<E extends Serializable> {
 	public void delete(E e) {
 		getCurrentSession().delete(e);
 	}
+	
+	public void update(E e) {
+		getCurrentSession().update(e);
+	}
 
 	public List<E> query(String hql, Map<String, Object> map, Object... args) {
 		Query query = getCurrentSession().createQuery(hql);

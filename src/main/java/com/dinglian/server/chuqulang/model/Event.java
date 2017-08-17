@@ -24,6 +24,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import com.dinglian.server.chuqulang.comparator.EventUserComparator;
+
 @Table(name = "event")
 @Entity
 public class Event implements Serializable {
@@ -235,7 +237,7 @@ public class Event implements Serializable {
 		this.status = status;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "event")
+	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "event", orphanRemoval = true)
 	public List<EventTag> getTags() {
 		Collections.sort(tags, new Comparator<EventTag>() {
 			@Override
@@ -259,7 +261,7 @@ public class Event implements Serializable {
 		this.eventUsers = eventUsers;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "event")
+	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "event", orphanRemoval = true)
 	public Set<EventPicture> getEventPictures() {
 		return eventPictures;
 	}
@@ -337,6 +339,19 @@ public class Event implements Serializable {
 
 	public void setActivityTopic(Topic activityTopic) {
 		this.activityTopic = activityTopic;
+	}
+	
+	@Transient
+	public List<EventUser> getEffectiveMembers () {
+		List<EventUser> data = new ArrayList<>();
+		List<EventUser> resultList = new ArrayList<>(this.eventUsers);
+		Collections.sort(resultList, new EventUserComparator());
+		for (EventUser eventUser : resultList) {
+			if (eventUser.isEffective()) {
+				data.add(eventUser);
+			}
+		}
+		return data;
 	}
 
 	@Transient

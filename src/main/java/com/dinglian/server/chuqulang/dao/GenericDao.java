@@ -14,6 +14,8 @@ public interface GenericDao <E extends Serializable> {
     public void saveOrUpdate(E e);
 
     public void delete(E e);
+    
+    public void update(E e);
 
     public List<E> query(String hql, Map<String, Object> map, Object... args);
 
