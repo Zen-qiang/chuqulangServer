@@ -814,7 +814,7 @@ public class WechatController {
 						Map<String, Object> countMap = new HashMap<String, Object>();
 						countMap.put("maxCount", event.getMaxCount());
 						countMap.put("minCount", event.getMinCount());
-						countMap.put("currentCount", event.getEventUsers().size());
+						countMap.put("currentCount", event.getEffectiveMembers().size());
 						eventMap.put("userCount", countMap);
 						
 						map.put("activity", eventMap);
@@ -1136,6 +1136,7 @@ public class WechatController {
             eventUser.setRealName(user.getNickName());
             eventUser.setPhoneNo(phoneNo);
             eventUser.setGender(user.getGender());
+            eventUser.setEffective(true);
             event.getEventUsers().add(eventUser);
             
             if (event.getCoterie() == null) {
@@ -1414,7 +1415,7 @@ public class WechatController {
 					Map<String, Object> numbersMap = new HashMap<String, Object>();
 					numbersMap.put("maxCount", event.getMaxCount());
 					numbersMap.put("minCount", event.getMinCount());
-					numbersMap.put("currentCount", event.getEventUsers().size());
+					numbersMap.put("currentCount", event.getEffectiveMembers().size());
 					// 人数情况
 					result.put("userCount", numbersMap);
 					
@@ -1520,8 +1521,9 @@ public class WechatController {
 			result.put("tags", tagList);
 			
 			// 参与活动人员
-			List<EventUser> eventUsers = new ArrayList<EventUser>(event.getEventUsers());
-			Collections.sort(eventUsers, new EventUserComparator());
+//			List<EventUser> eventUsers = new ArrayList<EventUser>(event.getEventUsers());
+//			Collections.sort(eventUsers, new EventUserComparator());
+			List<EventUser> eventUsers = event.getEffectiveMembers();
 			
 			List<Map> eventUserList = new ArrayList<>();
 			for (EventUser eventUser : eventUsers) {
@@ -1707,8 +1709,10 @@ public class WechatController {
 					Map<String, Object> numbersMap = new HashMap<String, Object>();
 					numbersMap.put("maxCount", event.getMaxCount());
 					numbersMap.put("minCount", event.getMinCount());
-					numbersMap.put("currentCount", event.getEventUsers().size());
+					numbersMap.put("currentCount", event.getEffectiveMembers().size());
 					result.put("userCount", numbersMap);
+					
+					result.put("isSignUp", event.isSignUp(userId));
 					
 					resultList.add(result);
 				}
@@ -1842,7 +1846,7 @@ public class WechatController {
    			Map<String, Object> countMap = new HashMap<String, Object>();
    			countMap.put("maxCount", event.getMaxCount());
    			countMap.put("minCount", event.getMinCount());
-   			countMap.put("currentCount", event.getEventUsers().size());
+   			countMap.put("currentCount", event.getEffectiveMembers().size());
    			activityMap.put("userCount", countMap);
    			
    			if (event.getCoterie() != null) {
@@ -2085,7 +2089,7 @@ public class WechatController {
 			}
             
             //检查活动是否满员，满员返回错误信息，否则继续
-            Set<EventUser> eventUsers = event.getEventUsers();
+            List<EventUser> eventUsers = event.getEffectiveMembers();
             if (eventUsers.size() == event.getMaxCount()) {
             	throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_USER_FULL);
 			}
@@ -2099,9 +2103,10 @@ public class WechatController {
             }
             int maxOrderNo = event.getEventUserMaxOrderNo() + 1;
             EventUser fristeventUser = new EventUser(event, user, maxOrderNo++);
-            fristeventUser.setRealName(realName);
-            fristeventUser.setPhoneNo(phoneNo);
+            fristeventUser.setRealName(realName == null ? user.getNickName() : "");
+            fristeventUser.setPhoneNo(phoneNo == null ? user.getPhoneNo() : "");
             fristeventUser.setGender(gender);
+            fristeventUser.setEffective(true);
             
             event.getEventUsers().add(fristeventUser);
             if (friends != null) {
@@ -2115,6 +2120,7 @@ public class WechatController {
 						friend.setEvent(event);
 						friend.setOrderNo(maxOrderNo++);
 						friend.setInviter(user);
+						friend.setEffective(true);
 						event.getEventUsers().add(friend);
 					}
 				}
@@ -2161,6 +2167,45 @@ public class WechatController {
 			}
             
             ResponseHelper.addResponseSuccessData(resultMap, result);
+            logger.info("=====> Event signup end <=====");
+        } catch (ApplicationServiceException e) {
+        	ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+        }
+        return resultMap;
+    }
+    
+    /**
+     * 取消报名
+     * @param activityId
+     * @param userId
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/signOut", method = RequestMethod.POST)
+    public Map<String, Object> signOut(@RequestParam(name = "activityId") int activityId,
+    		@RequestParam("userId") int userId) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        try {
+        	logger.info("=====> Start to event signout <=====");
+        	
+            Event event = activityService.getEventById(activityId);
+            if (event == null) {
+            	throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_EXIST);
+			}
+            
+            for (EventUser eventUser : event.getEventUsers()) {
+            	User eu = eventUser.getUser();
+            	User inviter = eventUser.getInviter();
+				if ((eu != null && eu.getId() == userId) || (inviter != null && inviter.getId() == userId)) {
+					eventUser.setEffective(false);
+				}
+			}
+            activityService.saveEvent(event);
+            
+            ResponseHelper.addResponseSuccessData(resultMap, null);
             logger.info("=====> Event signup end <=====");
         } catch (ApplicationServiceException e) {
         	ResponseHelper.addResponseFailData(resultMap, e.getMessage());

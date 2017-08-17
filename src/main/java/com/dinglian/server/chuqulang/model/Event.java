@@ -396,4 +396,18 @@ public class Event implements Serializable {
 		return false;
 	}
 
+	@Transient
+	public boolean isSignUp(int userId) {
+		for (EventUser eventUser : this.eventUsers) {
+			if (eventUser.getUser() != null && eventUser.getUser().getId() == userId) {
+				if (eventUser.isEffective()) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+		return false;
+	}
+
 }
