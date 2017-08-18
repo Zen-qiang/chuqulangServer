@@ -105,7 +105,36 @@
                 });
                 
             });
+			
+			$('#login').click(function(){
+                $.post("user/login",{
+                	phoneno : '18270790997',
+                	password : 'xxh131420',
+                	type : 'username'
+                },function(result){
+                	console.log(result);
+                });
+            });
+			
+			$('#user').click(function(){
+                $.get("user/getUser", {}, function(result) {
+					console.log(result);
+				});
+            });
+			
 		});
+		
+		function getLocation(){
+			if (navigator.geolocation){
+				navigator.geolocation.getCurrentPosition(showPosition);
+			}else{
+				x.innerHTML="Geolocation is not supported by this browser.";
+			}
+		}
+		
+		function showPosition(position){
+			alert("Latitude: " + position.coords.latitude + " Longitude: " + position.coords.longitude);
+		}
 	</script>
 </head>
 <body>
@@ -113,6 +142,10 @@
 <P>  The time on the server is ${serverTime}. </P>
 
 <!-- <img src="resources/dllogo.svg" onerror="" /> -->
+<button onclick="alert(11);">定位经纬度下</button><br>
+
+<button id="login">登录</button><button id="user">我的信息</button>
+
 
 <h2>账号登录：</h2>
 <form action="user/login" method="post">

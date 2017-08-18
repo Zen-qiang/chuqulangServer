@@ -49,4 +49,11 @@ public class ResponseHelper {
 		resultMap.put("data", data);
 	}
 
+	public static void addInterceptorResponseData(Map<String, Object> map, int code, String message) {
+		map.put("message", message);
+		map.put("code", code);
+		map.put("status", RequestHelper.RESPONSE_STATUS_FAIL);
+		
+	}
+
 }
