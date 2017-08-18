@@ -104,4 +104,9 @@ public class DiscoverServiceImpl implements DiscoverService {
 		return coterieDao.getLastCoterie(userId);
 	}
 
+	@Override
+	public List<String> getCoterieCarouselPictures() {
+		return generalDao.getCoterieCarouselPictures();
+	}
+
 }

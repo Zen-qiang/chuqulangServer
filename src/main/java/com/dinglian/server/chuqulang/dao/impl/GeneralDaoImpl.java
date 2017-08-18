@@ -3,6 +3,7 @@ package com.dinglian.server.chuqulang.dao.impl;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.Hibernate;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -127,6 +128,12 @@ public class GeneralDaoImpl implements GeneralDao {
 	@Override
 	public void saveWxOAuth2AccessToken(WxOAuth2AccessToken token) {
 		getCurrentSession().save(token);
+	}
+
+	@Override
+	public List<String> getCoterieCarouselPictures() {
+		String sql = "SELECT url FROM coterie_carousel_picture";
+		return getCurrentSession().createSQLQuery(sql).list();
 	}
 
 }

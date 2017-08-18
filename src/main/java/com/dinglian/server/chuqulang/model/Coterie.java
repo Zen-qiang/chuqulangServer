@@ -138,7 +138,7 @@ public class Coterie implements Serializable {
 		this.topics = topics;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "coterie")
+	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "coterie", orphanRemoval = true)
 	public List<CoterieTag> getTags() {
 		Collections.sort(tags, new Comparator<CoterieTag>() {
 			@Override
@@ -180,6 +180,14 @@ public class Coterie implements Serializable {
 			if (user.getId() == userId) {
 				return true;
 			}
+		}
+		return false;
+	}
+
+	@Transient
+	public boolean isCreator(int userId) {
+		if (this.getCreator().getId() == userId) {
+			return true;
 		}
 		return false;
 	}

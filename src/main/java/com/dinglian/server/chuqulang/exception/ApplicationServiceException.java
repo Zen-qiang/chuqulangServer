@@ -30,6 +30,7 @@ public class ApplicationServiceException extends RuntimeException {
 	
 	// 圈子相关
 	public final static int COTERIE_NOT_EXIST = 3001;
+	public final static int COTERIE_NOT_CREATOR = 3002;
 	
 	// 话题相关
 	public final static int TOPIC_EXIST = 4001;
@@ -73,6 +74,8 @@ public class ApplicationServiceException extends RuntimeException {
 			return "活动留言不存在";
 		case COTERIE_NOT_EXIST:
 			return "圈子不存在";
+		case COTERIE_NOT_CREATOR:
+			return "您不是圈子创建者";
 		case ACCESS_TOKEN_NOT_EXIST:
 			return "Access Token 不存在，请重新获取授权";
 		default:

@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,7 +29,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.comparator.EventPictureComparator;
-import com.dinglian.server.chuqulang.comparator.EventUserComparator;
 import com.dinglian.server.chuqulang.comparator.TopicCommentComparator;
 import com.dinglian.server.chuqulang.comparator.TopicPraiseComparator;
 import com.dinglian.server.chuqulang.exception.ActivityException;
@@ -521,15 +519,6 @@ public class WechatController {
 				}
 			}
 
-			/*for (int i = 1; i <= tags.length; i++) {
-				Tag tag = activityService.findTagById(tags[i - 1]);
-				if (tag != null) {
-					List<Tag> secondLevelTags = activityService.getSecondLevelTags(tag.getId());
-					CoterieTag coterieTag = new CoterieTag(coterie, tag, secondLevelTags.size() > 0 ? -i : i);
-					coterie.getTags().add(coterieTag);
-				}
-			}*/
-
 			coterie.getCoterieGuys().add(new CoterieGuy(coterie, 1, user, new Date(), true, true));
 
 			discoverService.saveCoterie(coterie);
@@ -553,6 +542,101 @@ public class WechatController {
 			logger.info("=====> Create coterie end <=====");
 		} catch (UserException e) {
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		}
+		return responseMap;
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/editCoterie", method = RequestMethod.POST)
+	public Map<String, Object> editCoterie(@RequestParam("userId") int userId, 
+			@RequestParam("coterieId") int coterieId,
+			@RequestParam(name = "name", required = false) String name, 
+			@RequestParam(name = "tags", required = false) String tags, 
+			@RequestParam(name = "description", required = false) String description,
+			@RequestParam(name = "picture", required = false) String picture) {
+		logger.info("=====> Start to edit coterie <=====");
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			Coterie coterie = discoverService.findCoterieById(coterieId);
+			if (coterie == null) {
+				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_EXIST);
+			}
+
+			if (coterie.getCreator() != null && coterie.getCreator().getId() != userId) {
+				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_CREATOR);
+			}
+			
+			User user = userService.findUserById(userId);
+			if (user == null) {
+				throw new ApplicationServiceException(ApplicationServiceException.USER_NOT_EXIST);
+			}
+			
+			if (StringUtils.isNotBlank(name)) {
+				coterie.setName(name);
+			}
+			
+			if (description != null) {
+				coterie.setDescription(description);
+			}
+			
+			if (StringUtils.isNotBlank(tags) && tags.indexOf(",") > 0) {
+				coterie.getTags().clear();
+				String[] tagsSplit = tags.split(",");
+				int i = 1;
+				for (String tagIdstr : tagsSplit) {
+					Tag tag = activityService.findTagById(Integer.parseInt(tagIdstr));
+					if (tag != null) {
+						List<Tag> secondLevelTags = activityService.getSecondLevelTags(tag.getId());
+	            		CoterieTag coterieTag = new CoterieTag(coterie, tag, secondLevelTags.size() > 0 ? -1 : i++);
+						coterie.getTags().add(coterieTag);
+					}
+				}
+				
+			}
+			
+			if (StringUtils.isNotBlank(picture) && picture.indexOf(",") > 0) {
+				String coverPath = ApplicationConfig.getInstance().getCoterieCoverPath();
+				String coverFolderPath = String.format(coverPath, coterie.getId());
+				String picPath = FileUploadHelper.uploadPicture(coverFolderPath, picture, "cover.jpg");
+				if (coterie.getCoteriePicture() != null) {
+					coterie.getCoteriePicture().setUser(user);
+					coterie.getCoteriePicture().setUrl(picPath);
+				} else {
+					CoteriePicture coteriePicture = new CoteriePicture();
+					coteriePicture.setCoterie(coterie);
+					coteriePicture.setCreationDate(new Date());
+					coteriePicture.setUser(user);
+					coteriePicture.setUrl(picPath);
+					coterie.setCoteriePicture(coteriePicture);
+				}
+			}
+
+			discoverService.saveCoterie(coterie);
+
+			ResponseHelper.addResponseSuccessData(responseMap, null);
+			logger.info("=====> Edit coterie end <=====");
+		} catch (ApplicationServiceException e) {
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		}
+		return responseMap;
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/getCoterieCarouselPictures", method = RequestMethod.GET)
+	public Map<String, Object> getCoterieCarouselPictures() {
+		logger.info("=====> Start to get coterie carousel pictures <=====");
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			
+			List<String> urls = discoverService.getCoterieCarouselPictures();
+			ResponseHelper.addResponseSuccessData(responseMap, urls);
+			logger.info("=====> Get coterie carousel pictures end <=====");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
@@ -708,6 +792,15 @@ public class WechatController {
 			data.put("description", coterie.getDescription());
 			data.put("membersCnt", coterie.getCoterieGuys().size());
 			data.put("isJoined", coterie.isJoined(userId));
+			data.put("isCreator", coterie.isCreator(userId));
+			
+			List<String> tagList = new ArrayList<>();
+			for (CoterieTag coterieTag : coterie.getTags()) {
+				Tag tag = coterieTag.getTag();
+				tagList.add(tag.getName());
+			}
+			// 标签
+			data.put("tags", tagList);
 			
 			ResponseHelper.addResponseSuccessData(responseMap, data);
 			logger.info("=====> Get coterie info end <=====");

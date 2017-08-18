@@ -35,4 +35,6 @@ public interface DiscoverService {
 
 	Coterie getLastCoterie(int userId);
 
+	List<String> getCoterieCarouselPictures();
+
 }

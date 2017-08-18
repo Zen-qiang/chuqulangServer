@@ -39,4 +39,6 @@ public interface GeneralDao {
 
 	void saveWxOAuth2AccessToken(WxOAuth2AccessToken token);
 
+	List<String> getCoterieCarouselPictures();
+
 }

@@ -96,10 +96,10 @@
             });
 			
 			$('#test').click(function(){
-                $.post("api/editActivity",{
+                $.post("api/editCoterie",{
                 	userId : $('#userId').val(),
-                	activityId : $('#activityId').val(),
-                	pictures : pic
+                	coterieId : $('#coterieId').val(),
+                	picture : pic
                 },function(result){
                 	console.log(result);
                 });
@@ -139,7 +139,7 @@ NAME：<input type="text" id="paramName10" value=""/>VALUE：<input type="text" 
 
 <h2>TEST：</h2>
 userId：<input type="text" value="2" id="userId"/><br>
-activityId：<input type="text" value="1" id="activityId"/><br>
+coterieId：<input type="text" value="4" id="coterieId"/><br>
 <input type="file" value="转base64" id="input" onchange="gotoBase(event)"><br>
 <button id="test">TEST</button>
 
