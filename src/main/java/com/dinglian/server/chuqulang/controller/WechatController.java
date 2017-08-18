@@ -507,7 +507,7 @@ public class WechatController {
 			coterie.setCreator(user);
 			coterie.setHot(0);
 			
-			if (StringUtils.isNotBlank(tags) && tags.indexOf(",") > 0) {
+			if (StringUtils.isNotBlank(tags)) {
 				String[] tagsSplit = tags.split(",");
 				for (int j = 1; j <= tagsSplit.length; j++) {
 					Tag tag = activityService.findTagById(Integer.parseInt(tagsSplit[j - 1]));
@@ -582,7 +582,7 @@ public class WechatController {
 				coterie.setDescription(description);
 			}
 			
-			if (StringUtils.isNotBlank(tags) && tags.indexOf(",") > 0) {
+			if (StringUtils.isNotBlank(tags)) {
 				coterie.getTags().clear();
 				String[] tagsSplit = tags.split(",");
 				int i = 1;
@@ -715,7 +715,7 @@ public class WechatController {
 			}
 			
 			List<Integer> tags = new ArrayList<Integer>();
-			if (StringUtils.isNotBlank(secondLevelTagIds) && secondLevelTagIds.indexOf(",") > 0) {
+			if (StringUtils.isNotBlank(secondLevelTagIds)) {
 				String[] tag2Ids = secondLevelTagIds.split(",");
 				for (String tagId : tag2Ids) {
 					tags.add(Integer.parseInt(tagId));
@@ -1184,7 +1184,7 @@ public class WechatController {
 				event.setPassword(password);
 			}
             
-            if (StringUtils.isNotBlank(tags) && tags.indexOf(",") > 0) {
+            if (StringUtils.isNotBlank(tags)) {
 				String[] tagsSplit = tags.split(",");
 				for (int j = 1; j <= tagsSplit.length; j++) {
 					Tag tag = activityService.findTagById(Integer.parseInt(tagsSplit[j - 1]));
@@ -1382,7 +1382,7 @@ public class WechatController {
         	event.setAllowSignUp(true);
         	event.setStatus(Event.STATUS_SIGNUP);
         	
-        	if (StringUtils.isNotBlank(tags) && tags.indexOf(",") > 0) {
+        	if (StringUtils.isNotBlank(tags)) {
 				String[] tagsSplit = tags.split(",");
 				
 				event.getTags().clear();
