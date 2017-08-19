@@ -497,7 +497,11 @@ public class WechatController {
 		try {
 			User user = userService.findUserById(userId);
 			if (user == null) {
-				throw new UserException(UserException.NOT_EXISTING);
+				throw new ApplicationServiceException(ApplicationServiceException.USER_NOT_EXIST);
+			}
+			
+			if (StringUtils.isBlank(name) || StringUtils.isBlank(tags)) {
+				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_PARAM_IS_EMPTY);
 			}
 
 			Coterie coterie = new Coterie();
@@ -540,7 +544,7 @@ public class WechatController {
 			}
 			ResponseHelper.addResponseSuccessData(responseMap, null);
 			logger.info("=====> Create coterie end <=====");
-		} catch (UserException e) {
+		} catch (ApplicationServiceException e) {
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1163,7 +1167,11 @@ public class WechatController {
         	
         	User user = userService.findUserById(userId);
         	if (user == null) {
-				throw new UserException(UserException.NOT_EXISTING);
+				throw new ApplicationServiceException(ApplicationServiceException.USER_NOT_EXIST);
+			}
+        	
+        	if (StringUtils.isBlank(name) || StringUtils.isBlank(tags) || StringUtils.isBlank(address) || StringUtils.isBlank(gps) || StringUtils.isBlank(charge)) {
+				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_PARAM_IS_EMPTY);
 			}
         	
             Event event = new Event();
@@ -1264,6 +1272,8 @@ public class WechatController {
 			
             logger.info("=====> Launch activity end <=====");
             ResponseHelper.addResponseSuccessData(resultMap, result);
+        } catch (ApplicationServiceException e) {
+        	ResponseHelper.addResponseFailData(resultMap, e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             ResponseHelper.addResponseFailData(resultMap, e.getMessage());
