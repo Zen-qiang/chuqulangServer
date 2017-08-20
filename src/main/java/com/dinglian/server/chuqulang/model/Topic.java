@@ -177,5 +177,15 @@ public class Topic implements Serializable {
 		}
 		return orderNo + 1;
 	}
+
+	@Transient
+	public boolean hasPraise(int userId) {
+		for (TopicPraise praise : this.getPraises()) {
+			if (praise.getUser().getId() == userId) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 }

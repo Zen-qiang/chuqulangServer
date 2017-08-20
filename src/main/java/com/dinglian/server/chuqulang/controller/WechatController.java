@@ -827,6 +827,7 @@ public class WechatController {
 	@ResponseBody
 	@RequestMapping(value = "/getTopicList", method = RequestMethod.GET)
 	public Map<String, Object> getTopicList(@RequestParam("coterieId") int coterieId,
+			@RequestParam("userId") int userId,
 			@RequestParam(name = "pageSize", required = false) Integer pageSize,
 			@RequestParam(name = "start", required = false) Integer startRow,
 			@RequestParam(name = "dataType", required = false) String dataType) {
@@ -863,6 +864,7 @@ public class WechatController {
 //					map.put("topicCreateTime", topic.getCreationDate());
 					map.put("commentCnt", topic.getComments().size());
 					map.put("praiseCnt", topic.getPraises().size());
+					map.put("hasPraise", topic.hasPraise(userId));
 					
 					// 用户相关
 					/*User topicUser = topic.getCreator();
