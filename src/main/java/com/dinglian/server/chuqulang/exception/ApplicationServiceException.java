@@ -24,6 +24,7 @@ public class ApplicationServiceException extends RuntimeException {
 	public final static int ACTIVITY_SPACE_INSUFFICIENT = 2005;
 	public final static int ACTIVITY_HAS_SIGNUPED = 2006;
 	public final static int ACTIVITY_NOT_CREATOR = 2007;
+	public final static int ACTIVITY_PARAM_IS_EMPTY = 2008;
 	
 	public final static int ACTIVITY_TOPIC_EXIST = 2101;
 	public final static int ACTIVITY_TOPIC_NOT_EXIST = 2102;
@@ -31,6 +32,7 @@ public class ApplicationServiceException extends RuntimeException {
 	// 圈子相关
 	public final static int COTERIE_NOT_EXIST = 3001;
 	public final static int COTERIE_NOT_CREATOR = 3002;
+	public final static int COTERIE_PARAM_IS_EMPTY = 3003;
 	
 	// 话题相关
 	public final static int TOPIC_EXIST = 4001;
@@ -72,10 +74,14 @@ public class ApplicationServiceException extends RuntimeException {
 			return "活动留言已存在";
 		case ACTIVITY_TOPIC_NOT_EXIST:
 			return "活动留言不存在";
+		case ACTIVITY_PARAM_IS_EMPTY:
+			return "参数不能为空";
 		case COTERIE_NOT_EXIST:
 			return "圈子不存在";
 		case COTERIE_NOT_CREATOR:
 			return "您不是圈子创建者";
+		case COTERIE_PARAM_IS_EMPTY:
+			return "参数不能为空";
 		case ACCESS_TOKEN_NOT_EXIST:
 			return "Access Token 不存在，请重新获取授权";
 		default:
