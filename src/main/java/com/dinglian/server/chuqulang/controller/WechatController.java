@@ -1177,7 +1177,7 @@ public class WechatController {
 				throw new ApplicationServiceException(ApplicationServiceException.USER_NOT_EXIST);
 			}
         	
-        	if (StringUtils.isBlank(name) || StringUtils.isBlank(tags) || StringUtils.isBlank(address) || StringUtils.isBlank(gps) || StringUtils.isBlank(charge)) {
+        	if (StringUtils.isBlank(name) || StringUtils.isBlank(tags) || StringUtils.isBlank(address) /*|| StringUtils.isBlank(gps)*/ || StringUtils.isBlank(charge)) {
 				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_PARAM_IS_EMPTY);
 			}
         	
