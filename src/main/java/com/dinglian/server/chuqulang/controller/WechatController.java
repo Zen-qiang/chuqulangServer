@@ -798,10 +798,15 @@ public class WechatController {
 			data.put("isJoined", coterie.isJoined(userId));
 			data.put("isCreator", coterie.isCreator(userId));
 			
-			List<String> tagList = new ArrayList<>();
+			List<Map> tagList = new ArrayList<>();
 			for (CoterieTag coterieTag : coterie.getTags()) {
 				Tag tag = coterieTag.getTag();
-				tagList.add(tag.getName());
+				if (tag != null) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("id", tag.getId());
+					map.put("name", tag.getName());
+					tagList.add(map);
+				}
 			}
 			// 标签
 			data.put("tags", tagList);
@@ -1616,11 +1621,14 @@ public class WechatController {
 			}
 			
 			// 标签
-			List<String> tagList = new ArrayList<>();
+			List<Map> tagList = new ArrayList<>();
 			for (EventTag eventTag : event.getTags()) {
 				Tag tag = eventTag.getTag();
 				if (tag != null) {
-					tagList.add(tag.getName());
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("id", tag.getId());
+					map.put("name", tag.getName());
+					tagList.add(map);
 				}
 			}
 			result.put("tags", tagList);
