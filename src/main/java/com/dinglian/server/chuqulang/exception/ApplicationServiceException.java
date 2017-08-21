@@ -38,6 +38,9 @@ public class ApplicationServiceException extends RuntimeException {
 	public final static int TOPIC_EXIST = 4001;
 	public final static int TOPIC_NOT_EXIST = 4002;
 	
+	// 百度接口
+	public final static int IP_INVALID = 5001;
+	
 	private int code;
 
 	private static String getMessage(int code) {
@@ -84,6 +87,8 @@ public class ApplicationServiceException extends RuntimeException {
 			return "参数不能为空";
 		case ACCESS_TOKEN_NOT_EXIST:
 			return "Access Token 不存在，请重新获取授权";
+		case IP_INVALID:
+			return "IP定位失败，请检查参数";
 		default:
 			return null; // cannot be
 		}

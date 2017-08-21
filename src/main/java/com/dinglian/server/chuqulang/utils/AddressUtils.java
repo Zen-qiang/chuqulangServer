@@ -9,6 +9,17 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.Consts;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+
+import com.dinglian.server.chuqulang.exception.ApplicationServiceException;
+
+import net.sf.json.JSONObject;
 
 /**
  * 根据IP地址获取详细的地域信息
@@ -242,6 +253,26 @@ public class AddressUtils {
 //			return infos[1];
 			info = info.replace("	", " ");
 			return info;
+		}
+		return "";
+	}
+	
+	//=======================百度IP定位========================
+	public static String getLocation(String ip) throws ClientProtocolException, IOException{
+		if (StringUtils.isNotBlank(ip)) {
+			String url = "http://api.map.baidu.com/location/ip?ak=k4rZ0mvGzRCuaDKrEcjKOHdHSP2dIbG6&coor=bd09ll&ip=%s";
+			url = String.format(url, ip);
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+			HttpGet httpGet = new HttpGet(url);
+			CloseableHttpResponse httpResponse = httpclient.execute(httpGet);
+			String response = EntityUtils.toString(httpResponse.getEntity(), Consts.UTF_8);
+			JSONObject jsonObject=JSONObject.fromObject(response);
+			if (jsonObject.getInt("status") != 0) {
+				throw new ApplicationServiceException(ApplicationServiceException.IP_INVALID);
+			}
+			
+			JSONObject content = jsonObject.getJSONObject("content");
+			return content.getString("address");
 		}
 		return "";
 	}

@@ -336,7 +336,7 @@ public class UserController {
 			
 			// IP不同提示登录地点
 			String ip = request.getRemoteAddr();
-			String address = AddressUtils.getLoginAddresses(ip);
+			String address = AddressUtils.getLocation(ip);
 			String content = "";
 			if (!ip.equalsIgnoreCase(user.getLastLoginIp()) && StringUtils.isNotBlank(user.getLastLoginCity())) {
 				content = "最近一次登录地点：%s ,登录时间：%s ,IP地址：%s ";
@@ -362,6 +362,8 @@ public class UserController {
 		} catch (AuthenticationException e) {
 			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, errorMsg);
 			return resultMap;
+		} catch (Exception e) {
+			ResponseHelper.addResponseData(resultMap, RequestHelper.RESPONSE_STATUS_FAIL, e.getMessage());
 		}
 		
 		logger.info("=====> User login end <=====");
