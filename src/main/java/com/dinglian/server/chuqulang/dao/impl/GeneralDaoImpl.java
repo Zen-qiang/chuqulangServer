@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.dao.GeneralDao;
 import com.dinglian.server.chuqulang.model.Contact;
+import com.dinglian.server.chuqulang.model.CoterieCarouselPicture;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.TopicPraise;
 import com.dinglian.server.chuqulang.model.UserAttention;
@@ -131,9 +132,8 @@ public class GeneralDaoImpl implements GeneralDao {
 	}
 
 	@Override
-	public List<String> getCoterieCarouselPictures() {
-		String sql = "SELECT url FROM coterie_carousel_picture";
-		return getCurrentSession().createSQLQuery(sql).list();
+	public List<CoterieCarouselPicture> getCoterieCarouselPictures() {
+		return getCurrentSession().createQuery("FROM CoterieCarouselPicture ORDER BY orderNo").list();
 	}
 
 }

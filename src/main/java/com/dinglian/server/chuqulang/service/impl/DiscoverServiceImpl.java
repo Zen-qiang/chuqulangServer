@@ -12,6 +12,7 @@ import com.dinglian.server.chuqulang.dao.CoterieDao;
 import com.dinglian.server.chuqulang.dao.GeneralDao;
 import com.dinglian.server.chuqulang.dao.TopicDao;
 import com.dinglian.server.chuqulang.model.Coterie;
+import com.dinglian.server.chuqulang.model.CoterieCarouselPicture;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.Topic;
 import com.dinglian.server.chuqulang.model.TopicPraise;
@@ -105,7 +106,7 @@ public class DiscoverServiceImpl implements DiscoverService {
 	}
 
 	@Override
-	public List<String> getCoterieCarouselPictures() {
+	public List<CoterieCarouselPicture> getCoterieCarouselPictures() {
 		return generalDao.getCoterieCarouselPictures();
 	}
 

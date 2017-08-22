@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.model.Coterie;
+import com.dinglian.server.chuqulang.model.CoterieCarouselPicture;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.Topic;
 import com.dinglian.server.chuqulang.model.TopicPraise;
@@ -35,6 +36,6 @@ public interface DiscoverService {
 
 	Coterie getLastCoterie(int userId);
 
-	List<String> getCoterieCarouselPictures();
+	List<CoterieCarouselPicture> getCoterieCarouselPictures();
 
 }

@@ -36,6 +36,7 @@ import com.dinglian.server.chuqulang.exception.AesException;
 import com.dinglian.server.chuqulang.exception.ApplicationServiceException;
 import com.dinglian.server.chuqulang.exception.UserException;
 import com.dinglian.server.chuqulang.model.Coterie;
+import com.dinglian.server.chuqulang.model.CoterieCarouselPicture;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.CoteriePicture;
 import com.dinglian.server.chuqulang.model.CoterieTag;
@@ -632,14 +633,50 @@ public class WechatController {
 	}
 	
 	@ResponseBody
+	@RequestMapping(value = "/dismissCoterie", method = RequestMethod.GET)
+	public Map<String, Object> dismissCoterie(@RequestParam("userId") int userId, @RequestParam("coterieId") int coterieId) {
+		logger.info("=====> Start to dismiss coterie <=====");
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			Coterie coterie = discoverService.findCoterieById(coterieId);
+			if (coterie == null) {
+				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_EXIST);
+			}
+			
+			if (coterie.getCreator().getId() != userId) {
+				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_CREATOR);
+			}
+
+			coterie.setDismissed(true);
+			discoverService.saveCoterie(coterie);
+			
+			ResponseHelper.addResponseSuccessData(responseMap, null);
+			logger.info("=====> Dismiss coterie end <=====");
+		} catch (ApplicationServiceException e) {
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		}
+		return responseMap;
+	}
+	
+	@ResponseBody
 	@RequestMapping(value = "/getCoterieCarouselPictures", method = RequestMethod.GET)
 	public Map<String, Object> getCoterieCarouselPictures() {
 		logger.info("=====> Start to get coterie carousel pictures <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
 			
-			List<String> urls = discoverService.getCoterieCarouselPictures();
-			ResponseHelper.addResponseSuccessData(responseMap, urls);
+			List<CoterieCarouselPicture> pictures = discoverService.getCoterieCarouselPictures();
+			List<Map> resultList = new ArrayList<Map>();
+			for (CoterieCarouselPicture coterieCarouselPicture : pictures) {
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("url", coterieCarouselPicture.getUrl());
+				map.put("redirectUrl", coterieCarouselPicture.getRedirectUrl());
+				resultList.add(map);
+			}
+			ResponseHelper.addResponseSuccessData(responseMap, resultList);
 			logger.info("=====> Get coterie carousel pictures end <=====");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -752,6 +789,7 @@ public class WechatController {
 					data.put("description", coterie.getDescription());
 					data.put("membersCnt", coterie.getCoterieGuys().size());
 					data.put("activityCnt", coterie.getEvents().size());
+					data.put("isDismissed", coterie.isDismissed());
 					
 					List<String> tagList = new ArrayList<>();
 					for (CoterieTag coterieTag : coterie.getTags()) {
@@ -797,6 +835,7 @@ public class WechatController {
 			data.put("membersCnt", coterie.getCoterieGuys().size());
 			data.put("isJoined", coterie.isJoined(userId));
 			data.put("isCreator", coterie.isCreator(userId));
+			data.put("isDismissed", coterie.isDismissed());
 			
 			List<Map> tagList = new ArrayList<>();
 			for (CoterieTag coterieTag : coterie.getTags()) {
@@ -865,21 +904,9 @@ public class WechatController {
 				for (Topic topic : topics) {
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("topicId", topic.getId());
-//					map.put("description", topic.getDescription());
-//					map.put("topicCreateTime", topic.getCreationDate());
 					map.put("commentCnt", topic.getComments().size());
 					map.put("praiseCnt", topic.getPraises().size());
 					map.put("hasPraise", topic.hasPraise(userId));
-					
-					// 用户相关
-					/*User topicUser = topic.getCreator();
-					if (topicUser != null) {
-						Map<String, Object> userMap = new HashMap<String, Object>();
-						userMap.put("userId", topicUser.getId());
-						userMap.put("nickName", topicUser.getNickName());
-						userMap.put("picture", topicUser.getPicture());
-						map.put("user", userMap);
-					}*/
 					
 					// 活动相关
 					Event event = topic.getEvent();

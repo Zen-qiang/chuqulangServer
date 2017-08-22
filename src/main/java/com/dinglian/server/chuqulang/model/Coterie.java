@@ -49,6 +49,8 @@ public class Coterie implements Serializable {
 	private Date creationDate; // 创建时间
 
 	private CoteriePicture coteriePicture; // 圈子图片
+	
+	private boolean dismissed;
 
 	private Set<CoterieGuy> coterieGuys = new HashSet<CoterieGuy>(); // 圈子成员
 
@@ -160,6 +162,14 @@ public class Coterie implements Serializable {
 
 	public void setEvents(List<Event> events) {
 		this.events = events;
+	}
+	
+	public boolean isDismissed() {
+		return dismissed;
+	}
+
+	public void setDismissed(boolean dismissed) {
+		this.dismissed = dismissed;
 	}
 
 	@Transient
