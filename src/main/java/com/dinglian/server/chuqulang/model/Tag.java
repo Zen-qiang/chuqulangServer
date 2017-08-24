@@ -2,6 +2,7 @@ package com.dinglian.server.chuqulang.model;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -19,6 +20,8 @@ public class Tag implements Serializable {
 	public static final String TAG_STREET_DANCE = "街舞";
 	public static final String TAG_BOARD_GAME = "桌游";
 	public static final String TAG_OTHER = "其他";
+	
+	public static final String TAG_UNLIMITED = "不限";
 
 	private int id;
 	
@@ -46,6 +49,7 @@ public class Tag implements Serializable {
 		this.type = type;
 	}
 
+	@Column(unique = true)
 	public String getName() {
 		return name;
 	}

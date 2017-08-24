@@ -6,6 +6,7 @@ import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.model.Contact;
 import com.dinglian.server.chuqulang.model.CoterieCarouselPicture;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
+import com.dinglian.server.chuqulang.model.Tag;
 import com.dinglian.server.chuqulang.model.TopicPraise;
 import com.dinglian.server.chuqulang.model.UserAttention;
 import com.dinglian.server.chuqulang.model.WxAccessToken;
@@ -41,5 +42,7 @@ public interface GeneralDao {
 	void saveWxOAuth2AccessToken(WxOAuth2AccessToken token);
 
 	List<CoterieCarouselPicture> getCoterieCarouselPictures();
+
+	Tag findTagByName(String tagName);
 
 }

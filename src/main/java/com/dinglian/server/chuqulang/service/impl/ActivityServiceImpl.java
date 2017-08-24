@@ -11,6 +11,7 @@ import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.dao.ActivityDao;
 import com.dinglian.server.chuqulang.dao.EventDao;
 import com.dinglian.server.chuqulang.dao.EventUserDao;
+import com.dinglian.server.chuqulang.dao.GeneralDao;
 import com.dinglian.server.chuqulang.dao.TagDao;
 import com.dinglian.server.chuqulang.dao.UserCollectDao;
 import com.dinglian.server.chuqulang.model.Event;
@@ -37,6 +38,9 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private ActivityDao activityDao;
+    
+    @Autowired
+    private GeneralDao generalDao;
 
     @Override
     public void saveEvent(Event event) throws Exception {
@@ -120,6 +124,11 @@ public class ActivityServiceImpl implements ActivityService {
 		} else {
 			return tagDao.getChildTags(parentId);
 		}
+	}
+
+	@Override
+	public Tag findTagByName(String tagName) {
+		return generalDao.findTagByName(tagName);
 	}
 
 }

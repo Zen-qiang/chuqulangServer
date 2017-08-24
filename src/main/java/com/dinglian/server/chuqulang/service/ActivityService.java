@@ -40,4 +40,6 @@ public interface ActivityService {
 
 	List<Tag> getSecondLevelTags(Integer parentId);
 
+	Tag findTagByName(String tagUnlimited);
+
 }

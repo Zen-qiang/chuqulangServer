@@ -754,19 +754,23 @@ public class WechatController {
 			if (pageSize == null) {
 				pageSize = ApplicationConfig.getInstance().getDefaultPageSize();
 			}
-			
 			List<Integer> tags = new ArrayList<Integer>();
 			if (StringUtils.isNotBlank(secondLevelTagIds)) {
-				String[] tag2Ids = secondLevelTagIds.split(",");
-				for (String tagId : tag2Ids) {
-					tags.add(Integer.parseInt(tagId));
+				Tag unlimitedTag = activityService.findTagByName(Tag.TAG_UNLIMITED);
+				if (unlimitedTag != null && secondLevelTagIds.indexOf(String.valueOf(unlimitedTag.getId())) == -1) {
+					String[] tag2Ids = secondLevelTagIds.split(",");
+					for (String tagId : tag2Ids) {
+						tags.add(Integer.parseInt(tagId));
+					}
+				} else if (firstLevelTagId != null){
+					tags.add(firstLevelTagId);
 				}
-			} else if (firstLevelTagId != null) {
+			} else if (firstLevelTagId != null){
 				tags.add(firstLevelTagId);
 			}
 			
 			SearchCriteria searchCriteria = new SearchCriteria();
-			if (tags != null) {
+			if (tags.size() > 0) {
 				searchCriteria.setTags(tags);
 			}
 			searchCriteria.setStartRow(startRow);

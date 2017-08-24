@@ -31,8 +31,9 @@ public class Coterie implements Serializable {
 	public static final String TYPE_HOT = "hot";
 	public static final String TYPE_NEW = "new";
 
-	public static final String DATATYPE_CREATED = "1";
-	public static final String DATATYPE_ATTENTION = "2";
+	public static final String DATATYPE_ALL = "1";
+	public static final String DATATYPE_CREATED = "2";
+	public static final String DATATYPE_ATTENTION = "3";
 
 	private int id;
 
