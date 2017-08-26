@@ -104,6 +104,7 @@ body {
 .dinglian-btn {
 	color: #000000;
 	background-color: #FFD700;
+	border-radius: 20px;
 }
 
 .change-btn {
@@ -158,8 +159,8 @@ body {
 	position: relative;
 	display: block;
 	background-color: white;
-	min-width: 80px;
-	padding: 5px;
+	min-width: 18px;
+	padding: 3px;
 	margin:2px;
 	color: black;
 	border-radius: 5px;
@@ -239,4 +240,26 @@ hr {
 	-ms-transform: translateY(-50%);
 	-o-transform: translateY(-50%);
 	transform: translateY(-50%);
+}
+.footbut{
+	line-height: 50px;
+	text-align: center;
+	border-radius: 5px;
+	margin-top: 50px;
+	margin-bottom: 70px;
+}
+.picturefont{
+	border-bottom: 2px solid white;
+	position: relative;
+	top: -45px;
+	left: 10px;
+	font-size: 20px;
+	width: 100px;
+}
+.picturefont2{
+	position: relative;
+	top: -300px;
+	left: 10px;
+	font-size: 20px;
+	width: 100px;
 }

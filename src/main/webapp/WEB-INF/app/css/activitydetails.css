@@ -1,0 +1,27 @@
+@CHARSET "UTF-8";
+.imgstyle{
+	width: 30px;
+	height: 30px;
+	margin-top: 8px;
+	margin-bottom: 8px;
+	border-radius: 50%;
+	margin-right: 5px;
+}
+.imgstyle2{
+	width: 50px;
+	height: 60px;
+	margin-top: 8px;
+	margin-bottom: 8px;
+}
+.spanfont{
+	font-size: 16px;
+	color: grey;
+}
+.divstyle{
+	background-color: white;
+	border-bottom: 1px solid #dddddd;
+}
+.footbut{
+	line-height: 50px;
+	text-align: center;
+}

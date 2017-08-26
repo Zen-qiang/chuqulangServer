@@ -1,0 +1,50 @@
+@CHARSET "UTF-8";
+.list-inline li{
+	width: 80px;
+	height: 30px;
+	text-align: center;
+	line-height: 30px;
+}
+.list-inline li a{
+	text-decoration: none;
+	color: gray;
+}
+.iconstyle{
+	text-decoration: none;
+	color: gray;
+}
+.fontred{
+	color: red;
+	line-height: 30px;
+	margin-top: 10px;
+}
+.fontlineheight{
+	line-height: 30px;
+	margin-top: 10px;
+	color: grey;
+}
+.fontlineheight2{
+	line-height: 22px;
+	margin-top: 10px;
+	color: grey;
+}
+.activitymargin{
+	margin-top: 15px;
+}
+.activitymargin2{
+	margin-top: 5px;
+}
+.list-inline>li>a {
+	min-width: 80px;
+	padding: 5px;
+	color: black;
+	border-radius: 5px;
+	text-decoration: none;
+	font-weight: 100;
+}
+.list-inline>li:hover {
+	background-color: yellow;
+	font-weight:bold;
+	color:white;
+	cursor: pointer;
+}

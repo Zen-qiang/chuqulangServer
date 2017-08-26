@@ -1687,6 +1687,14 @@ public class WechatController {
 			numbersMap.put("currentCount", eventUsers.size());
 			result.put("userCount", numbersMap);
 			
+			Coterie coterie = event.getCoterie();
+			if (coterie != null) {
+				Map<String, Object> coterieMap = new HashMap<String, Object>();
+				coterieMap.put("id", coterie.getId());
+				coterieMap.put("name", coterie.getName());
+				result.put("coterie", coterieMap);
+			}
+			
 			logger.info("=====> Get activity info end <=====");
 			ResponseHelper.addResponseSuccessData(resultMap, result);
 		} catch (ActivityException e) {

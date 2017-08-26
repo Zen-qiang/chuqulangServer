@@ -42,9 +42,28 @@ public class HomeController {
 		return "index";
 	}
 	
+	@RequestMapping("/findactivity")
+	public String findactivity(Locale locale, Model model) {
+		return "findactivity";
+	}
+	
 	@RequestMapping("/index")
 	public String index(Locale locale, Model model) {
 		return "index";
+	}
+	@RequestMapping("/loginactivity")
+	public String loginactivity(Locale locale, Model model) {
+		return "loginactivity";
+	}
+	
+	@RequestMapping("/activitydetails")
+	public String activitydetails(Locale locale, Model model) {
+		return "activitydetails";
+	}
+	
+	@RequestMapping("/communitytalk")
+	public String communitytalk(Locale locale, Model model) {
+		return "communitytalk";
 	}
 	
 	@RequestMapping("/community")
