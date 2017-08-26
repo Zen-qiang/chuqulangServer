@@ -12,8 +12,8 @@
 		var code = '<%=request.getParameter("code")%>';
 		var state = '<%=request.getParameter("state")%>';
 		var redirectUrl = '<%=request.getParameter("redirectUrl")%>';
-		console.log(code);
-		console.log(redirectUrl);
+		//console.log(code);
+		//console.log(redirectUrl);
 		$.ajax({
 			url : 'getAccessToken',
 			data : {
@@ -21,7 +21,7 @@
 				state : state
 			},
 			success : function(response, status, xhr) {
-				console.log(response.data.openId);
+				//console.log(response.data.openId);
 				window.location.href = redirectUrl + "?openId=" + response.data.openId;
 			},
 			dataType : 'json'

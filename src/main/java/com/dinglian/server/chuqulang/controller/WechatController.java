@@ -121,7 +121,7 @@ public class WechatController {
 
 	@ResponseBody
 	@RequestMapping(value = "/userAuthorization", method = RequestMethod.GET)
-	public ModelAndView userAuthorization(@RequestParam("callbackUrl") String callbackUrl) {
+	public String userAuthorization(@RequestParam("callbackUrl") String callbackUrl) {
 		logger.info("=====> Start to user authorization <=====");
 		String url = "";
 		try {
@@ -133,7 +133,8 @@ public class WechatController {
 			e.printStackTrace();
 		}
 		logger.info("=====> User authorization info end <=====");
-		return new ModelAndView(new RedirectView(url));
+//		return new ModelAndView(new RedirectView(url));
+		return url;
 	}
 
 	/**
@@ -1189,7 +1190,7 @@ public class WechatController {
     		@RequestParam("tags") String tags,
     		@RequestParam("name") String name,
     		@RequestParam(name = "pictures", required = false) String[] pictures,
-    		@RequestParam(name = "startTime",required = false) Date startTime,
+    		@RequestParam(name = "startTime",required = false) long startTimeMillisecond,
     		@RequestParam("gps") String gps,
     		@RequestParam("address") String address,
             @RequestParam("minCount") int minCount,
@@ -1243,7 +1244,7 @@ public class WechatController {
 			}
             
             event.setName(name);
-            
+            Date startTime = new Date(startTimeMillisecond);
             event.setStartTime(startTime);
             event.setMinCount(minCount);
             event.setMaxCount(maxCount);
@@ -1305,8 +1306,11 @@ public class WechatController {
             activityService.saveEvent(event);
             
             Map<String, Object> result = new HashMap<String, Object>();
+            Coterie coterie = event.getCoterie();
 			result.put("activityId", event.getId());
-			result.put("coterieId", event.getCoterie().getId());
+			result.put("coterieId", coterie.getId());
+			result.put("coterieName", coterie.getName());
+			result.put("coterieCover", coterie.getCoteriePicture() != null ? coterie.getCoteriePicture().getUrl() : "");
 			
             logger.info("=====> Launch activity end <=====");
             ResponseHelper.addResponseSuccessData(resultMap, result);

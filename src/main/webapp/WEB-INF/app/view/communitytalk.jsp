@@ -50,7 +50,7 @@
 					<input type="text" class="form-control" placeholder="请输入关键字">
 					<A href="#" onclick="userinfo()" data-container="body">
 					<span class="glyphicon glyphicon glyphicon-user"
-						style="margin-left: 20px;color: white;" aria-hidden="true"></span>
+						style="color: white;" aria-hidden="true"></span>
 					</A>
 				</form>
 			</div>
@@ -65,14 +65,14 @@
 			<div class="row communitytalknav2">
 				<div class="col-xs-8 col-sm-8 col-md-8">
 					<img class="bodyImage logoimg"
-					  src="resources/img/chuqulangLOGO728-03.png">
+					  src="resources/img/chuqulanglogo.png">
 				</div>
 				<div class="col-xs-4 col-sm-4 col-md-4 gongaofont4">
 					<h3>出去浪论坛</h3>
 				</div>
 			</div>
 			<!-- 圈子文化 -->
-			<div class="row communitytalknav2" style="background: url(resources/img/luntanbg.png);height: 50px;">
+			<div class="row communitytalknav2" style="background: url(resources/img/culturalbackground.png);height: 50px;">
 				<div class="col-xs-8 col-sm-8 col-md-8 gongaofont2">
 					圈子文化-趣味爱好兴趣门户-社区/论坛
 				</div>
@@ -198,7 +198,7 @@
 				 	<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 bordergrey">
 				 		<div class="row">
 				 			<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-				 				<img class="bodyImage" src="resources/img/huodong.png">
+				 				<img class="bodyImage" src="resources/img/forumactivities.png">
 				 			</div>
 				 			<div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
 				 				<div class="row">

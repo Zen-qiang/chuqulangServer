@@ -51,7 +51,7 @@
 					<input type="text" class="form-control" placeholder="请输入关键字">
 					<A href="#" onclick="userinfo()" data-container="body">
 					<span class="glyphicon glyphicon glyphicon-user"
-						style="margin-left: 20px;color: white;" aria-hidden="true"></span>
+						style="color: white;" aria-hidden="true"></span>
 					</A>
 				</form>
 			</div>

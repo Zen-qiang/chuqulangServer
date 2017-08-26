@@ -48,7 +48,7 @@
 				<form class="navbar-form navbar-right">
 					<input type="text" class="form-control" placeholder="请输入关键字">
 					<span class="glyphicon glyphicon glyphicon-user"
-						style="margin-left: 20px;color: white;" aria-hidden="true"></span>
+						style="color: white;" aria-hidden="true"></span>
 				</form>
 			</div>
 		</div>
@@ -61,7 +61,7 @@
 		</ol>
 		<div class="carousel-inner" role="listbox">
 			<div class="item active">
-				<img class="first-slide" src="resources/img/33333.jpg" alt="First slide">
+				<img class="first-slide" src="resources/img/index.jpg" alt="First slide">
 				<button class="btn btn-lg dinglian-btn btn-disable dinglian-button">敬请期待</button>
 			</div>
 		</div>

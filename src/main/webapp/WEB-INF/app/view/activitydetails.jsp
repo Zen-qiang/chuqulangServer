@@ -52,7 +52,7 @@
 					<input type="text" class="form-control" placeholder="请输入关键字">
 					<A href="#" onclick="userinfo()" data-container="body">
 					<span class="glyphicon glyphicon glyphicon-user"
-						style="margin-left: 20px;color: white;" aria-hidden="true"></span>
+						style="color: white;" aria-hidden="true"></span>
 					</A>
 				</form>
 			</div>
@@ -64,7 +64,7 @@
 	   <div class="col-xs-1 col-sm-1 col-md-3"></div>
 	   <div class="col-xs-10 col-sm-10 col-md-6">
 			<div class="row divstyle">
-				<img class="bodyImage" style="background-size: 100% 100%" src="resources/img/i98y987975.jpg">
+				<img class="bodyImage" style="background-size: 100% 100%" src="resources/img/discoveryactivities.jpg">
 			</div>
 				<!-- 文字开始 -->
 			<div class="row divstyle">
@@ -77,10 +77,10 @@
 			</div>
 			
 			<div class="row divstyle">
-				<div class="col-xs-3 col-sm-2 col-md-3 col-lg-2">
-					<img class="bodyImage imgstyle2" src="resources/img/i98y987975.jpg">
+				<div class="col-xs-4 col-sm-2 col-md-3 col-lg-2">
+					<img class="bodyImage imgstyle2" src="resources/img/discoveryactivities.jpg">
 				</div>
-				<div class="col-xs-9 col-sm-5 col-md-5 col-lg-7">
+				<div class="col-xs-8 col-sm-5 col-md-5 col-lg-7">
 					<table style="margin-top: 15px;">
 						<tr>
 							<th>上海曹路临时聊天</th>
@@ -131,7 +131,7 @@
 					<span  class="spanfont">地址</span>
 				</div>
 				<div class="col-xs-10 col-sm-9 col-md-8 col-lg-9 gongaofont2">
-					<span style="font-size: 18px;">浦东曹路体育馆浦东北路123号</span>
+					<span style="font-size: 17px;">浦东曹路体育馆浦东北路123号</span>
 				</div>
 				<div class="col-xs-2 col-sm-1 col-md-1 col-lg-1 gongaofont3">
 					<span class="glyphicon glyphicon-map-marker"></span>
@@ -139,13 +139,13 @@
 			</div>
 			
 			<div class="row divstyle" style="margin-top: 10px;">
-				<div class="col-xs-5 col-sm-6 col-md-3 col-lg-2 gongaofont2">
+				<div class="col-xs-4 col-sm-6 col-md-3 col-lg-2 gongaofont2">
 					<span style="font-size: 16px;">报名信息</span>
 				</div>
-				<div class="col-xs-7 col-sm-6 col-md-9 col-lg-10 gongaofont3">
-					<img class="bodyImage imgstyle" src="resources/img/i98y987975.jpg">
-					<img class="bodyImage imgstyle" src="resources/img/i98y987975.jpg">
-					<img class="bodyImage imgstyle" src="resources/img/i98y987975.jpg">
+				<div class="col-xs-8 col-sm-6 col-md-9 col-lg-10 gongaofont3">
+					<img class="bodyImage imgstyle" src="resources/img/discoveryactivities.jpg">
+					<img class="bodyImage imgstyle" src="resources/img/discoveryactivities.jpg">
+					<img class="bodyImage imgstyle" src="resources/img/discoveryactivities.jpg">
 					<span style="color: grey;">more</span><span class="glyphicon glyphicon-chevron-right"></span>
 				</div>
 			</div>

@@ -51,7 +51,7 @@
 					<input type="text" class="form-control" placeholder="请输入关键字">
 					<A href="#" onclick="userinfo()" data-container="body">
 					<span class="glyphicon glyphicon glyphicon-user"
-						style="margin-left: 20px;color: white;" aria-hidden="true"></span>
+						style="color: white;" aria-hidden="true"></span>
 					</A>
 				</form>
 			</div>
@@ -145,7 +145,8 @@
 						</ul>
 				</div>
 				
-				<div class="row widget hidden-lg" style="background-color: grey;line-height: 50px;">
+				<div class="row widget hidden-lg" style="background-color: grey;line-height: 50px;
+				margin-top: -30px;">
 					<div class="col-xs-10 col-sm-11 col-md-11">
 						分类
 					</div>
@@ -233,7 +234,8 @@
 				<div class="row">
 				<div class="col-xs-8 col-sm-8	col-md-7 col-lg-8">
 				</div>
-				<div class="col-xs-12 col-sm-12	col-md-5 col-lg-4">
+				<div class="col-xs-12 col-sm-12	col-md-5 col-lg-4"
+				style="margin-top: -10px;">
 					<div class="row">
 						<div class="col-xs-4 col-md-4">
 							<a href="#"  style="text-decoration: none;color: grey;" class="glyphicon glyphicon-th-large">默认排序</a>
@@ -250,7 +252,7 @@
 				<hr>
 		<div class="row placeholders activitymargin">
           <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -282,7 +284,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="activitydetails"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="activitydetails"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -314,7 +316,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -346,7 +348,7 @@
 			  </div>
             </div>
             <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -381,7 +383,7 @@
           
           		<div class="row placeholders activitymargin">
           <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -413,7 +415,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -445,7 +447,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -477,7 +479,7 @@
 			  </div>
             </div>
             <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -512,7 +514,7 @@
           
           		<div class="row placeholders activitymargin">
           <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -544,7 +546,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -576,7 +578,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -608,7 +610,7 @@
 			  </div>
             </div>
             <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -643,7 +645,7 @@
           
           		<div class="row placeholders activitymargin">
           <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -675,7 +677,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -707,7 +709,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -739,7 +741,7 @@
 			  </div>
             </div>
             <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/find1.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
