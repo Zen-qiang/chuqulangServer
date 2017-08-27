@@ -1,6 +1,7 @@
 package com.dinglian.server.chuqulang.controller;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,6 +10,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,11 +58,14 @@ import com.dinglian.server.chuqulang.service.ActivityService;
 import com.dinglian.server.chuqulang.service.DiscoverService;
 import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.service.WxMpService;
+import com.dinglian.server.chuqulang.utils.CodeUtils;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
+import com.dinglian.server.chuqulang.utils.RequestHelper;
 import com.dinglian.server.chuqulang.utils.ResponseHelper;
 import com.dinglian.server.chuqulang.utils.WXBizMsgCrypt;
 import com.dinglian.server.chuqulang.utils.WxRequestHelper;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 /**
@@ -1835,6 +1841,7 @@ public class WechatController {
 					result.put("status", event.getStatus());
 					result.put("gps", event.getGps());
 					result.put("address", event.getAddress());
+					result.put("isOpen", event.isOpen());
 					
 					// 封面
 					List<EventPicture> eventPictures = new ArrayList<EventPicture>(event.getEventPictures());
@@ -2223,15 +2230,16 @@ public class WechatController {
     		@RequestParam(name="realName",required = false) String realName,
     		@RequestParam(name="phoneNo",required = false) String phoneNo,
     		@RequestParam("gender") int gender,
-    		@RequestParam(name = "friends", required = false) String[] friends,
-    		@RequestParam(name="password",required = false) String password
+    		@RequestParam(name = "friends", required = false) String friends,
+    		@RequestParam(name="password",required = false) String password,
+    		@RequestParam("isEditSignUp") boolean isEditSignUp
     		) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         try {
         	logger.info("=====> Start to event signup <=====");
         	//获取当前用户报名信息
         	User user = userService.findUserById(userId);
-            Event event = activityService.getEventById(activityId);
+            Event event = activityService.findEventById(activityId);
             if (event == null) {
             	throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_EXIST);
 			}
@@ -2249,25 +2257,43 @@ public class WechatController {
             if (eventUsers.size() == event.getMaxCount()) {
             	throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_USER_FULL);
 			}
-            if (friends != null && (event.getMaxCount() - eventUsers.size()) <= (friends.length + 1)) {
-        		throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_SPACE_INSUFFICIENT);
+            JSONArray friendArray = null;
+            if (StringUtils.isNotBlank(friends)) {
+            	friendArray = JSONArray.fromObject(friends);
+            	if ((event.getMaxCount() - eventUsers.size()) <= (friendArray.size() + 1)) {
+            		throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_SPACE_INSUFFICIENT);
+    			}
 			}
-            //检查重复报名
-            boolean haveSignUp = event.haveSignUp(user.getId());
-            if (haveSignUp){
-                throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_HAS_SIGNUPED);
-            }
+            
+            if (!isEditSignUp) {
+            	//检查重复报名
+                boolean haveSignUp = event.haveSignUp(user.getId());
+                if (haveSignUp){
+                    throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_HAS_SIGNUPED);
+                }
+			}
+            
+            //清空旧报名信息
+            List<EventUser> needRemoveUsers = new ArrayList<EventUser>();
+            for (EventUser eventUser : event.getEventUsers()) {
+				if ((eventUser.getUser() != null && eventUser.getUser().getId() == user.getId()) 
+						|| (eventUser.getInviter() != null && eventUser.getInviter().getId() == user.getId())) {
+					needRemoveUsers.add(eventUser);
+				}
+			}
+            event.getEventUsers().removeAll(needRemoveUsers);
+            
             int maxOrderNo = event.getEventUserMaxOrderNo() + 1;
             EventUser fristeventUser = new EventUser(event, user, maxOrderNo++);
-            fristeventUser.setRealName(realName == null ? user.getNickName() : "");
-            fristeventUser.setPhoneNo(phoneNo == null ? user.getPhoneNo() : "");
+            fristeventUser.setRealName(realName != null ? realName : user.getNickName());
+            fristeventUser.setPhoneNo(phoneNo != null ? phoneNo : user.getPhoneNo());
             fristeventUser.setGender(gender);
             fristeventUser.setEffective(true);
             
             event.getEventUsers().add(fristeventUser);
-            if (friends != null) {
-				for (String friendsStr : friends) {
-					JSONObject obj = JSONObject.fromObject(friendsStr);
+            if (friendArray != null) {
+            	for (int i = 0; i < friendArray.size(); i++) {
+            		JSONObject obj = friendArray.getJSONObject(i);
 					if (obj != null) {
 						EventUser friend = new EventUser();
 						friend.setRealName(obj.getString("name"));
@@ -2321,6 +2347,12 @@ public class WechatController {
             	coterieMap.put("name", coterie.getName());
             	result.put("coterie", coterieMap);
 			}
+            
+            Map<String, Object> countMap = new HashMap<String, Object>();
+			countMap.put("maxCount", event.getMaxCount());
+			countMap.put("minCount", event.getMinCount());
+			countMap.put("currentCount", event.getEffectiveMembers().size());
+			result.put("userCount", countMap);
             
             ResponseHelper.addResponseSuccessData(resultMap, result);
             logger.info("=====> Event signup end <=====");
@@ -2416,6 +2448,7 @@ public class WechatController {
 					Map<String, Object> data = new HashMap<String, Object>();
 					data.put("userId", user.getId());
 					data.put("gender", eventUser.getGender());
+					data.put("phoneNo", eventUser.getPhoneNo());
 					data.put("signUpTime", eventUser.getCreationDate());
 					data.put("name", eventUser.getRealName());
 					data.put("picture", user.getPicture());
@@ -2443,6 +2476,132 @@ public class WechatController {
 
             ResponseHelper.addResponseSuccessData(resultMap, resultList);
             logger.info("=====> Event signup end <=====");
+        } catch (ApplicationServiceException e) {
+        	ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+        }
+        return resultMap;
+    }
+    
+    @ResponseBody
+	@RequestMapping(value = "/sendCode", method = RequestMethod.GET)
+	public Map<String, Object> sendCode(@RequestParam(name = "phoneno") String phoneNo) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		logger.info("=====> Start to send verify no <=====");
+		
+		try {
+			// 添加手机号格式验证
+			if (!isMobile(phoneNo)) {
+				throw new ApplicationServiceException(ApplicationServiceException.PHONE_NO_INVALID);
+			}
+
+			// 读取短信接口配置文件
+			Properties prop =  new Properties();
+			logger.info("loading sms.properties...");
+			InputStream in = getClass().getClassLoader().getResourceAsStream("sms.properties");
+			prop.load(in);
+			in.close();
+			
+			Date currentTime = new Date();
+			String verifyNo = CodeUtils.generateVerifyNo();
+			String sendhRes = "";
+			
+			// 同一号码，一小时内只可以接收三条验证码
+			boolean canSendSms = userService.checkUserVerifyNoByIp(phoneNo);
+			if (!canSendSms) {
+				throw new ApplicationServiceException(ApplicationServiceException.VERIFY_FREQUENT);
+			}
+			
+			// 检查旧验证码是否存在，是否过期
+			VerifyNo existVerifyNo = userService.getVerifyNo(phoneNo, VerifyNo.VERIFY_NO_TYPE_REGISTER);
+			if (existVerifyNo != null) {
+				// 如果未过期，发送旧验证码
+				Date createTime = existVerifyNo.getCreationTime();
+				long difference = currentTime.getTime() - createTime.getTime();
+				if (difference <= (60 * 1000)) {
+					// 间隔一分钟
+					throw new RuntimeException("请" + (60 - Math.round(difference * 0.001)) + "秒后再重新获取");
+				}
+				
+				// 10分钟有效期
+				if (difference <= (10 * 60 * 1000)) {
+					// 未过期,发送旧验证码
+					sendhRes = CodeUtils.sendSms(existVerifyNo, prop);
+				} else {
+					// 如果过期，发送新验证码，删除旧验证码
+					existVerifyNo.setValid(false);
+					userService.saveVerifyNo(existVerifyNo);
+					
+					VerifyNo newVerifyNo = new VerifyNo(phoneNo, verifyNo, VerifyNo.VERIFY_NO_TYPE_REGISTER, currentTime);
+					userService.saveVerifyNo(newVerifyNo);
+					
+					// 发送短信
+					sendhRes = CodeUtils.sendSms(newVerifyNo, prop);
+				}
+			} else {
+				// 旧验证码不存在，发送新验证码
+				VerifyNo newVerifyNo = new VerifyNo(phoneNo, verifyNo, VerifyNo.VERIFY_NO_TYPE_REGISTER, currentTime);
+				userService.saveVerifyNo(newVerifyNo);
+				
+				// 发送短信
+				sendhRes = CodeUtils.sendSms(newVerifyNo, prop);
+			}
+			logger.info(sendhRes);
+			ResponseHelper.addResponseSuccessData(resultMap, null);
+		} catch (ApplicationServiceException e) {
+        	ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+		}
+		logger.info("=====> Send verify no end <=====");
+		return resultMap;
+	}
+    
+    @ResponseBody
+    @RequestMapping(value = "/getSignInfo", method = RequestMethod.GET)
+    public Map<String, Object> getSignInfo(@RequestParam(name = "userId") int userId, @RequestParam(name = "activityId") int activityId) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        try {
+        	logger.info("=====> Start to get sign up info <=====");
+        	
+            Event event = activityService.findEventById(activityId);
+            if (event == null) {
+            	throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_EXIST);
+			}
+            
+            Set<EventUser> eventUsers = event.getEventUsers();
+            EventUser currentUser = null;
+            List<EventUser> retinues = new ArrayList<>();
+            for (EventUser eu : eventUsers) {
+				if (eu.getUser() != null && eu.getUser().getId() == userId) {
+					currentUser = eu;
+					continue;
+				}
+				if (eu.getInviter() != null && eu.getInviter().getId() == userId) {
+					retinues.add(eu);
+				}
+			}
+            
+            Map<String, Object> data = new HashMap<String, Object>();
+            if (currentUser != null) {
+            	data.put("realName", currentUser.getRealName());
+            	data.put("phoneNo", currentUser.getPhoneNo());
+            	data.put("gender", currentUser.getGender());
+            	List<Map> retinueList = new ArrayList<Map>();
+            	for (EventUser retinue : retinues) {
+            		Map<String, Object> retinueMap = new HashMap<String, Object>();
+            		retinueMap.put("name", retinue.getRealName());
+            		retinueMap.put("gender", retinue.getGender());
+            		retinueList.add(retinueMap);
+				}
+            	data.put("retinues", retinueList);
+			}
+
+            ResponseHelper.addResponseSuccessData(resultMap, data);
+            logger.info("=====> Get signup info end <=====");
         } catch (ApplicationServiceException e) {
         	ResponseHelper.addResponseFailData(resultMap, e.getMessage());
         } catch (Exception e) {

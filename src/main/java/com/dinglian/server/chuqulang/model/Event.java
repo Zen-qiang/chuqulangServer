@@ -252,7 +252,7 @@ public class Event implements Serializable {
 		this.tags = tags;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "event")
+	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "event", orphanRemoval = true)
 	public Set<EventUser> getEventUsers() {
 		return eventUsers;
 	}
@@ -370,7 +370,7 @@ public class Event implements Serializable {
 			if(eventUser.getUser()==null){
 				continue;
 			}
-			if (eventUser.getUser().getId() == userId) {
+			if (eventUser.getUser().getId() == userId && eventUser.isEffective()) {
 				return true;
 			}
 		}

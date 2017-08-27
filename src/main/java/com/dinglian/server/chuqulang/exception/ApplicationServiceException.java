@@ -6,6 +6,7 @@ public class ApplicationServiceException extends RuntimeException {
 	// 用户相关
 	public final static int PHONE_NO_INVALID = 1001;
 	public final static int PHONE_REGISTERED = 1002;
+	public final static int VERIFY_FREQUENT = 1003;
 	
 	public final static int VERIFY_CODE_INVALID = 1101;
 	public final static int VERIFY_CODE_EXPIRE = 1102;
@@ -49,6 +50,8 @@ public class ApplicationServiceException extends RuntimeException {
 			return "请输入正确的手机号码";
 		case PHONE_REGISTERED:
 			return "该手机号已经注册";
+		case VERIFY_FREQUENT:
+			return "同一号码一小时内只可以获取3次验证码，请稍后再试";
 		case VERIFY_CODE_INVALID:
 			return "验证码无效，请重新获取";
 		case VERIFY_CODE_EXPIRE:

@@ -15,9 +15,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
-@Table(name = "event_user", uniqueConstraints = { 
-		@UniqueConstraint(columnNames = { "fk_event_id", "fk_user_id" })
-})
+@Table(name = "event_user")
 @Entity
 public class EventUser implements Serializable{
 	
