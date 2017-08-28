@@ -1196,7 +1196,7 @@ public class WechatController {
     		@RequestParam("tags") String tags,
     		@RequestParam("name") String name,
     		@RequestParam(name = "pictures", required = false) String[] pictures,
-    		@RequestParam(name = "startTime",required = false) long startTimeMillisecond,
+    		@RequestParam(name = "startTime",required = false) Long startTimeMillisecond,
     		@RequestParam("gps") String gps,
     		@RequestParam("address") String address,
             @RequestParam("minCount") int minCount,
@@ -1250,8 +1250,12 @@ public class WechatController {
 			}
             
             event.setName(name);
-            Date startTime = new Date(startTimeMillisecond);
-            event.setStartTime(startTime);
+            
+            if (startTimeMillisecond != null) {
+            	Date startTime = new Date(startTimeMillisecond);
+                event.setStartTime(startTime);
+			}
+            
             event.setMinCount(minCount);
             event.setMaxCount(maxCount);
             event.setGps(gps);
