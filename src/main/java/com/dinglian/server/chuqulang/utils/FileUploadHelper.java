@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.imageio.ImageIO;
@@ -127,6 +128,36 @@ public class FileUploadHelper {
 		String separator = config.getResourceFolder().replaceAll("/", "").trim();
 		String[] splitStr = filePath.split(separator);
 		return splitStr[1];
+	}
+	
+	public static String uploadToAliyunOSSFromNetwork(String imgUrl, String folder, String fileName) throws IOException {
+		AliyunOSSUtil util = AliyunOSSUtil.getInstance();
+
+		URL url = new URL(imgUrl);
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("GET");
+		conn.setConnectTimeout(5 * 1000);
+		InputStream inStream = conn.getInputStream();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		byte[] buffer = new byte[1024];
+		int len = 0;
+		while ((len = inStream.read(buffer)) != -1) {
+			baos.write(buffer, 0, len);
+		}
+		inStream.close();
+		byte[] data = baos.toByteArray();
+		
+		String key = folder + "/" + fileName;
+		return util.putObject(key, data);
+	}
+	
+	public static String uploadToAliyunOSS(String base64Str, String folder, String fileName) {
+		AliyunOSSUtil util = AliyunOSSUtil.getInstance();
+
+		base64Str = base64Str.split(",")[1];
+		String key = folder + "/" + fileName;
+		
+		return util.putObject(key, base64Str);
 	}
 
 }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -58,6 +59,7 @@ import com.dinglian.server.chuqulang.service.ActivityService;
 import com.dinglian.server.chuqulang.service.DiscoverService;
 import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.service.WxMpService;
+import com.dinglian.server.chuqulang.utils.AliyunOSSUtil;
 import com.dinglian.server.chuqulang.utils.CodeUtils;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
 import com.dinglian.server.chuqulang.utils.RequestHelper;
@@ -252,9 +254,9 @@ public class WechatController {
 					user.setOpenId(openId);
 
 					if (StringUtils.isNotBlank(headimgurl)) {
-						UUID uuid = UUID.randomUUID();
-						String folder = uuid.toString().replaceAll("-", "");
-						user.setPicture(FileUploadHelper.saveNetProfilePicture(folder, headimgurl));
+//						UUID uuid = UUID.randomUUID();
+//						String folder = uuid.toString().replaceAll("-", "");
+						user.setPicture(headimgurl);
 					}
 
 					userService.register(user);
@@ -536,11 +538,11 @@ public class WechatController {
 			discoverService.saveCoterie(coterie);
 
 			if (StringUtils.isNotBlank(picture) && coterie.getId() != 0) {
-				String coverPath = ApplicationConfig.getInstance().getCoterieCoverPath();
 				if (picture.indexOf(",") > 0) {
-					String coverFolderPath = String.format(coverPath, coterie.getId());
-					String picPath = FileUploadHelper.uploadPicture(coverFolderPath, picture, "cover.jpg");
-
+					String folder = ApplicationConfig.getInstance().getCoterieCoverPath();
+					String fileName = String.valueOf(new Date().getTime()) + ".jpg";
+					String picPath = FileUploadHelper.uploadToAliyunOSS(picture, folder + "/" + coterie.getId(), fileName);
+					
 					CoteriePicture coteriePicture = new CoteriePicture();
 					coteriePicture.setCoterie(coterie);
 					coteriePicture.setCreationDate(new Date());
@@ -610,9 +612,18 @@ public class WechatController {
 			}
 			
 			if (StringUtils.isNotBlank(picture) && picture.indexOf(",") > 0) {
-				String coverPath = ApplicationConfig.getInstance().getCoterieCoverPath();
-				String coverFolderPath = String.format(coverPath, coterie.getId());
-				String picPath = FileUploadHelper.uploadPicture(coverFolderPath, picture, "cover.jpg");
+				// 删除旧图片
+				if (coterie.getCoteriePicture() != null) {
+					String oldUrl = coterie.getCoteriePicture().getUrl();
+					String[] paths = oldUrl.split("com/");
+					if (paths != null && paths.length > 1) {
+						AliyunOSSUtil.getInstance().deleteObject(paths[1]);
+					}
+				}
+				String folder = ApplicationConfig.getInstance().getCoterieCoverPath();
+				String fileName = String.valueOf(new Date().getTime()) + ".jpg";
+				String picPath = FileUploadHelper.uploadToAliyunOSS(picture, folder + "/" + coterieId, fileName);
+				
 				if (coterie.getCoteriePicture() != null) {
 					coterie.getCoteriePicture().setUser(user);
 					coterie.getCoteriePicture().setUrl(picPath);
@@ -1270,11 +1281,11 @@ public class WechatController {
             
             if (pictures != null) {
             	int i = 1;
-            	String basePicturePath = ApplicationConfig.getInstance().getActivityPicturePath();
+            	String folder = ApplicationConfig.getInstance().getActivityPicturePath();
             	for (String picBase64Str : pictures) {
             		if (picBase64Str.indexOf(",") > 0) {
-            			String pictureFolderPath = String.format(basePicturePath, event.getId());
-            			String picPath = FileUploadHelper.uploadPicture(pictureFolderPath, picBase64Str, i + ".jpg");
+    					String fileName = String.valueOf(new Date().getTime()) + ".jpg";
+    					String picPath = FileUploadHelper.uploadToAliyunOSS(picBase64Str, folder + "/" + event.getId(), fileName);
             			
             			EventPicture eventPicture = new EventPicture(event, picPath, i, user);
             			event.getEventPictures().add(eventPicture);

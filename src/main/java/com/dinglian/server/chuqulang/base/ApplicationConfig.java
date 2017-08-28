@@ -34,6 +34,25 @@ public class ApplicationConfig {
 		String value = System.getProperty("netease.im.nonce", "chuqulang");
 		return value;
 	}
+	
+	public String getAliyunOSSEndpoint() {
+		String value = System.getProperty("netease.im.nonce", "oss-cn-shanghai.aliyuncs.com");
+		return value;
+	}
+	public String getAliyunOSSAccessKeyId() {
+		String value = System.getProperty("aliyun.oss.accesskeyid", "LTAI4YaSyHSEzGZ2");
+		return value;
+	}
+	
+	public String getAliyunOSSAccessSecret() {
+		String value = System.getProperty("aliyun.oss.accessSecret", "TEifc7QUvgp3nX0Z8PlSPfNqRMW3qL");
+		return value;
+	}
+	
+	public String getAliyunOSSBucketName() {
+		String value = System.getProperty("aliyun.oss.bucketName", "langlang2go");
+		return value;
+	}
 
 	public int getDefaultPageSize() {
 		String value = System.getProperty("default.pagesize", "20");
@@ -65,15 +84,15 @@ public class ApplicationConfig {
 	}
 	
 	public String getUserProfilePath() {
-		return System.getProperty("resource.user.profile.path", getResourceRoot() + getResourceFolder() + getResourceProfileFolder() + "/%s/");
+		return System.getProperty("resource.user.profile.folder", "profile");
 	}
 	
 	public String getActivityPicturePath() {
-		return System.getProperty("resource.activity.picture.path", getResourceRoot() + getResourceFolder() + getResourceActivityFolder() + "/%s/");
+		return System.getProperty("resource.activity.picture.folder", "activity");
 	}
 	
 	public String getCoterieCoverPath() {
-		return System.getProperty("resource.coterie.cover.path", getResourceRoot() + getResourceFolder() + getResourceCoterieFolder() + "/%s/");
+		return System.getProperty("resource.coterie.cover.folder", "coterie");
 	}
 
 	public String getUserProfilePicturePath() {
