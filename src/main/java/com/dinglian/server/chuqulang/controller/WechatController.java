@@ -1284,6 +1284,14 @@ public class WechatController {
             
             activityService.saveEvent(event);
             
+            Topic topic = new Topic();
+            topic.setCreationDate(new Date());
+            topic.setCreator(user);
+            topic.setEvent(event);
+            topic.setTopicType(Topic.TYPE_ATIVITY);
+            event.setActivityTopic(topic);
+            discoverService.saveTopic(topic);
+            
             if (pictures != null) {
             	int i = 1;
             	String folder = ApplicationConfig.getInstance().getActivityPicturePath();
@@ -1327,6 +1335,7 @@ public class WechatController {
     			
     			discoverService.saveCoterie(coterie);
     			event.setCoterie(coterie);
+    			event.getActivityTopic().setCoterie(coterie);
 			}
             
             activityService.saveEvent(event);
@@ -1603,7 +1612,7 @@ public class WechatController {
 				}
 			}
 			
-			logger.info("=====> Get my activity list end <=====");
+			logger.info("=====> Get activity list end <=====");
 			
 			ResponseHelper.addResponseSuccessData(responseMap, resultList);
 		} catch (Exception e) {
