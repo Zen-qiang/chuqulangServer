@@ -79,7 +79,7 @@
 						class="icon-bar"></span> <span class="icon-bar"></span> <span
 						class="icon-bar"></span>
 				</button>
-				<a href="#"><img src="resources/img/logo.svg" class="navbar-brand"></a>
+				<a href="#"><img src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/logo.svg" class="navbar-brand"></a>
 			</div>
 			<div id="navbar" class="collapse navbar-collapse navbar-right">
 				<ul class="nav navbar-nav">
@@ -108,7 +108,8 @@
 		</ol>
 		<div class="carousel-inner" role="listbox">
 			<div class="item active">
-				<img class="first-slide" src="resources/img/loginfind.jpg" alt="First slide">
+				<img class="first-slide" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/loginfind.jpg
+" alt="First slide">
 				<div class="container hidden-xs">
 					<div class="carousel-caption">
 						<button class="btn btn-lg download-btn pull-left">发布活动</button>
@@ -116,7 +117,8 @@
 				</div>
 			</div>
 			<div class="item">
-				<img class="second-slide" src="resources/img/loginfind.jpg" alt="Second slide">
+				<img class="second-slide" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/loginfind.jpg
+" alt="Second slide">
 				<div class="container hidden-xs">
 					<div class="carousel-caption">
 						<button class="btn btn-lg download-btn pull-left">发布活动</button>
@@ -124,7 +126,8 @@
 				</div>
 			</div>
 			<div class="item">
-				<img class="third-slide" src="resources/img/loginfind.jpg" alt="Third slide">
+				<img class="third-slide" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/loginfind.jpg
+" alt="Third slide">
 				<div class="container hidden-xs">
 					<div class="carousel-caption">
 						<button class="btn btn-lg download-btn pull-left">发布活动</button>
@@ -295,7 +298,7 @@
 				<hr>
 		<div class="row placeholders activitymargin">
           <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -327,7 +330,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="activitydetails"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="activitydetails"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -359,7 +362,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -391,7 +394,7 @@
 			  </div>
             </div>
             <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -426,7 +429,7 @@
           
           		<div class="row placeholders activitymargin">
           <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -458,7 +461,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -490,7 +493,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -522,7 +525,7 @@
 			  </div>
             </div>
             <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -557,7 +560,7 @@
           
           		<div class="row placeholders activitymargin">
           <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -589,7 +592,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -621,7 +624,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -653,7 +656,7 @@
 			  </div>
             </div>
             <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -688,7 +691,7 @@
           
           		<div class="row placeholders activitymargin">
           <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -720,7 +723,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -752,7 +755,7 @@
 			  </div>
             </div>
            <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"
@@ -784,7 +787,7 @@
 			  </div>
             </div>
             <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 placeholder activitymargin2">
-            <a href="loginactivity"><img class="bodyImage" src="resources/img/activitylist.png"></a>
+            <a href="loginactivity"><img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/activitylist.png"></a>
               <h4>世博园kaboy街舞对战</h4>
               <span class="text-muted">
 				<a href="loginactivity" class="glyphicon glyphicon-map-marker"

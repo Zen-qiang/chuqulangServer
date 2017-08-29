@@ -37,7 +37,7 @@
 						class="icon-bar"></span> <span class="icon-bar"></span> <span
 						class="icon-bar"></span>
 				</button>
-				<a href="#"><img src="resources/img/logo.svg"
+				<a href="#"><img src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/logo.svg"
 					class="navbar-brand"></a>
 			</div>
 			<div id="navbar" class="collapse navbar-collapse navbar-right">
@@ -77,20 +77,20 @@
 				<div class="col-xs-12 col-md-6 col-sm-12 col-lg-6 imageColumn">
 					<div class="row">
 						<div class="col-xs-6 col-md-6 col-sm-6 col-lg-6 imageColumn">
-							<img class="bodyImage" src="resources/img/兴趣圈子1_03.jpg">
+							<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/coterie1_03.jpg">
 						<div class="picturefont">
 						<A href="#" style="text-decoration: none;color: white;"><span>#街舞</span></A>
 						</div>
 						</div>
 						<div class="col-xs-6 col-md-6 imageColumn">
-							<img class="bodyImage" src="resources/img/兴趣圈子1_05.jpg">
+							<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/coterie1_05.jpg">
 							<div class="picturefont">
 								<A href="#" style="text-decoration: none; color: white;"><span>#桌游</span></A>
 							</div>
 						</div>
 						<div class="col-xs-12 col-md-12 col-sm-12 col-lg-12 imageColumn"
 						 style="margin-top: -30px;">
-							<img class="bodyImage" src="resources/img/兴趣圈子1_09.jpg">
+							<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/coterie1_09.jpg">
 							<div class="picturefont">
 								<A href="#" style="text-decoration: none; color: white;"><span>#其它</span></A>
 							</div>
@@ -112,7 +112,7 @@
 		</div>
 	</div>
 
-	<div class="carousel-inner" role="listbox" style="background: url(resources/img/兴趣圈子1_11.jpg);height: 560px;">
+	<div class="carousel-inner" role="listbox" style="background: url(http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/coterie1_11.jpg);height: 560px;">
 		<div class="container" style="text-align: center;color: white;">
 			<div class="row">
 				<div class="col-lg-3"></div>
@@ -150,30 +150,30 @@
 			</div>
 			<div class="row">
 				<div class="col-xs-6 col-md-3 col-sm-6 col-lg-3 imageColumn">
-					<img class="bodyImage" src="resources/img/兴趣圈子8.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/coterie8.png">
 				</div>
 				<div class="col-xs-6 col-md-3 col-sm-6 col-lg-3 imageColumn">
-					<img class="bodyImage" src="resources/img/兴趣圈子8.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/coterie8.png">
 				</div>
 				<div class="col-xs-6 col-md-3 col-sm-6 col-lg-3 imageColumn">
-					<img class="bodyImage" src="resources/img/兴趣圈子8.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/coterie8.png">
 				</div>
 				<div class="col-xs-6 col-md-3 col-sm-6 col-lg-3 imageColumn">
-					<img class="bodyImage" src="resources/img/兴趣圈子8.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/coterie8.png">
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-xs-6 col-md-3 col-sm-6 col-lg-3 imageColumn">
-					<img class="bodyImage" src="resources/img/兴趣圈子8.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/coterie8.png">
 				</div>
 				<div class="col-xs-6 col-md-3 col-sm-6 col-lg-3 imageColumn">
-					<img class="bodyImage" src="resources/img/兴趣圈子8.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/coterie8.png">
 				</div>
 				<div class="col-xs-6 col-md-3 col-sm-6 col-lg-3 imageColumn">
-					<img class="bodyImage" src="resources/img/兴趣圈子8.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/coterie8.png">
 				</div>
 				<div class="col-xs-6 col-md-3 col-sm-6 col-lg-3 imageColumn">
-					<img class="bodyImage" src="resources/img/兴趣圈子8.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/coterie8.png">
 				</div>
 			</div>
 		  <div class="row">
@@ -195,7 +195,8 @@
         <div class="container">
             <div class="row">
             	<div class="col-xs-12 col-sm-12	col-md-3 col-lg-3 widget hidden-xs hidden-sm">
-					<img style="width: 150px;height: 80px;margin-top: -19px;" src="resources/img/logo.svg">
+					<img style="width: 150px;height: 80px;margin-top: -19px;" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/logo.svg
+">
 	            </div>
                 <div class="col-xs-12 col-sm-12	col-md-2 col-lg-2 widget">
 					<h4 class="title">关于我们</h4>
@@ -228,7 +229,7 @@
                      </div>
 	            </div>
 	            <div class="col-sm-2 widget hidden-md hidden-lg">
-					<img class="img-responsive" src="resources/img/logo.svg" style="width:50%;">
+					<img class="img-responsive" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/logo.svg" style="width:50%;">
 	            </div>
 	            <div class="col-sm-2 col-xs-12 col-md-2 col-lg-3">
 					<img style="width: 90px; height: 90px;margin-bottom: 8px;margin-top: -2px;" class="img-responsive" src="resources/img/code.jpg">

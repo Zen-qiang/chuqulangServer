@@ -1071,7 +1071,7 @@ public class WechatController {
 			
 			List<Map> resultList = new ArrayList<Map>();
 			if (coteries != null) {
-				if (showLastCoterie) {
+				if (showLastCoterie != null && showLastCoterie) {
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("id", "");
 					map.put("name", "以活动名创建");

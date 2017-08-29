@@ -36,7 +36,7 @@
 						class="icon-bar"></span> <span class="icon-bar"></span> <span
 						class="icon-bar"></span>
 				</button>
-				<a href="#"><img src="resources/img/logo.svg" class="navbar-brand"></a>
+				<a href="#"><img src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/logo.svg" class="navbar-brand"></a>
 			</div>
 			<div id="navbar" class="collapse navbar-collapse navbar-right">
 				<ul class="nav navbar-nav">
@@ -61,7 +61,7 @@
 		</ol>
 		<div class="carousel-inner" role="listbox">
 			<div class="item active">
-				<img class="first-slide" src="resources/img/index.jpg" alt="First slide">
+				<img class="first-slide" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/home_02.jpg" alt="First slide">
 				<button class="btn btn-lg dinglian-btn btn-disable dinglian-button">敬请期待</button>
 			</div>
 		</div>
@@ -83,16 +83,16 @@
 			</div>
 			<div class="row">
 				<div class="col-xs-6 col-md-3 imageColumn">
-					<img class="bodyImage" src="resources/img/首页_06.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/home_06.png">
 				</div>
 				<div class="col-xs-6 col-md-3 imageColumn">
-					<img class="bodyImage" src="resources/img/首页_08.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/home_08.png">
 				</div>
 				<div class="col-xs-6 col-md-3 imageColumn">
-					<img class="bodyImage" src="resources/img/首页_10.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/home_10.png">
 				</div>
 				<div class="col-xs-6 col-md-3 imageColumn">
-					<img class="bodyImage" src="resources/img/首页_12.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/home_12.png">
 				</div>
 			</div>
 		</div>
@@ -109,16 +109,16 @@
 			</div>
 			<div class="row">
 				<div class="col-xs-12 col-md-6 imageColumn">
-					<img class="bodyImage" src="resources/img/首页_18.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/home_18.png">
 				</div>
 				<div class="col-xs-12 col-md-6 imageColumn">
-					<img class="bodyImage" src="resources/img/首页_19.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/home_19.png">
 				</div>
 				<div class="col-xs-6 col-md-3 imageColumn">
-					<img class="bodyImage" src="resources/img/首页_21.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/home_21.png">
 				</div>
 				<div class="col-xs-6 col-md-3 imageColumn">
-					<img class="bodyImage" src="resources/img/首页_23.png">
+					<img class="bodyImage" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/home_23.png">
 				</div>
 			</div>
 		</div>
@@ -128,7 +128,7 @@
         <div class="container">
             <div class="row">
             	<div class="col-xs-12 col-sm-12	col-md-3 col-lg-3 widget hidden-xs hidden-sm">
-					<img style="width: 150px;height: 80px;margin-top: -19px;" src="resources/img/logo.svg">
+					<img style="width: 150px;height: 80px;margin-top: -19px;" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/logo.svg">
 	            </div>
                 <div class="col-xs-12 col-sm-12	col-md-2 col-lg-2 widget">
 					<h4 class="title">关于我们</h4>
@@ -161,10 +161,10 @@
                      </div>
 	            </div>
 	            <div class="col-sm-2 widget hidden-md hidden-lg">
-					<img class="img-responsive" src="resources/img/logo.svg" style="width:50%;">
+					<img class="img-responsive" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/logo.svg" style="width:50%;">
 	            </div>
 	            <div class="col-sm-2 col-xs-12 col-md-2 col-lg-3">
-					<img style="width: 90px; height: 90px;margin-bottom: 8px;margin-top: -2px;" class="img-responsive" src="resources/img/code.jpg">
+					<img style="width: 90px; height: 90px;margin-bottom: 8px;margin-top: -2px;" class="img-responsive" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/code.jpg">
 	            </div>
 	            <div class="col-sm-8 col-xs-12 col-md-3">
 					联系我们：021-68821662<br>邮箱：service@dingliantech.com

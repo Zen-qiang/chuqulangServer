@@ -39,7 +39,7 @@
 						class="icon-bar"></span> <span class="icon-bar"></span> <span
 						class="icon-bar"></span>
 				</button>
-				<a href="#"><img src="resources/img/logo.svg" class="navbar-brand"></a>
+				<a href="#"><img src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/logo.svg" class="navbar-brand"></a>
 			</div>
 			<div id="navbar" class="collapse navbar-collapse navbar-right">
 				<ul class="nav navbar-nav">
@@ -64,7 +64,7 @@
 	   <div class="col-xs-1 col-sm-1 col-md-3"></div>
 	   <div class="col-xs-10 col-sm-10 col-md-6">
 			<div class="row divstyle">
-				<img class="bodyImage" style="background-size: 100% 100%" src="resources/img/discoveryactivities.jpg">
+				<img class="bodyImage" style="background-size: 100% 100%" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/discoveryactivities.jpg">
 			</div>
 				<!-- 文字开始 -->
 			<div class="row divstyle">
@@ -78,7 +78,7 @@
 			
 			<div class="row divstyle">
 				<div class="col-xs-4 col-sm-2 col-md-3 col-lg-2">
-					<img class="bodyImage imgstyle2" src="resources/img/discoveryactivities.jpg">
+					<img class="bodyImage imgstyle2" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/discoveryactivities.jpg">
 				</div>
 				<div class="col-xs-8 col-sm-5 col-md-5 col-lg-7">
 					<table style="margin-top: 15px;">
@@ -143,9 +143,9 @@
 					<span style="font-size: 16px;">报名信息</span>
 				</div>
 				<div class="col-xs-8 col-sm-6 col-md-9 col-lg-10 gongaofont3">
-					<img class="bodyImage imgstyle" src="resources/img/discoveryactivities.jpg">
-					<img class="bodyImage imgstyle" src="resources/img/discoveryactivities.jpg">
-					<img class="bodyImage imgstyle" src="resources/img/discoveryactivities.jpg">
+					<img class="bodyImage imgstyle" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/discoveryactivities.jpg">
+					<img class="bodyImage imgstyle" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/discoveryactivities.jpg">
+					<img class="bodyImage imgstyle" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/discoveryactivities.jpg">
 					<span style="color: grey;">more</span><span class="glyphicon glyphicon-chevron-right"></span>
 				</div>
 			</div>
