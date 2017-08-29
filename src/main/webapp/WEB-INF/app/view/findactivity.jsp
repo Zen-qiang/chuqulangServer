@@ -228,7 +228,7 @@
 				</div>
 				<script type="text/javascript">
 					function classify() {
-						$("#hiddenclassify").slideToggle("slow");
+						$("#hiddenclassify").stop(true, false).slideToggle();
 					}
 				</script>
 				<div class="row">

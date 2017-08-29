@@ -155,6 +155,13 @@
 	<button type="submit" >登录</button>
 </form>
 
+<h2>校验密码：</h2>
+<form action="api/validActivityPassword" method="post">
+	活动id：<input type="text" name="activityId"/><br>
+	密码：<input type="text" name="password"/><br>
+	<button type="submit" >提交</button>
+</form>
+
 <h2>接口测试</h2>
 URL：<input type="text" id="url" value=""/><br>
 METHOD：<input type="text" id="method" value="get"/><br>

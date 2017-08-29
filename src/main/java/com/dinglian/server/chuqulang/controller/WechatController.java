@@ -1648,10 +1648,12 @@ public class WechatController {
 				Collections.sort(comments, new TopicCommentComparator());
 				topicMap.put("commentCount", comments.size());
 				
-				TopicComment lastComment = comments.get(0);
-				if (lastComment != null) {
-					topicMap.put("lastComment", lastComment.getContent());
-					topicMap.put("lastCommentTime", lastComment.getCreationDate());
+				if (comments.size() > 0) {
+					TopicComment lastComment = comments.get(0);
+					if (lastComment != null) {
+						topicMap.put("lastComment", lastComment.getContent());
+						topicMap.put("lastCommentTime", lastComment.getCreationDate());
+					}
 				}
 				result.put("topic", topicMap);
 			}
@@ -1746,7 +1748,9 @@ public class WechatController {
    			@RequestParam(name = "minCount", required = false) Integer minCount, 
    			@RequestParam(name = "maxCount", required = false) Integer maxCount,
    			@RequestParam(name = "description", required = false) String description,
-   			@RequestParam(name = "allowSignUp", required = false) Boolean allowSignUp) {
+   			@RequestParam(name = "allowSignUp", required = false) Boolean allowSignUp,
+   			@RequestParam(name = "isOpen", required = false) Boolean isOpen,
+   			@RequestParam(name = "password", required = false) String password) {
    		Map<String, Object> resultMap = new HashMap<String, Object>();
    		try {
    			logger.info("=====> Start to update activity info <=====");
@@ -1767,8 +1771,13 @@ public class WechatController {
    			if (description != null) {
 				event.setDescription(description);
 			}
+   			if (isOpen != null) {
+   				event.setOpen(isOpen);
+   				if (!isOpen && password != null) {
+   					event.setPassword(password);
+				}
+			}
    			activityService.saveEvent(event);
-   			
    			logger.info("=====> Update activity info end <=====");
    			ResponseHelper.addResponseSuccessData(resultMap, null);
    		} catch (ApplicationServiceException e) {
@@ -2246,7 +2255,7 @@ public class WechatController {
     		@RequestParam(name="phoneNo",required = false) String phoneNo,
     		@RequestParam("gender") int gender,
     		@RequestParam(name = "friends", required = false) String friends,
-    		@RequestParam(name="password",required = false) String password,
+//    		@RequestParam(name="password",required = false) String password,
     		@RequestParam("isEditSignUp") boolean isEditSignUp
     		) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -2259,9 +2268,9 @@ public class WechatController {
             	throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_EXIST);
 			}
             
-            if (!event.isOpen() && !password.equals(event.getPassword())) {
+            /*if (!event.isOpen() && !password.equals(event.getPassword())) {
 				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_INCORRECT_CREDENTIALS);
-			}
+			}*/
             
             if (!event.isAllowSignUp()) {
             	throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_DONT_ALLOW_SINGNUP);
@@ -2625,6 +2634,38 @@ public class WechatController {
         }
         return resultMap;
     }
+    /**
+     * 活动密码校验
+     * @param activityId
+     * @param password
+     * @return
+     */
+    @ResponseBody
+   	@RequestMapping(value = "/validActivityPassword", method = RequestMethod.POST)
+   	public Map<String, Object> validActivityPassword(@RequestParam("activityId") int activityId,
+   			@RequestParam(name = "password") String password) {
+   		Map<String, Object> resultMap = new HashMap<String, Object>();
+   		try {
+   			logger.info("=====> Start to validActivity Password info <=====");
+   			
+   			Event event = activityService.findEventById(activityId);
+   			if (event == null) {
+   				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_EXIST);
+   			}
+   			if(!event.getPassword().equals(password)){
+   				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_INCORRECT_CREDENTIALS);
+   			}
+   			logger.info("=====> validActivity Password info end <=====");
+   			ResponseHelper.addResponseSuccessData(resultMap, null);
+   		} catch (ApplicationServiceException e) {
+   			ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+   		} catch (Exception e) {
+   			e.printStackTrace();
+   			ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+   		}
+
+   		return resultMap;
+   	}
     
 	private static boolean isMobile(String phoneNo) {
 		String regex = ApplicationConfig.getInstance().getPhoneNoRegex();

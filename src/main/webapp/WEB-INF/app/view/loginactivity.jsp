@@ -44,10 +44,10 @@
 			$("#topdaohang")
 					.popover(
 							{
-								trigger : 'manual',//manual 触发方式  
+								trigger : 'manual',  
 								placement : 'bottom',
 								html : 'true',
-								content : ulstring, //这里可以直接写字符串，也可以 是一个函数，该函数返回一个字符串；  
+								content : ulstring,
 								animation : false
 							}).on(
 							"mouseenter",
@@ -198,7 +198,7 @@
 					</div>
 				</div>
 				<!-- 隐藏 列表 -->
-				<div id="hiddenfeilei" class="row widget hidden-lg" style="background-color: #eee;display: none;
+				<div id="hiddenclassify" class="row widget hidden-lg" style="background-color: #eee;display: none;
 				height: 250px;margin-top: -34px;">
 						<div class="col-xs-11 col-sm-12	col-md-12">
 							<h4>精选街舞</h4>
@@ -271,7 +271,7 @@
 				</div>
 				<script type="text/javascript">
 					function fenlei() {
-						$("#hiddenfeilei").slideToggle("slow");
+						$("#hiddenclassify").stop(true, false).slideToggle();
 					}
 				</script>
 				<div class="row">
