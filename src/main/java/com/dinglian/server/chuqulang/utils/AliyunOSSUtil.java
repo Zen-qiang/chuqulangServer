@@ -2,6 +2,9 @@ package com.dinglian.server.chuqulang.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.common.utils.BinaryUtil;
@@ -85,8 +88,7 @@ public class AliyunOSSUtil {
 		// 设置上传内容类型
 		meta.setContentType("image/*");
 
-		PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key,
-				new ByteArrayInputStream(data), meta);
+		PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, new ByteArrayInputStream(data), meta);
 
 		ossClient.putObject(putObjectRequest);
 
@@ -95,6 +97,31 @@ public class AliyunOSSUtil {
 			return obj.getResponse().getUri();
 		}
 		ossClient.shutdown();
+		return null;
+	}
+
+	public String putObject(String key, CommonsMultipartFile coverFile) {
+		OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+		try {
+			ObjectMetadata meta = new ObjectMetadata();
+			meta.setContentLength(coverFile.getSize());
+			String md5 = BinaryUtil.toBase64String(BinaryUtil.calculateMd5(coverFile.getBytes()));
+			meta.setContentMD5(md5);
+			meta.setContentType("image/*");
+
+			PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, coverFile.getInputStream(), meta);
+
+			ossClient.putObject(putObjectRequest);
+
+			OSSObject obj = ossClient.getObject(bucketName, key);
+			if (obj != null && obj.getResponse() != null) {
+				return obj.getResponse().getUri();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			ossClient.shutdown();
+		}
 		return null;
 	}
 }

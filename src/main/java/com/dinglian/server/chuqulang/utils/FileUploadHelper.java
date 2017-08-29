@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
@@ -158,6 +159,10 @@ public class FileUploadHelper {
 		String key = folder + "/" + fileName;
 		
 		return util.putObject(key, base64Str);
+	}
+	
+	public static String generateTempImageFileName(){
+		return String.valueOf(new Date().getTime()) + ".jpg";
 	}
 
 }

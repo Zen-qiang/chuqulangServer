@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -13,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,8 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
@@ -62,7 +59,6 @@ import com.dinglian.server.chuqulang.service.WxMpService;
 import com.dinglian.server.chuqulang.utils.AliyunOSSUtil;
 import com.dinglian.server.chuqulang.utils.CodeUtils;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
-import com.dinglian.server.chuqulang.utils.RequestHelper;
 import com.dinglian.server.chuqulang.utils.ResponseHelper;
 import com.dinglian.server.chuqulang.utils.WXBizMsgCrypt;
 import com.dinglian.server.chuqulang.utils.WxRequestHelper;
@@ -93,6 +89,8 @@ public class WechatController {
 
 	@Autowired
 	private WxMpService wxMpService;
+	
+	private static ApplicationConfig config = ApplicationConfig.getInstance();
 	
 	@RequestMapping("/authorization")
 	public String authorization() {
@@ -499,9 +497,12 @@ public class WechatController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/createCoterie", method = RequestMethod.POST)
-	public Map<String, Object> createCoterie(@RequestParam("userId") int userId, @RequestParam("name") String name,
-			@RequestParam("tags") String tags, @RequestParam(name = "description", required = false) String description,
-			@RequestParam(name = "picture", required = false) String picture) {
+	public Map<String, Object> createCoterie(@RequestParam("userId") int userId, 
+			@RequestParam("name") String name,
+			@RequestParam("tags") String tags, 
+			@RequestParam(name = "description", required = false) String description,
+			@RequestParam(name = "file") CommonsMultipartFile picture
+			) {
 		logger.info("=====> Start to create coterie <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
@@ -536,20 +537,18 @@ public class WechatController {
 			coterie.getCoterieGuys().add(new CoterieGuy(coterie, 1, user, new Date(), true, true));
 
 			discoverService.saveCoterie(coterie);
-
-			if (StringUtils.isNotBlank(picture) && coterie.getId() != 0) {
-				if (picture.indexOf(",") > 0) {
-					String folder = ApplicationConfig.getInstance().getCoterieCoverPath();
-					String fileName = String.valueOf(new Date().getTime()) + ".jpg";
-					String picPath = FileUploadHelper.uploadToAliyunOSS(picture, folder + "/" + coterie.getId(), fileName);
-					
-					CoteriePicture coteriePicture = new CoteriePicture();
-					coteriePicture.setCoterie(coterie);
-					coteriePicture.setCreationDate(new Date());
-					coteriePicture.setUser(user);
-					coteriePicture.setUrl(picPath);
-					coterie.setCoteriePicture(coteriePicture);
-				}
+			
+			if (picture != null) {
+				String folder = config.getCoterieCoverPath() + "/" + coterie.getId();
+				String fileName = FileUploadHelper.generateTempImageFileName();
+				
+				String picPath = AliyunOSSUtil.getInstance().putObject(folder +"/" + fileName, picture);
+				CoteriePicture coteriePicture = new CoteriePicture();
+				coteriePicture.setCoterie(coterie);
+				coteriePicture.setCreationDate(new Date());
+				coteriePicture.setUser(user);
+				coteriePicture.setUrl(picPath);
+				coterie.setCoteriePicture(coteriePicture);
 				discoverService.saveCoterie(coterie);
 			}
 			ResponseHelper.addResponseSuccessData(responseMap, null);
@@ -1072,6 +1071,12 @@ public class WechatController {
 			
 			List<Map> resultList = new ArrayList<Map>();
 			if (coteries != null) {
+				if (showLastCoterie) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("id", "");
+					map.put("name", "以活动名创建");
+					resultList.add(map);
+				}
 				for (Coterie coterie : coteries) {
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("id", coterie.getId());
@@ -2641,7 +2646,7 @@ public class WechatController {
      * @return
      */
     @ResponseBody
-   	@RequestMapping(value = "/validActivityPassword", method = RequestMethod.POST)
+   	@RequestMapping(value = "/validActivityPassword", method = RequestMethod.GET)
    	public Map<String, Object> validActivityPassword(@RequestParam("activityId") int activityId,
    			@RequestParam(name = "password") String password) {
    		Map<String, Object> resultMap = new HashMap<String, Object>();
