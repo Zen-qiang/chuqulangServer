@@ -131,4 +131,14 @@ public class ActivityServiceImpl implements ActivityService {
 		return generalDao.findTagByName(tagName);
 	}
 
+	@Override
+	public List<Event> getSingnUpActivitys() {
+		return eventDao.getSingnUpActivitys();
+	}
+
+	@Override
+	public void changeActivityStatus(int id, String status) {
+		eventDao.changeActivityStatus(id, status);
+	}
+
 }

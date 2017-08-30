@@ -56,6 +56,7 @@ import com.dinglian.server.chuqulang.service.ActivityService;
 import com.dinglian.server.chuqulang.service.DiscoverService;
 import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.service.WxMpService;
+import com.dinglian.server.chuqulang.task.ActivityStatusTask;
 import com.dinglian.server.chuqulang.utils.AliyunOSSUtil;
 import com.dinglian.server.chuqulang.utils.CodeUtils;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
@@ -569,7 +570,7 @@ public class WechatController {
 			@RequestParam(name = "name", required = false) String name, 
 			@RequestParam(name = "tags", required = false) String tags, 
 			@RequestParam(name = "description", required = false) String description,
-			@RequestParam(name = "picture", required = false) String picture) {
+			@RequestParam(name = "file", required = false) CommonsMultipartFile picture) {
 		logger.info("=====> Start to edit coterie <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
@@ -610,7 +611,7 @@ public class WechatController {
 				
 			}
 			
-			if (StringUtils.isNotBlank(picture) && picture.indexOf(",") > 0) {
+			/*if (StringUtils.isNotBlank(picture) && picture.indexOf(",") > 0) {
 				// 删除旧图片
 				if (coterie.getCoteriePicture() != null) {
 					String oldUrl = coterie.getCoteriePicture().getUrl();
@@ -623,6 +624,31 @@ public class WechatController {
 				String fileName = String.valueOf(new Date().getTime()) + ".jpg";
 				String picPath = FileUploadHelper.uploadToAliyunOSS(picture, folder + "/" + coterieId, fileName);
 				
+				if (coterie.getCoteriePicture() != null) {
+					coterie.getCoteriePicture().setUser(user);
+					coterie.getCoteriePicture().setUrl(picPath);
+				} else {
+					CoteriePicture coteriePicture = new CoteriePicture();
+					coteriePicture.setCoterie(coterie);
+					coteriePicture.setCreationDate(new Date());
+					coteriePicture.setUser(user);
+					coteriePicture.setUrl(picPath);
+					coterie.setCoteriePicture(coteriePicture);
+				}
+			}*/
+			if (picture != null) {
+				// 删除旧图片
+				if (coterie.getCoteriePicture() != null) {
+					String oldUrl = coterie.getCoteriePicture().getUrl();
+					String[] paths = oldUrl.split("com/");
+					if (paths != null && paths.length > 1) {
+						AliyunOSSUtil.getInstance().deleteObject(paths[1]);
+					}
+				}
+				String folder = config.getCoterieCoverPath() + "/" + coterie.getId();
+				String fileName = FileUploadHelper.generateTempImageFileName();
+				
+				String picPath = AliyunOSSUtil.getInstance().putObject(folder +"/" + fileName, picture);
 				if (coterie.getCoteriePicture() != null) {
 					coterie.getCoteriePicture().setUser(user);
 					coterie.getCoteriePicture().setUrl(picPath);
@@ -1211,8 +1237,12 @@ public class WechatController {
     		@RequestParam(name = "coterieId",required = false) Integer coterieId,
     		@RequestParam("tags") String tags,
     		@RequestParam("name") String name,
-    		@RequestParam(name = "pictures", required = false) String[] pictures,
-    		@RequestParam(name = "startTime",required = false) Long startTimeMillisecond,
+//    		@RequestParam(name = "pictures", required = false) String[] pictures,
+//    		@RequestParam("file") CommonsMultipartFile[] pictures,
+    		@RequestParam("pic1") CommonsMultipartFile picture1,
+    		@RequestParam(name = "pic2",required = false) CommonsMultipartFile picture2,
+    		@RequestParam(name = "pic3",required = false) CommonsMultipartFile picture3,
+    		@RequestParam("startTime") long startTimeMillisecond,
     		@RequestParam("gps") String gps,
     		@RequestParam("address") String address,
             @RequestParam("minCount") int minCount,
@@ -1233,6 +1263,15 @@ public class WechatController {
         	
         	if (StringUtils.isBlank(name) || StringUtils.isBlank(tags) || StringUtils.isBlank(address) /*|| StringUtils.isBlank(gps)*/ || StringUtils.isBlank(charge)) {
 				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_PARAM_IS_EMPTY);
+			}
+        	
+        	List<CommonsMultipartFile> pictures = new ArrayList<>();
+        	pictures.add(picture1);
+        	if (picture2 != null) {
+        		pictures.add(picture2);
+			}
+        	if (picture3 != null) {
+        		pictures.add(picture3);
 			}
         	
             Event event = new Event();
@@ -1267,10 +1306,7 @@ public class WechatController {
             
             event.setName(name);
             
-            if (startTimeMillisecond != null) {
-            	Date startTime = new Date(startTimeMillisecond);
-                event.setStartTime(startTime);
-			}
+            event.setStartTime(new Date(startTimeMillisecond));
             
             event.setMinCount(minCount);
             event.setMaxCount(maxCount);
@@ -1284,16 +1320,22 @@ public class WechatController {
             
             activityService.saveEvent(event);
             
+            // 创建定时任务
+            ApplicationConfig.getScheduledThreadPool().submit(new ActivityStatusTask(event, activityService));
+            
             Topic topic = new Topic();
             topic.setCreationDate(new Date());
             topic.setCreator(user);
             topic.setEvent(event);
             topic.setTopicType(Topic.TYPE_ATIVITY);
             event.setActivityTopic(topic);
+            if (event.getCoterie() != null) {
+            	topic.setCoterie(event.getCoterie());
+            }
             discoverService.saveTopic(topic);
             
-            if (pictures != null) {
-            	int i = 1;
+//            if (pictures != null) {
+            	/*int i = 1;
             	String folder = ApplicationConfig.getInstance().getActivityPicturePath();
             	for (String picBase64Str : pictures) {
             		if (picBase64Str.indexOf(",") > 0) {
@@ -1304,8 +1346,18 @@ public class WechatController {
             			event.getEventPictures().add(eventPicture);
             			i++;
 					}
+				}*/
+            	int j = 1;
+            	for (CommonsMultipartFile picture : pictures) {
+            		String folder = config.getActivityPicturePath() + "/" + event.getId();
+    				String fileName = FileUploadHelper.generateTempImageFileName();
+    				
+    				String picPath = AliyunOSSUtil.getInstance().putObject(folder +"/" + fileName, picture);
+    				EventPicture eventPicture = new EventPicture(event, picPath, j++, user);
+        			event.getEventPictures().add(eventPicture);
 				}
-			}
+//			}
+            
             EventUser eventUser = new EventUser(event, user, 1);
             eventUser.setRealName(user.getNickName());
             eventUser.setPhoneNo(phoneNo);

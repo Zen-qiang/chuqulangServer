@@ -1,5 +1,6 @@
 package com.dinglian.server.chuqulang.dao.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -112,6 +113,19 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 			query.setMaxResults(searchCriteria.getPageSize());
 		}
 		return query.list();
+	}
+
+	@Override
+	public List<Event> getSingnUpActivitys() {
+		String hql = "FROM Event WHERE status = :status AND startTime >= :date ";
+//		return getCurrentSession().createQuery(hql).setString("status", Event.STATUS_SIGNUP).setDate("date", new Date()).list();
+		return getCurrentSession().createQuery(hql).setString("status", Event.STATUS_SIGNUP).setTimestamp("date", new Date()).list();
+	}
+
+	@Override
+	public void changeActivityStatus(int id, String status) {
+		String sql = "UPDATE event SET status = :status WHERE id = :id AND status = 2 ";
+		getCurrentSession().createSQLQuery(sql).setString("status", status).setInteger("id", id).executeUpdate();
 	}
 
 }

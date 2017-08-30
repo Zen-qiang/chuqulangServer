@@ -56,20 +56,20 @@
 
 	<div id="myCarousel" class="carousel slide" data-ride="carousel">
 		<!-- Indicators -->
-		<ol class="carousel-indicators">
+		<!-- <ol class="carousel-indicators">
 			<li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-		</ol>
+		</ol> -->
 		<div class="carousel-inner" role="listbox">
 			<div class="item active">
 				<img class="first-slide" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/home_02.jpg" alt="First slide">
-				<button class="btn btn-lg dinglian-btn btn-disable dinglian-button">敬请期待</button>
+				<button class="widget hidden-xs btn btn-lg dinglian-btn btn-disable dinglian-button">敬请期待</button>
 			</div>
 		</div>
-		<a class="left carousel-control" href="#myCarousel" role="button"
+		<!-- <a class="left carousel-control" href="#myCarousel" role="button"
 			data-slide="prev"> <span class="sr-only">Previous</span>
 		</a> <a class="right carousel-control" href="#myCarousel" role="button"
 			data-slide="next"> <span class="sr-only">Next</span>
-		</a>
+		</a> -->
 	</div>
 
 	<div class="bodyContent">

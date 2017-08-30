@@ -875,7 +875,7 @@
                      </div>
 	            </div>
 	            <div class="col-sm-2 widget hidden-md hidden-lg">
-					<img class="img-responsive" src="resources/img/logo.svg" style="width:50%;">
+					<img class="img-responsive" src="http://langlang2go.oss-cn-shanghai.aliyuncs.com/website/logo.svg" style="width:50%;">
 	            </div>
 	            <div class="col-sm-2 col-xs-12 col-md-2 col-lg-3">
 					<img style="width: 90px; height: 90px;margin-bottom: 8px;margin-top: -2px;" class="img-responsive" src="resources/img/code.jpg">

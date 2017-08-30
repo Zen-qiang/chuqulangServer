@@ -42,4 +42,8 @@ public interface ActivityService {
 
 	Tag findTagByName(String tagUnlimited);
 
+	List<Event> getSingnUpActivitys();
+
+	void changeActivityStatus(int id, String status);
+
 }

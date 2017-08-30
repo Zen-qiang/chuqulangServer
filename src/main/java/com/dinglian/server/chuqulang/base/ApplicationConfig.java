@@ -1,6 +1,8 @@
 package com.dinglian.server.chuqulang.base;
 
-import java.io.File;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
@@ -11,8 +13,19 @@ public class ApplicationConfig {
 
 	private static final ApplicationConfig instance = new ApplicationConfig();
 
+	private static final ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(10);
+	private static ConcurrentHashMap<Integer, Thread> threadMap = new ConcurrentHashMap<Integer, Thread>();
+	
 	public static ApplicationConfig getInstance() {
 		return instance;
+	}
+	
+	public static ScheduledExecutorService getScheduledThreadPool() {
+		return scheduledThreadPool;
+	}
+	
+	public static ConcurrentHashMap<Integer, Thread> getActivityTaskThreadMap() {
+		return threadMap;
 	}
 
 	public boolean isSmsDebugMode() {
