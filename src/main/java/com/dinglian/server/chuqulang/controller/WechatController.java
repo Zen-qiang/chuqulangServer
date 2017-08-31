@@ -247,7 +247,7 @@ public class WechatController {
 
         String requestUrl = url;
 
-        String timestamp = Long.toString(System.currentTimeMillis() / 1000); // 必填，生成签名的时间戳
+        String timestamp = Long.toString(System.currentTimeMillis()); // 必填，生成签名的时间戳
 
         String nonceStr = UUID.randomUUID().toString(); // 必填，生成签名的随机串
 
@@ -256,7 +256,14 @@ public class WechatController {
         String accessToken = wxMpService.getWxAccessToken();
         
         try {
-        	String jsApiTicket = WxRequestHelper.getWxJsApiTicket(accessToken);
+        	String responseObj = WxRequestHelper.getWxJsApiTicket(accessToken);
+        	String jsApiTicket = "";
+        	if (StringUtils.isNotBlank(responseObj)) {
+				JSONObject ticket = JSONObject.fromObject(responseObj);
+				if (ticket != null) {
+					jsApiTicket = ticket.getString("ticket");
+				}
+			}
 
         	String sign = "jsapi_ticket=" + jsApiTicket + "&noncestr=" + nonceStr+ "&timestamp=" + timestamp + "&url=" + requestUrl;
             MessageDigest crypt = MessageDigest.getInstance("SHA-1");
