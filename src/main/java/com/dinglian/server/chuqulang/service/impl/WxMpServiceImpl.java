@@ -49,4 +49,13 @@ public class WxMpServiceImpl implements WxMpService {
 		return generalDao.findWxOAuth2AccessTokenByOpenId(openId);
 	}
 
+	@Override
+	public String getWxAccessToken() {
+		WxAccessToken token = generalDao.findWxAccessTokenById(WxAccessToken.ACCESS_TOKEN_ID);
+		if (token != null) {
+			return token.getAccessToken();
+		}
+		return null;
+	}
+
 }

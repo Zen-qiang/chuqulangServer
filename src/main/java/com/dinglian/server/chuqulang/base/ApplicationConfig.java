@@ -20,11 +20,11 @@ public class ApplicationConfig {
 		return instance;
 	}
 	
-	public static ScheduledExecutorService getScheduledThreadPool() {
+	public ScheduledExecutorService getScheduledThreadPool() {
 		return scheduledThreadPool;
 	}
 	
-	public static ConcurrentHashMap<Integer, Thread> getActivityTaskThreadMap() {
+	public ConcurrentHashMap<Integer, Thread> getActivityTaskThreadMap() {
 		return threadMap;
 	}
 
@@ -150,5 +150,9 @@ public class ApplicationConfig {
 
 	public String getWxMpUserInfoUrl() {
 		return System.getProperty("wx.mp.user.info.url", "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN");
+	}
+
+	public String getWxJsApiTicketUrl() {
+		return System.getProperty("wx.mp.jsapi.ticket.url", "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=%s&type=jsapi");
 	}
 }

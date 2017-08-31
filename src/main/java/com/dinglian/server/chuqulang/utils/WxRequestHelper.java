@@ -34,4 +34,10 @@ public class WxRequestHelper {
 		return doGet(url);
 	}
 
+	public static String getWxJsApiTicket(String accessToken) throws ParseException, IOException {
+		ApplicationConfig config = ApplicationConfig.getInstance();
+		String url = String.format(config.getWxJsApiTicketUrl(), accessToken);
+		return doGet(url);
+	}
+
 }

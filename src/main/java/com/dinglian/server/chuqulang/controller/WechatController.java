@@ -1,21 +1,28 @@
 package com.dinglian.server.chuqulang.controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -214,6 +221,63 @@ public class WechatController {
 		}
 		return responseMap;
 	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/getWxConfig", method = RequestMethod.GET)
+	public Map<String, Object> getWxConfig(@RequestParam("url") String url) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		logger.info("=====> Start to get wx config <=====");
+		
+        Map<String, Object> ret = new HashMap<String, Object>();
+
+        String appId = ApplicationConfig.getInstance().getWxMpAppId(); // 必填，公众号的唯一标识
+
+        String requestUrl = url;
+
+        String timestamp = Long.toString(System.currentTimeMillis() / 1000); // 必填，生成签名的时间戳
+
+        String nonceStr = UUID.randomUUID().toString(); // 必填，生成签名的随机串
+
+        String signature = "";
+        // 注意这里参数名必须全部小写，且必须有序
+        String accessToken = wxMpService.getWxAccessToken();
+        
+        try {
+        	String jsApiTicket = WxRequestHelper.getWxJsApiTicket(accessToken);
+
+        	String sign = "jsapi_ticket=" + jsApiTicket + "&noncestr=" + nonceStr+ "&timestamp=" + timestamp + "&url=" + requestUrl;
+            MessageDigest crypt = MessageDigest.getInstance("SHA-1");
+            crypt.reset();
+            crypt.update(sign.getBytes("UTF-8"));
+            signature = byteToHex(crypt.digest());
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        ret.put("appId", appId);
+        ret.put("timestamp", timestamp);
+        ret.put("nonceStr", nonceStr);
+        ret.put("signature", signature);
+        ResponseHelper.addResponseSuccessData(responseMap, ret);
+        logger.info("=====> Get wx config end <=====");
+        return responseMap;
+    }
+	
+	private static String byteToHex(final byte[] hash) {
+        Formatter formatter = new Formatter();
+        for (byte b : hash) {
+            formatter.format("%02x", b);
+        }
+        String result = formatter.toString();
+        formatter.close();
+        return result;
+
+    }
 	
 	/**
 	 * 获取用户信息，自动注册
@@ -1321,7 +1385,7 @@ public class WechatController {
             activityService.saveEvent(event);
             
             // 创建定时任务
-            ApplicationConfig.getScheduledThreadPool().submit(new ActivityStatusTask(event, activityService));
+            ApplicationConfig.getInstance().getScheduledThreadPool().submit(new ActivityStatusTask(event, activityService));
             
             Topic topic = new Topic();
             topic.setCreationDate(new Date());

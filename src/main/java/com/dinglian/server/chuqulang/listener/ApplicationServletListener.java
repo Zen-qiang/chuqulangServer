@@ -16,7 +16,7 @@ import com.dinglian.server.chuqulang.task.ActivityStatusTask;
 
 public class ApplicationServletListener implements ServletContextListener {
 	
-	private static ScheduledExecutorService executorService = ApplicationConfig.getScheduledThreadPool();
+	private static ScheduledExecutorService executorService = ApplicationConfig.getInstance().getScheduledThreadPool();
 	
 	@Override
 	public void contextDestroyed(ServletContextEvent arg0) {

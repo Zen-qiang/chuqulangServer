@@ -10,4 +10,6 @@ public interface WxMpService {
 
 	WxOAuth2AccessToken findWxOAuth2AccessTokenByOpenId(String openId);
 
+	String getWxAccessToken();
+
 }
