@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -122,42 +124,26 @@ public class WechatController {
 	 *            随机字符串
 	 * @return
 	 */
-	@RequestMapping(value = "/security", method = RequestMethod.GET)
-	public void doGet(@RequestParam("signature") String signature, @RequestParam("timestamp") String timestamp, 
-			@RequestParam("nonce") String nonce, @RequestParam("echostr") String echostr,
+	@ResponseBody
+	@GetMapping(value = "/security")
+	public String checkSignature(String signature, String timestamp, String nonce, String echostr,
 			HttpServletRequest request, HttpServletResponse response) {
-		PrintWriter out = null;
+		ApplicationConfig config = ApplicationConfig.getInstance();
 		try {
-			ApplicationConfig config = ApplicationConfig.getInstance();
 			WXBizMsgCrypt wxcpt = new WXBizMsgCrypt(config.getWxMpToken(), config.getWxMpEncodingAESKey(),config.getWxMpAppId());
 			if (wxcpt.checkSignature(signature, timestamp, nonce)) {
-				out = response.getWriter();
-				out.print(echostr);
+				return echostr;
 			}
 		} catch (AesException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (out != null) {
-				out.close();
-			}
 		}
+		return null;
 	}
 	
-	@RequestMapping(value = "/security", method = RequestMethod.POST)
-	public void doGet(HttpServletRequest request, HttpServletResponse response) {
-		PrintWriter out = null;
-		try {
-			out = response.getWriter();
-			out.print("");
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (out != null) {
-				out.close();
-			}
-		}
+	@ResponseBody
+	@PostMapping(value = "/security")
+	public String doPost(HttpServletRequest request) {
+		return "success";
 	}
 
 	@ResponseBody
