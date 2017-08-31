@@ -164,6 +164,10 @@ public class ApplicationConfig {
 		return System.getProperty("wx.mp.activity.signup.template.id", "P6O8aKh7VIUYQbeO5vJOETgufIirhMNumRpIa4vPhRg");
 	}
 	
+	public String getWxActivitySignOutTemplateId() {
+		return System.getProperty("wx.mp.activity.signout.template.id", "9fI5MUb9owz63iOkSBuvyeL8zdq_8Y0mJjb6B6gIPt0");
+	}
+	
 	public String getWxMpDomain() {
 		return System.getProperty("wx.mp.domain", "http://www.dingliantech.com:8080");
 	}

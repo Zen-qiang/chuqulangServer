@@ -10,6 +10,7 @@ import com.dinglian.server.chuqulang.model.Tag;
 import com.dinglian.server.chuqulang.model.TopicPraise;
 import com.dinglian.server.chuqulang.model.UserAttention;
 import com.dinglian.server.chuqulang.model.WxAccessToken;
+import com.dinglian.server.chuqulang.model.WxJsApiTicket;
 import com.dinglian.server.chuqulang.model.WxOAuth2AccessToken;
 
 public interface GeneralDao {
@@ -44,5 +45,9 @@ public interface GeneralDao {
 	List<CoterieCarouselPicture> getCoterieCarouselPictures();
 
 	Tag findTagByName(String tagName);
+
+	WxJsApiTicket findWxJsApiTicketById(int jsapiTicketId);
+
+	void saveWxJsApiTicket(WxJsApiTicket jsApiTicket);
 
 }

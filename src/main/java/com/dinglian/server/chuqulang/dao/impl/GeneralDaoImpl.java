@@ -19,6 +19,7 @@ import com.dinglian.server.chuqulang.model.Tag;
 import com.dinglian.server.chuqulang.model.TopicPraise;
 import com.dinglian.server.chuqulang.model.UserAttention;
 import com.dinglian.server.chuqulang.model.WxAccessToken;
+import com.dinglian.server.chuqulang.model.WxJsApiTicket;
 import com.dinglian.server.chuqulang.model.WxOAuth2AccessToken;
 
 @Repository
@@ -140,6 +141,16 @@ public class GeneralDaoImpl implements GeneralDao {
 	@Override
 	public Tag findTagByName(String tagName) {
 		return (Tag) getCurrentSession().createQuery("FROM Tag WHERE name = :name").setString("name", tagName).uniqueResult();
+	}
+
+	@Override
+	public WxJsApiTicket findWxJsApiTicketById(int jsapiTicketId) {
+		return (WxJsApiTicket) getCurrentSession().get(WxJsApiTicket.class, jsapiTicketId);
+	}
+
+	@Override
+	public void saveWxJsApiTicket(WxJsApiTicket jsApiTicket) {
+		getCurrentSession().save(jsApiTicket);
 	}
 
 }

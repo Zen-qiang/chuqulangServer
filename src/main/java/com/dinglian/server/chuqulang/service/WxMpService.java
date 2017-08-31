@@ -12,4 +12,8 @@ public interface WxMpService {
 
 	String getWxAccessToken();
 
+	void updateJsApiTicket(String ticket);
+
+	String getWxJsApiTicket();
+
 }

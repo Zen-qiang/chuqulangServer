@@ -247,23 +247,14 @@ public class WechatController {
 
         String requestUrl = url;
 
-        String timestamp = Long.toString(System.currentTimeMillis()); // 必填，生成签名的时间戳
+        String timestamp = Long.toString(System.currentTimeMillis() / 1000); // 必填，生成签名的时间戳
 
         String nonceStr = UUID.randomUUID().toString(); // 必填，生成签名的随机串
 
         String signature = "";
         // 注意这里参数名必须全部小写，且必须有序
-        String accessToken = wxMpService.getWxAccessToken();
-        
         try {
-        	String responseObj = WxRequestHelper.getWxJsApiTicket(accessToken);
-        	String jsApiTicket = "";
-        	if (StringUtils.isNotBlank(responseObj)) {
-				JSONObject ticket = JSONObject.fromObject(responseObj);
-				if (ticket != null) {
-					jsApiTicket = ticket.getString("ticket");
-				}
-			}
+        	String jsApiTicket = wxMpService.getWxJsApiTicket();
 
         	String sign = "jsapi_ticket=" + jsApiTicket + "&noncestr=" + nonceStr+ "&timestamp=" + timestamp + "&url=" + requestUrl;
             MessageDigest crypt = MessageDigest.getInstance("SHA-1");
@@ -276,9 +267,8 @@ public class WechatController {
             e.printStackTrace();
         } catch (ParseException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
+        
         ret.put("appId", appId);
         ret.put("timestamp", timestamp);
         ret.put("nonceStr", nonceStr);
@@ -2563,14 +2553,26 @@ public class WechatController {
             	throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_EXIST);
 			}
             
+            EventUser currentUser = null;
+            boolean hasRetinues = false;
             for (EventUser eventUser : event.getEventUsers()) {
             	User eu = eventUser.getUser();
             	User inviter = eventUser.getInviter();
-				if ((eu != null && eu.getId() == userId) || (inviter != null && inviter.getId() == userId)) {
+				if (eu != null && eu.getId() == userId) {
+					currentUser = eventUser;
+					eventUser.setEffective(false);
+				}
+				if (inviter != null && inviter.getId() == userId) {
+					hasRetinues = true;
 					eventUser.setEffective(false);
 				}
 			}
             activityService.saveEvent(event);
+            
+            String accessToken = wxMpService.getWxAccessToken();
+			if (StringUtils.isNotBlank(accessToken) && currentUser != null) {
+				WxRequestHelper.sendActivitySignOutMsg(accessToken, event, currentUser, hasRetinues);
+			}
             
             ResponseHelper.addResponseSuccessData(resultMap, null);
             logger.info("=====> Event signup end <=====");

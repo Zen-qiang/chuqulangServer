@@ -1,6 +1,7 @@
 package com.dinglian.server.chuqulang.utils;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import org.apache.http.util.EntityUtils;
 
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.model.Event;
+import com.dinglian.server.chuqulang.model.EventUser;
 import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.model.WxOAuth2AccessToken;
 
@@ -100,6 +102,43 @@ public class WxRequestHelper {
 		map = new HashMap<>();
 		String remark = "当前报名人数：%d人（最多%d人）";
 		map.put("value", String.format(remark, event.getEffectiveMembers().size(), event.getMaxCount()));
+		dataMap.put("remark", map);
+		
+		params.accumulate("data", dataMap);
+		doJsonPost(uri, params);
+	}
+	
+	public static void sendActivitySignOutMsg(String accessToken, Event event, EventUser currentUser, boolean hasRetinues) throws ParseException, IOException {
+		String uri = getTemplateMsgUrl(accessToken);
+		
+		JSONObject params = new JSONObject();
+		params.accumulate("touser", event.getCreator().getOpenId());
+		params.accumulate("template_id", config.getWxActivitySignOutTemplateId());
+		params.accumulate("url", config.getWxMpDomain() + config.getWxActivityDetails() + "/" + currentUser.getId() + "/" + event.getId());
+		
+		Map<String, Object> dataMap = new HashMap<String, Object>();
+		
+		Map<String, String> map = new HashMap<String, String>();
+		String firstStr = "%s 已经退出“%s”：";
+		String name = currentUser.getRealName();
+		if (hasRetinues) {
+			name += "和TA的小伙伴";
+		}
+		firstStr = String.format(firstStr, name, event.getName());
+		map.put("value", firstStr);
+		dataMap.put("first", map);
+		
+		map = new HashMap<>();
+		map.put("value", currentUser.getRealName());
+		dataMap.put("keyword1", map);
+		
+		map = new HashMap<>();
+		map.put("value", DateUtils.format(new Date(), DateUtils.yMdHms));
+		dataMap.put("keyword2", map);
+		
+		map = new HashMap<>();
+		String remark = "联系电话：%s\n当前已报名人数 %d人，活动最大可报名人数 %d人）";
+		map.put("value", String.format(remark, currentUser.getPhoneNo(), event.getEffectiveMembers().size(), event.getMaxCount()));
 		dataMap.put("remark", map);
 		
 		params.accumulate("data", dataMap);

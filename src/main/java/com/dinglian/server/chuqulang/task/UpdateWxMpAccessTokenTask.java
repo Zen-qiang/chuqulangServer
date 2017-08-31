@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.service.WxMpService;
+import com.dinglian.server.chuqulang.utils.WxRequestHelper;
 
 import net.sf.json.JSONObject;
 
@@ -31,8 +32,7 @@ public class UpdateWxMpAccessTokenTask {
 	/**
 	 * 每小时更新一次Access_token
 	 */
-	@Scheduled(cron="0 0 0/1 * * ?")
-//	@Scheduled(cron="0 14 13/1 * * ?")
+	@Scheduled(cron="0 38 0/1 * * ?")
 	public void run() {
 		logger.info("Start the get WX mp acces token.");
 		
@@ -54,6 +54,19 @@ public class UpdateWxMpAccessTokenTask {
 				JSONObject obj = JSONObject.fromObject(response);
 				String accessToken = obj.getString("access_token");
 				wxMpService.updateAccessToken(accessToken);
+				
+				logger.info("Start the get WX mp jsapi ticket.");
+				
+				String ticketResponse = WxRequestHelper.getWxJsApiTicket(accessToken);
+				logger.info(ticketResponse);
+				
+				JSONObject rpObj = JSONObject.fromObject(ticketResponse);
+				if (rpObj != null) {
+					String ticket = rpObj.getString("ticket");
+					wxMpService.updateJsApiTicket(ticket);
+				}
+				
+				logger.info("Get WX mp ajsapi ticket end.");
 			}
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block

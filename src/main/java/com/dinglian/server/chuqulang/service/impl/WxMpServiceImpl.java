@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.dinglian.server.chuqulang.dao.GeneralDao;
 import com.dinglian.server.chuqulang.model.WxAccessToken;
+import com.dinglian.server.chuqulang.model.WxJsApiTicket;
 import com.dinglian.server.chuqulang.model.WxOAuth2AccessToken;
 import com.dinglian.server.chuqulang.service.WxMpService;
 
@@ -54,6 +55,30 @@ public class WxMpServiceImpl implements WxMpService {
 		WxAccessToken token = generalDao.findWxAccessTokenById(WxAccessToken.ACCESS_TOKEN_ID);
 		if (token != null) {
 			return token.getAccessToken();
+		}
+		return null;
+	}
+
+	@Override
+	public void updateJsApiTicket(String ticket) {
+		WxJsApiTicket jsApiTicket = generalDao.findWxJsApiTicketById(WxJsApiTicket.JSAPI_TICKET_ID);
+		if (jsApiTicket != null) {
+			jsApiTicket.setTicket(ticket);
+			jsApiTicket.setModifiedDate(new Date());
+		} else {
+			jsApiTicket = new WxJsApiTicket();
+			jsApiTicket.setTicket(ticket);
+			jsApiTicket.setModifiedDate(new Date());
+			generalDao.saveWxJsApiTicket(jsApiTicket);
+		}
+		
+	}
+
+	@Override
+	public String getWxJsApiTicket() {
+		WxJsApiTicket ticket = generalDao.findWxJsApiTicketById(WxJsApiTicket.JSAPI_TICKET_ID);
+		if (ticket != null) {
+			return ticket.getTicket();
 		}
 		return null;
 	}
