@@ -288,16 +288,15 @@ public class WXBizMsgCrypt {
 		return result;
 	}
 	
-	public String checkSignature(String msgSignature, String timestamp, String nonce, String echostr)
+	public boolean checkSignature(String msgSignature, String timestamp, String nonce)
 			throws AesException {
 		String signature = SHA1.getSHA1(token, timestamp, nonce);
 
-		if (!signature.equals(msgSignature)) {
-			throw new AesException(AesException.ValidateSignatureError);
+		if (signature.equals(msgSignature)) {
+			return true;
+		} else {
+			return false;
 		}
-
-//		String result = decrypt(echostr);
-		return echostr;
 	}
 
 }

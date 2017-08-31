@@ -3,6 +3,7 @@ package com.dinglian.server.chuqulang.controller;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
@@ -20,6 +21,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.ParseException;
@@ -118,19 +122,42 @@ public class WechatController {
 	 *            随机字符串
 	 * @return
 	 */
-	@ResponseBody
-	@RequestMapping(value = "/checkSignature", method = RequestMethod.GET)
-	public String checkSignature(String signature, String timestamp, String nonce, String echostr) {
-		String result = "";
+	@RequestMapping(value = "/security", method = RequestMethod.GET)
+	public void doGet(@RequestParam("signature") String signature, @RequestParam("timestamp") String timestamp, 
+			@RequestParam("nonce") String nonce, @RequestParam("echostr") String echostr,
+			HttpServletRequest request, HttpServletResponse response) {
+		PrintWriter out = null;
 		try {
 			ApplicationConfig config = ApplicationConfig.getInstance();
-			WXBizMsgCrypt wxcpt = new WXBizMsgCrypt(config.getWxMpToken(), config.getWxMpEncodingAESKey(),
-					config.getWxMpAppId());
-			result = wxcpt.checkSignature(signature, timestamp, nonce, echostr);
+			WXBizMsgCrypt wxcpt = new WXBizMsgCrypt(config.getWxMpToken(), config.getWxMpEncodingAESKey(),config.getWxMpAppId());
+			if (wxcpt.checkSignature(signature, timestamp, nonce)) {
+				out = response.getWriter();
+				out.print(echostr);
+			}
 		} catch (AesException e) {
 			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (out != null) {
+				out.close();
+			}
 		}
-		return result;
+	}
+	
+	@RequestMapping(value = "/security", method = RequestMethod.POST)
+	public void doGet(HttpServletRequest request, HttpServletResponse response) {
+		PrintWriter out = null;
+		try {
+			out = response.getWriter();
+			out.print("");
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (out != null) {
+				out.close();
+			}
+		}
 	}
 
 	@ResponseBody
