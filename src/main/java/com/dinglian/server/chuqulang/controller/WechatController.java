@@ -2434,7 +2434,7 @@ public class WechatController {
             JSONArray friendArray = null;
             if (StringUtils.isNotBlank(friends)) {
             	friendArray = JSONArray.fromObject(friends);
-            	if ((event.getMaxCount() - eventUsers.size()) <= (friendArray.size() + 1)) {
+            	if ((event.getMaxCount() - eventUsers.size()) < (friendArray.size() + 1)) {
             		throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_SPACE_INSUFFICIENT);
     			}
 			}
@@ -2527,6 +2527,11 @@ public class WechatController {
 			countMap.put("minCount", event.getMinCount());
 			countMap.put("currentCount", event.getEffectiveMembers().size());
 			result.put("userCount", countMap);
+			
+			String accessToken = wxMpService.getWxAccessToken();
+			if (StringUtils.isNotBlank(accessToken)) {
+				WxRequestHelper.sendActivitySignUpMsg(accessToken, event, user);
+			}
             
             ResponseHelper.addResponseSuccessData(resultMap, result);
             logger.info("=====> Event signup end <=====");

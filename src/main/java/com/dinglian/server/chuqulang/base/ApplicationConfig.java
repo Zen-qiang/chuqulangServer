@@ -155,4 +155,24 @@ public class ApplicationConfig {
 	public String getWxJsApiTicketUrl() {
 		return System.getProperty("wx.mp.jsapi.ticket.url", "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=%s&type=jsapi");
 	}
+
+	public String getWxActivitySignUpMsgUrl() {
+		return System.getProperty("wx.mp.activity.signup.msg.url", "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s");
+	}
+	
+	public String getWxActivitySignUpTemplateId() {
+		return System.getProperty("wx.mp.activity.signup.template.id", "P6O8aKh7VIUYQbeO5vJOETgufIirhMNumRpIa4vPhRg");
+	}
+	
+	public String getWxMpDomain() {
+		return System.getProperty("wx.mp.domain", "http://www.dingliantech.com:8080");
+	}
+	
+	public String getWxActivityDetails() {
+		return System.getProperty("wx.mp.activity.path", "/activityDetails");
+	}
+	
+	public String getWxCoterieDetails() {
+		return System.getProperty("wx.mp.coterie.path", "/circleDetails");
+	}
 }

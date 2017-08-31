@@ -46,6 +46,7 @@ public class DateUtils {
 	public final static String dMyHms = "dd/MM/yyyy HH:mm:ss";
 	public final static String dMy = "dd/MM/yyyy";
 	public final static String yMdHms = "yyyy-MM-dd HH:mm:ss";
+	public final static String yMdHm = "yyyy-MM-dd HH:mm";
 
 	public final static String yMd = "yyyy-MM-dd";
 	public final static String yyyyMMddHM = "yyyyMMdd HH:mm";
