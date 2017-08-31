@@ -257,6 +257,7 @@ public class WechatController {
         	String jsApiTicket = wxMpService.getWxJsApiTicket();
 
         	String sign = "jsapi_ticket=" + jsApiTicket + "&noncestr=" + nonceStr+ "&timestamp=" + timestamp + "&url=" + requestUrl;
+        	System.out.println(sign);
             MessageDigest crypt = MessageDigest.getInstance("SHA-1");
             crypt.reset();
             crypt.update(sign.getBytes("UTF-8"));
