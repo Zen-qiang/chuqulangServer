@@ -169,7 +169,7 @@ public class ApplicationConfig {
 	}
 	
 	public String getWxMpDomain() {
-		return System.getProperty("wx.mp.domain", "http://www.dingliantech.com");
+		return System.getProperty("wx.mp.domain", "http://mp.dingliantech.com");
 	}
 	
 	public String getWxActivityDetails() {
