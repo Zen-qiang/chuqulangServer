@@ -1430,6 +1430,18 @@ public class WechatController {
     			coterie.setCreator(user);
     			coterie.setHot(0);
     			
+    			List<EventPicture> eventPictures = new ArrayList<EventPicture>(event.getEventPictures());
+    			if (eventPictures.size() > 0) {
+    				Collections.sort(eventPictures, new EventPictureComparator());
+    				
+    				CoteriePicture coteriePicture = new CoteriePicture();
+    				coteriePicture.setCoterie(coterie);
+    				coteriePicture.setCreationDate(new Date());
+    				coteriePicture.setUser(user);
+    				coteriePicture.setUrl(eventPictures.get(0).getUrl());
+    				coterie.setCoteriePicture(coteriePicture);
+				}
+				
     			List<EventTag> eventTags = event.getTags();
     			for (int i = 1; i <= eventTags.size(); i++) {
     				Tag tag = eventTags.get(i - 1).getTag();
