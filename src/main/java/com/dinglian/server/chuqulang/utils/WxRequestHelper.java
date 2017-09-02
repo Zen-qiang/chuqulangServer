@@ -1,13 +1,17 @@
 package com.dinglian.server.chuqulang.utils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.ParseException;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -143,6 +147,25 @@ public class WxRequestHelper {
 		
 		params.accumulate("data", dataMap);
 		doJsonPost(uri, params);
+	}
+
+	public static List<String> downloadServerFileToAliyunOSS(String folder, String[] serverIds, String accessToken) throws ClientProtocolException, IOException {
+		List<String> resultList = new ArrayList<>();
+		for (String serverId : serverIds) {
+			String url = String.format(config.getWxMpDownloadServerFileUrl(), accessToken, serverId);
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+			HttpGet httpGet = new HttpGet(url);
+			CloseableHttpResponse httpResponse = httpclient.execute(httpGet);
+			HttpEntity entry = httpResponse.getEntity();
+			
+			AliyunOSSUtil util = AliyunOSSUtil.getInstance();
+			String fileName = FileUploadHelper.generateTempImageFileName();
+			String picPath = util.putObject(folder +"/" + fileName, entry.getContent());
+			if (StringUtils.isNotBlank(picPath)) {
+				resultList.add(picPath);
+			}
+		}
+		return resultList;
 	}
 
 }

@@ -1311,11 +1311,8 @@ public class WechatController {
     		@RequestParam(name = "coterieId",required = false) Integer coterieId,
     		@RequestParam("tags") String tags,
     		@RequestParam("name") String name,
-//    		@RequestParam(name = "pictures", required = false) String[] pictures,
-//    		@RequestParam("file") CommonsMultipartFile[] pictures,
-    		@RequestParam("pic1") CommonsMultipartFile picture1,
-    		@RequestParam(name = "pic2",required = false) CommonsMultipartFile picture2,
-    		@RequestParam(name = "pic3",required = false) CommonsMultipartFile picture3,
+    		@RequestParam("serverIds") String[] serverIds,
+//    		@RequestParam("pic1") CommonsMultipartFile picture1,
     		@RequestParam("startTime") long startTimeMillisecond,
     		@RequestParam("gps") String gps,
     		@RequestParam("address") String address,
@@ -1339,14 +1336,14 @@ public class WechatController {
 				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_PARAM_IS_EMPTY);
 			}
         	
-        	List<CommonsMultipartFile> pictures = new ArrayList<>();
+        	/*List<CommonsMultipartFile> pictures = new ArrayList<>();
         	pictures.add(picture1);
         	if (picture2 != null) {
         		pictures.add(picture2);
 			}
         	if (picture3 != null) {
         		pictures.add(picture3);
-			}
+			}*/
         	
             Event event = new Event();
             event.setAllowSignUp(true);
@@ -1421,7 +1418,7 @@ public class WechatController {
             			i++;
 					}
 				}*/
-            	int j = 1;
+            	/*int j = 1;
             	for (CommonsMultipartFile picture : pictures) {
             		String folder = config.getActivityPicturePath() + "/" + event.getId();
     				String fileName = FileUploadHelper.generateTempImageFileName();
@@ -1429,8 +1426,19 @@ public class WechatController {
     				String picPath = AliyunOSSUtil.getInstance().putObject(folder +"/" + fileName, picture);
     				EventPicture eventPicture = new EventPicture(event, picPath, j++, user);
         			event.getEventPictures().add(eventPicture);
-				}
+				}*/
 //			}
+            
+            if (serverIds != null) {
+            	String folder = config.getActivityPicturePath() + "/" + event.getId();
+            	String accessToken = wxMpService.getWxAccessToken();
+            	List<String> pictures = WxRequestHelper.downloadServerFileToAliyunOSS(folder, serverIds, accessToken);
+				int j = 1;
+				for (String url : pictures) {
+					EventPicture eventPicture = new EventPicture(event, url, j++, user);
+        			event.getEventPictures().add(eventPicture);
+				}
+			}
             
             EventUser eventUser = new EventUser(event, user, 1);
             eventUser.setRealName(user.getNickName());

@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.http.HttpEntity;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import com.aliyun.oss.OSSClient;
@@ -119,6 +120,23 @@ public class AliyunOSSUtil {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			ossClient.shutdown();
+		}
+		return null;
+	}
+
+	public String putObject(String key, InputStream in) {
+		OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+		try {
+			PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, in);
+
+			ossClient.putObject(putObjectRequest);
+
+			OSSObject obj = ossClient.getObject(bucketName, key);
+			if (obj != null && obj.getResponse() != null) {
+				return obj.getResponse().getUri();
+			}
 		} finally {
 			ossClient.shutdown();
 		}
