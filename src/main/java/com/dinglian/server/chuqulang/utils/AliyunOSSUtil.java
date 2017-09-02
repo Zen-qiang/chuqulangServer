@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.http.HttpEntity;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import com.aliyun.oss.OSSClient;
@@ -14,9 +13,10 @@ import com.aliyun.oss.model.ObjectMetadata;
 import com.aliyun.oss.model.PutObjectRequest;
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 
-import sun.misc.BASE64Decoder;
-
 public class AliyunOSSUtil {
+
+	// private static final Logger logger =
+	// LoggerFactory.getLogger(AliyunOSSUtil.class);
 
 	private static final AliyunOSSUtil instance = new AliyunOSSUtil();
 
@@ -24,6 +24,10 @@ public class AliyunOSSUtil {
 	private static final String accessKeyId;
 	private static final String accessKeySecret;
 	private static final String bucketName;
+
+	private static final String IMG_CONTENT_TYPE = "image/*";
+
+	private OSSClient ossClient;
 
 	static {
 		ApplicationConfig config = ApplicationConfig.getInstance();
@@ -37,109 +41,70 @@ public class AliyunOSSUtil {
 		return instance;
 	}
 
-	public String putObject(String key, String base64Str) {
-		OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
-		try {
-			// Base64字符串解码
-			byte[] decoderBytes = new BASE64Decoder().decodeBuffer(base64Str);
+	private void openClient() {
+		ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+	}
 
-			ObjectMetadata meta = new ObjectMetadata();
-			// 设置上传文件长度
-			meta.setContentLength(decoderBytes.length);
-			// 设置上传MD5校验
-			String md5 = BinaryUtil.toBase64String(BinaryUtil.calculateMd5(decoderBytes));
-			meta.setContentMD5(md5);
-			// 设置上传内容类型
-			meta.setContentType("image/*");
-
-			PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key,
-					new ByteArrayInputStream(decoderBytes), meta);
-
-			ossClient.putObject(putObjectRequest);
-
-			OSSObject obj = ossClient.getObject(bucketName, key);
-			if (obj != null && obj.getResponse() != null) {
-				return obj.getResponse().getUri();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
+	private void closeClient() {
+		if (ossClient != null) {
 			ossClient.shutdown();
 		}
-		return null;
+	}
+
+	private String putObject(PutObjectRequest putObjectRequest) {
+		String uri = null;
+		openClient();
+
+		ossClient.putObject(putObjectRequest);
+
+		OSSObject obj = ossClient.getObject(putObjectRequest.getBucketName(), putObjectRequest.getKey());
+		if (obj != null && obj.getResponse() != null) {
+			uri = obj.getResponse().getUri();
+		}
+
+		closeClient();
+		return uri;
 	}
 
 	public void deleteObject(String key) {
-		OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+		openClient();
 		boolean found = ossClient.doesObjectExist(bucketName, key);
 		if (found) {
 			ossClient.deleteObject(bucketName, key);
 		}
-		ossClient.shutdown();
+		closeClient();
 	}
 
-	public String putObject(String key, byte[] data) {
-		OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
-		ObjectMetadata meta = new ObjectMetadata();
-		// 设置上传文件长度
-		meta.setContentLength(data.length);
-		// 设置上传MD5校验
-		String md5 = BinaryUtil.toBase64String(BinaryUtil.calculateMd5(data));
-		meta.setContentMD5(md5);
-		// 设置上传内容类型
-		meta.setContentType("image/*");
-
-		PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, new ByteArrayInputStream(data), meta);
-
-		ossClient.putObject(putObjectRequest);
-
-		OSSObject obj = ossClient.getObject(bucketName, key);
-		if (obj != null && obj.getResponse() != null) {
-			return obj.getResponse().getUri();
-		}
-		ossClient.shutdown();
-		return null;
+	private String calculateMd5(byte[] bytes) {
+		return BinaryUtil.toBase64String(BinaryUtil.calculateMd5(bytes));
 	}
 
-	public String putObject(String key, CommonsMultipartFile coverFile) {
-		OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+	public String upload(String key, CommonsMultipartFile file) {
+		String uri = null;
 		try {
 			ObjectMetadata meta = new ObjectMetadata();
-			meta.setContentLength(coverFile.getSize());
-			String md5 = BinaryUtil.toBase64String(BinaryUtil.calculateMd5(coverFile.getBytes()));
-			meta.setContentMD5(md5);
-			meta.setContentType("image/*");
+			meta.setContentLength(file.getSize());
+			meta.setContentMD5(this.calculateMd5(file.getBytes()));
+			meta.setContentType(IMG_CONTENT_TYPE);
 
-			PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, coverFile.getInputStream(), meta);
-
-			ossClient.putObject(putObjectRequest);
-
-			OSSObject obj = ossClient.getObject(bucketName, key);
-			if (obj != null && obj.getResponse() != null) {
-				return obj.getResponse().getUri();
-			}
+			uri = this.putObject(new PutObjectRequest(bucketName, key, file.getInputStream(), meta));
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			ossClient.shutdown();
 		}
-		return null;
+		return uri;
 	}
 
-	public String putObject(String key, InputStream in) {
-		OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
-		try {
-			PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, in);
+	public String upload(String key, byte[] data) {
+		ObjectMetadata meta = new ObjectMetadata();
+		meta.setContentLength(data.length);
+		meta.setContentMD5(this.calculateMd5(data));
+		meta.setContentType(IMG_CONTENT_TYPE);
 
-			ossClient.putObject(putObjectRequest);
+		return this.putObject(new PutObjectRequest(bucketName, key, new ByteArrayInputStream(data), meta));
+	}
 
-			OSSObject obj = ossClient.getObject(bucketName, key);
-			if (obj != null && obj.getResponse() != null) {
-				return obj.getResponse().getUri();
-			}
-		} finally {
-			ossClient.shutdown();
-		}
-		return null;
+	public String upload(String key, InputStream in) {
+		PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, in);
+		return this.putObject(putObjectRequest);
 	}
 }

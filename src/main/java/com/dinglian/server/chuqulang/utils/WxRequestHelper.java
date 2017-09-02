@@ -160,7 +160,7 @@ public class WxRequestHelper {
 			
 			AliyunOSSUtil util = AliyunOSSUtil.getInstance();
 			String fileName = FileUploadHelper.generateTempImageFileName();
-			String picPath = util.putObject(folder +"/" + fileName, entry.getContent());
+			String picPath = util.upload(folder +"/" + fileName, entry.getContent());
 			if (StringUtils.isNotBlank(picPath)) {
 				resultList.add(picPath);
 			}

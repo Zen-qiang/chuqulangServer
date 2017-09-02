@@ -149,16 +149,7 @@ public class FileUploadHelper {
 		byte[] data = baos.toByteArray();
 		
 		String key = folder + "/" + fileName;
-		return util.putObject(key, data);
-	}
-	
-	public static String uploadToAliyunOSS(String base64Str, String folder, String fileName) {
-		AliyunOSSUtil util = AliyunOSSUtil.getInstance();
-
-		base64Str = base64Str.split(",")[1];
-		String key = folder + "/" + fileName;
-		
-		return util.putObject(key, base64Str);
+		return util.upload(key, data);
 	}
 	
 	public static String generateTempImageFileName(){

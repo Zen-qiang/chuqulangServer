@@ -576,7 +576,8 @@ public class WechatController {
 			@RequestParam("name") String name,
 			@RequestParam("tags") String tags, 
 			@RequestParam(name = "description", required = false) String description,
-			@RequestParam(name = "file") CommonsMultipartFile picture
+//			@RequestParam(name = "file") CommonsMultipartFile picture
+			@RequestParam("serverId") String serverId
 			) {
 		logger.info("=====> Start to create coterie <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -613,11 +614,11 @@ public class WechatController {
 
 			discoverService.saveCoterie(coterie);
 			
-			if (picture != null) {
+			/*if (picture != null) {
 				String folder = config.getCoterieCoverPath() + "/" + coterie.getId();
 				String fileName = FileUploadHelper.generateTempImageFileName();
 				
-				String picPath = AliyunOSSUtil.getInstance().putObject(folder +"/" + fileName, picture);
+				String picPath = AliyunOSSUtil.getInstance().upload(folder +"/" + fileName, picture);
 				CoteriePicture coteriePicture = new CoteriePicture();
 				coteriePicture.setCoterie(coterie);
 				coteriePicture.setCreationDate(new Date());
@@ -625,6 +626,22 @@ public class WechatController {
 				coteriePicture.setUrl(picPath);
 				coterie.setCoteriePicture(coteriePicture);
 				discoverService.saveCoterie(coterie);
+			}*/
+			if (StringUtils.isNotBlank(serverId)) {
+				String folder = config.getCoterieCoverPath() + "/" + coterie.getId();
+				String[] serverIds = {serverId};
+				String accessToken = wxMpService.getWxAccessToken();
+				List<String> pictures = WxRequestHelper.downloadServerFileToAliyunOSS(folder, serverIds, accessToken);
+				if (pictures != null && pictures.size() > 0) {
+					String picPath = pictures.get(0);
+					CoteriePicture coteriePicture = new CoteriePicture();
+					coteriePicture.setCoterie(coterie);
+					coteriePicture.setCreationDate(new Date());
+					coteriePicture.setUser(user);
+					coteriePicture.setUrl(picPath);
+					coterie.setCoteriePicture(coteriePicture);
+					discoverService.saveCoterie(coterie);
+				}
 			}
 			ResponseHelper.addResponseSuccessData(responseMap, null);
 			logger.info("=====> Create coterie end <=====");
@@ -644,7 +661,8 @@ public class WechatController {
 			@RequestParam(name = "name", required = false) String name, 
 			@RequestParam(name = "tags", required = false) String tags, 
 			@RequestParam(name = "description", required = false) String description,
-			@RequestParam(name = "file", required = false) CommonsMultipartFile picture) {
+//			@RequestParam(name = "file", required = false) CommonsMultipartFile picture
+			@RequestParam(name = "serverId", required = false) String serverId) {
 		logger.info("=====> Start to edit coterie <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
@@ -685,7 +703,7 @@ public class WechatController {
 				
 			}
 			
-			/*if (StringUtils.isNotBlank(picture) && picture.indexOf(",") > 0) {
+			if (StringUtils.isNotBlank(serverId)) {
 				// 删除旧图片
 				if (coterie.getCoteriePicture() != null) {
 					String oldUrl = coterie.getCoteriePicture().getUrl();
@@ -694,45 +712,25 @@ public class WechatController {
 						AliyunOSSUtil.getInstance().deleteObject(paths[1]);
 					}
 				}
-				String folder = ApplicationConfig.getInstance().getCoterieCoverPath();
-				String fileName = String.valueOf(new Date().getTime()) + ".jpg";
-				String picPath = FileUploadHelper.uploadToAliyunOSS(picture, folder + "/" + coterieId, fileName);
 				
-				if (coterie.getCoteriePicture() != null) {
-					coterie.getCoteriePicture().setUser(user);
-					coterie.getCoteriePicture().setUrl(picPath);
-				} else {
-					CoteriePicture coteriePicture = new CoteriePicture();
-					coteriePicture.setCoterie(coterie);
-					coteriePicture.setCreationDate(new Date());
-					coteriePicture.setUser(user);
-					coteriePicture.setUrl(picPath);
-					coterie.setCoteriePicture(coteriePicture);
-				}
-			}*/
-			if (picture != null) {
-				// 删除旧图片
-				if (coterie.getCoteriePicture() != null) {
-					String oldUrl = coterie.getCoteriePicture().getUrl();
-					String[] paths = oldUrl.split("com/");
-					if (paths != null && paths.length > 1) {
-						AliyunOSSUtil.getInstance().deleteObject(paths[1]);
-					}
-				}
 				String folder = config.getCoterieCoverPath() + "/" + coterie.getId();
-				String fileName = FileUploadHelper.generateTempImageFileName();
 				
-				String picPath = AliyunOSSUtil.getInstance().putObject(folder +"/" + fileName, picture);
-				if (coterie.getCoteriePicture() != null) {
-					coterie.getCoteriePicture().setUser(user);
-					coterie.getCoteriePicture().setUrl(picPath);
-				} else {
-					CoteriePicture coteriePicture = new CoteriePicture();
-					coteriePicture.setCoterie(coterie);
-					coteriePicture.setCreationDate(new Date());
-					coteriePicture.setUser(user);
-					coteriePicture.setUrl(picPath);
-					coterie.setCoteriePicture(coteriePicture);
+				String[] serverIds = {serverId};
+				String accessToken = wxMpService.getWxAccessToken();
+				List<String> pictures = WxRequestHelper.downloadServerFileToAliyunOSS(folder, serverIds, accessToken);
+				if (pictures != null && pictures.size() > 0) {
+					String picPath = pictures.get(0);
+					if (coterie.getCoteriePicture() != null) {
+						coterie.getCoteriePicture().setUser(user);
+						coterie.getCoteriePicture().setUrl(picPath);
+					} else {
+						CoteriePicture coteriePicture = new CoteriePicture();
+						coteriePicture.setCoterie(coterie);
+						coteriePicture.setCreationDate(new Date());
+						coteriePicture.setUser(user);
+						coteriePicture.setUrl(picPath);
+						coterie.setCoteriePicture(coteriePicture);
+					}
 				}
 			}
 
@@ -1314,7 +1312,7 @@ public class WechatController {
     		@RequestParam("serverIds") String[] serverIds,
 //    		@RequestParam("pic1") CommonsMultipartFile picture1,
     		@RequestParam("startTime") long startTimeMillisecond,
-    		@RequestParam("gps") String gps,
+    		@RequestParam(name = "gps",required = false) String gps,
     		@RequestParam("address") String address,
             @RequestParam("minCount") int minCount,
             @RequestParam("maxCount") int maxCount,
@@ -1404,30 +1402,6 @@ public class WechatController {
             	topic.setCoterie(event.getCoterie());
             }
             discoverService.saveTopic(topic);
-            
-//            if (pictures != null) {
-            	/*int i = 1;
-            	String folder = ApplicationConfig.getInstance().getActivityPicturePath();
-            	for (String picBase64Str : pictures) {
-            		if (picBase64Str.indexOf(",") > 0) {
-    					String fileName = String.valueOf(new Date().getTime()) + ".jpg";
-    					String picPath = FileUploadHelper.uploadToAliyunOSS(picBase64Str, folder + "/" + event.getId(), fileName);
-            			
-            			EventPicture eventPicture = new EventPicture(event, picPath, i, user);
-            			event.getEventPictures().add(eventPicture);
-            			i++;
-					}
-				}*/
-            	/*int j = 1;
-            	for (CommonsMultipartFile picture : pictures) {
-            		String folder = config.getActivityPicturePath() + "/" + event.getId();
-    				String fileName = FileUploadHelper.generateTempImageFileName();
-    				
-    				String picPath = AliyunOSSUtil.getInstance().putObject(folder +"/" + fileName, picture);
-    				EventPicture eventPicture = new EventPicture(event, picPath, j++, user);
-        			event.getEventPictures().add(eventPicture);
-				}*/
-//			}
             
             if (serverIds != null) {
             	String folder = config.getActivityPicturePath() + "/" + event.getId();
