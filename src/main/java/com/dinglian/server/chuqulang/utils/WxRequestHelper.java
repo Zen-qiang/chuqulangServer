@@ -84,7 +84,7 @@ public class WxRequestHelper {
 		JSONObject params = new JSONObject();
 		params.accumulate("touser", user.getOpenId());
 		params.accumulate("template_id", config.getWxActivitySignUpTemplateId());
-		params.accumulate("url", config.getWxMpDomain() + config.getWxActivityDetails() + "/" + user.getId() + "/" + event.getId());
+		params.accumulate("url", config.getWxMpDomain() + "/#" + config.getWxActivityDetails() /*+ "/" + user.getId()*/ + "/" + event.getId());
 		
 		Map<String, Object> dataMap = new HashMap<String, Object>();
 		
@@ -118,7 +118,7 @@ public class WxRequestHelper {
 		JSONObject params = new JSONObject();
 		params.accumulate("touser", event.getCreator().getOpenId());
 		params.accumulate("template_id", config.getWxActivitySignOutTemplateId());
-		params.accumulate("url", config.getWxMpDomain() + config.getWxActivityDetails() + "/" + currentUser.getId() + "/" + event.getId());
+		params.accumulate("url", config.getWxMpDomain() + "/#" + config.getWxActivityDetails() /*+ "/" + currentUser.getId()*/ + "/" + event.getId());
 		
 		Map<String, Object> dataMap = new HashMap<String, Object>();
 		
