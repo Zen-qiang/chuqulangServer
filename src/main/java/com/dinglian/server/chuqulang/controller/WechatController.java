@@ -148,12 +148,12 @@ public class WechatController {
 
 	@ResponseBody
 	@RequestMapping(value = "/userAuthorization", method = RequestMethod.GET)
-	public String userAuthorization(@RequestParam("callbackUrl") String callbackUrl) {
+	public String userAuthorization(/*@RequestParam("callbackUrl") String callbackUrl*/) {
 		logger.info("=====> Start to user authorization <=====");
 		String url = "";
 		try {
 			ApplicationConfig config = ApplicationConfig.getInstance();
-			String redirectUrl = URLEncoder.encode(config.getWxMpAuthorizeRedirectUrl() + "?redirectUrl=" + callbackUrl);
+			String redirectUrl = URLEncoder.encode(config.getWxMpAuthorizeRedirectUrl()/* + "?redirectUrl=" + callbackUrl*/);
 			url = String.format(config.getWxMpAuthorizeCodeUrl(), config.getWxMpAppId(), redirectUrl);
 			logger.info("url : " + url);
 		} catch (Exception e) {
