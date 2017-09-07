@@ -2191,7 +2191,7 @@ public class WechatController {
      */
     @ResponseBody
    	@RequestMapping(value = "/getActivityTopic", method = RequestMethod.GET)
-   	public Map<String, Object> getActivityTopic(@RequestParam("topicId") int topicId) {
+   	public Map<String, Object> getActivityTopic(@RequestParam("topicId") int topicId, @RequestParam("userId") int userId) {
    		logger.info("=====> Start to get activity topic <=====");
    		Map<String, Object> responseMap = new HashMap<String, Object>();
    		try {
@@ -2277,6 +2277,7 @@ public class WechatController {
    			resultMap.put("praise", praiseList);
    			resultMap.put("commentCnt", topic.getComments().size());
    			resultMap.put("praiseCnt", topic.getPraises().size());
+   			resultMap.put("hasPraise", topic.hasPraise(userId));
    			
    			ResponseHelper.addResponseSuccessData(responseMap, resultMap);
    			logger.info("=====> Get avtivity topic end <=====");
