@@ -2577,7 +2577,7 @@ public class WechatController {
 			}
             
             // 关闭允许报名
-            if (event.getEventUsers().size() == event.getMaxCount()) {
+            if (event.getEffectiveMembers().size() == event.getMaxCount()) {
 				event.setAllowSignUp(false);
 			}
             
