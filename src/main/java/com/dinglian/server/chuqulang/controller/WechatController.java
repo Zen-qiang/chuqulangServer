@@ -156,25 +156,25 @@ public class WechatController {
 			@RequestParam(name = "nonce", required = false) String nonce,
 			HttpServletRequest request) {
 		try {
-			Map<String, String> map = new HashMap<String, String>();  
-			   
-	        // 从request中取得输入流   
-	        InputStream inputStream = request.getInputStream();  
-	        // 读取输入流   
-	        SAXReader reader = new SAXReader();  
-	        org.dom4j.Document document1 = reader.read(inputStream);  
-	        // 得到xml根元素   
-	        org.dom4j.Element root1 = document1.getRootElement();  
-	        // 得到根元素的所有子节点   
-	        List<org.dom4j.Element> elementList = root1.elements();  
-	   
-	        // 遍历所有子节点   
-	        for (org.dom4j.Element e : elementList)  
-	            map.put(e.getName(), e.getText());  
-	   
-	        // 释放资源   
-	        inputStream.close();  
-	        System.out.println(map);
+//			Map<String, String> map = new HashMap<String, String>();  
+//			   
+//	        // 从request中取得输入流   
+//	        InputStream inputStream = request.getInputStream();  
+//	        // 读取输入流   
+//	        SAXReader reader = new SAXReader();  
+//	        org.dom4j.Document document1 = reader.read(inputStream);  
+//	        // 得到xml根元素   
+//	        org.dom4j.Element root1 = document1.getRootElement();  
+//	        // 得到根元素的所有子节点   
+//	        List<org.dom4j.Element> elementList = root1.elements();  
+//	   
+//	        // 遍历所有子节点   
+//	        for (org.dom4j.Element e : elementList)  
+//	            map.put(e.getName(), e.getText());  
+//	   
+//	        // 释放资源   
+//	        inputStream.close();  
+//	        System.out.println(map);
 	        
 			WXBizMsgCrypt wxcpt = new WXBizMsgCrypt(config.getWxMpToken(), config.getWxMpEncodingAESKey(),config.getWxMpAppId());
 //			String msg = wxcpt.decryptMsg(msgSignature, timeStamp, nonce, postData);
@@ -186,9 +186,15 @@ public class WechatController {
 //			InputSource is = new InputSource(sr);
 			Document document = db.parse(request.getInputStream());
 
+			// 关注事件
 			Element root = document.getDocumentElement();
-			NodeList nodelist1 = root.getElementsByTagName("Encrypt");
-//			NodeList nodelist2 = root.getElementsByTagName("MsgSignature");
+//			NodeList nodelist1 = root.getElementsByTagName("Encrypt");
+			NodeList nodelist1 = root.getElementsByTagName("ToUserName");
+			NodeList nodelist2 = root.getElementsByTagName("FromUserName");
+			NodeList nodelist3 = root.getElementsByTagName("CreateTime");
+			NodeList nodelist4 = root.getElementsByTagName("MsgType");
+			NodeList nodelist5 = root.getElementsByTagName("Event");
+//			NodeList nodelist1 = root.getElementsByTagName("EventKey");
 
 			String encrypt = nodelist1.item(0).getTextContent();
 //			String msgSignature = nodelist2.item(0).getTextContent();
@@ -2666,6 +2672,7 @@ public class WechatController {
 					eventUser.setEffective(false);
 				}
 			}
+            event.setAllowSignUp(true);
             activityService.saveEvent(event);
             
             // 取消报名，给组织者发送通知
