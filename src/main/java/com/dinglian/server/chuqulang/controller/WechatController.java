@@ -157,25 +157,25 @@ public class WechatController {
 //			String postData, 
 			HttpServletRequest request) {
 		try {
-			Map<String, String> map = new HashMap<String, String>();  
-			   
-	        // 从request中取得输入流   
-	        InputStream inputStream = request.getInputStream();  
-	        // 读取输入流   
-	        SAXReader reader = new SAXReader();  
-	        org.dom4j.Document document = reader.read(inputStream);  
-	        // 得到xml根元素   
-	        org.dom4j.Element root = document.getRootElement();  
-	        // 得到根元素的所有子节点   
-	        List<org.dom4j.Element> elementList = root.elements();  
-	   
-	        // 遍历所有子节点   
-	        for (org.dom4j.Element e : elementList)  
-	            map.put(e.getName(), e.getText());  
-	   
-	        // 释放资源   
-	        inputStream.close();  
-	        System.out.println(map);
+//			Map<String, String> map = new HashMap<String, String>();  
+//			   
+//	        // 从request中取得输入流   
+//	        InputStream inputStream = request.getInputStream();  
+//	        // 读取输入流   
+//	        SAXReader reader = new SAXReader();  
+//	        org.dom4j.Document document = reader.read(inputStream);  
+//	        // 得到xml根元素   
+//	        org.dom4j.Element root = document.getRootElement();  
+//	        // 得到根元素的所有子节点   
+//	        List<org.dom4j.Element> elementList = root.elements();  
+//	   
+//	        // 遍历所有子节点   
+//	        for (org.dom4j.Element e : elementList)  
+//	            map.put(e.getName(), e.getText());  
+//	   
+//	        // 释放资源   
+//	        inputStream.close();  
+//	        System.out.println(map);
 	        
 			WXBizMsgCrypt wxcpt = new WXBizMsgCrypt(config.getWxMpToken(), config.getWxMpEncodingAESKey(),config.getWxMpAppId());
 //			String msg = wxcpt.decryptMsg(msgSignature, timeStamp, nonce, postData);
