@@ -24,6 +24,9 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.ParseException;
@@ -39,6 +42,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
@@ -144,6 +150,20 @@ public class WechatController {
 	@ResponseBody
 	@PostMapping(value = "/security")
 	public String doPost(HttpServletRequest request) {
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();     
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			Document doc = db.parse(request.getInputStream());
+			
+			NodeList xml = doc.getElementsByTagName("xml");
+			NodeList ToUserName = doc.getElementsByTagName("ToUserName");
+			NodeList FromUserName = doc.getElementsByTagName("FromUserName");
+			NodeList MsgType = doc.getElementsByTagName("MsgType");
+			NodeList Event = doc.getElementsByTagName("Event");
+			
+		} catch (ParserConfigurationException | SAXException | IOException e) {
+			e.printStackTrace();
+		}     
 		return "success";
 	}
 
