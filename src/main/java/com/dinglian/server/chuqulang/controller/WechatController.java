@@ -155,6 +155,7 @@ public class WechatController {
 			@RequestParam(name = "timestamp", required = false) String timeStamp,
 			@RequestParam(name = "nonce", required = false) String nonce,
 			HttpServletRequest request) {
+		String replyMsg = "success";
 		try {
 //			Map<String, String> map = new HashMap<String, String>();  
 //			   
@@ -188,32 +189,25 @@ public class WechatController {
 
 			// 关注事件
 			Element root = document.getDocumentElement();
-//			NodeList nodelist1 = root.getElementsByTagName("Encrypt");
-			NodeList nodelist1 = root.getElementsByTagName("ToUserName");
-			NodeList nodelist2 = root.getElementsByTagName("FromUserName");
-			NodeList nodelist3 = root.getElementsByTagName("CreateTime");
-			NodeList nodelist4 = root.getElementsByTagName("MsgType");
-			NodeList nodelist5 = root.getElementsByTagName("Event");
-//			NodeList nodelist1 = root.getElementsByTagName("EventKey");
-
-			String encrypt = nodelist1.item(0).getTextContent();
-//			String msgSignature = nodelist2.item(0).getTextContent();
-
-			String format = "<xml><ToUserName><![CDATA[toUser]]></ToUserName><Encrypt><![CDATA[%1$s]]></Encrypt></xml>";
-			String fromXML = String.format(format, encrypt);
-
-			//
-			// 公众平台发送消息给第三方，第三方处理
-			//
-
-			// 第三方收到公众号平台发送的消息
-			String result2 = wxcpt.decryptMsg(msgSignature, timeStamp, nonce, fromXML);
-			System.out.println("解密后明文: " + result2);
+			NodeList typeNode = root.getElementsByTagName("MsgType");
+			String msgType = typeNode.item(0).getTextContent();
 			
+			if (msgType.equalsIgnoreCase("event")) {
+				NodeList eventNode = root.getElementsByTagName("Event");
+				String event = eventNode.item(0).getTextContent();
+				if (event.equalsIgnoreCase("subscribe")) {
+					NodeList fromUserNode = root.getElementsByTagName("FromUserName");
+					String fromUserOpenId = fromUserNode.item(0).getTextContent();
+					
+					String content = "欢迎关注出趣浪！";
+					replyMsg = "<xml><ToUserName><![CDATA[%s]]></ToUserName><FromUserName><![CDATA[%s]]></FromUserName><CreateTime>%d</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[%s]]></Content></xml>";
+					replyMsg = String.format(replyMsg, fromUserOpenId, config.getWxMpOpenId(), Long.toString(System.currentTimeMillis()), content);
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return "success";
+		return replyMsg;
 	}
 
 	@ResponseBody
@@ -2386,6 +2380,7 @@ public class WechatController {
 					praise.put("nickName", praiseUser.getNickName());
 					praise.put("picture", praiseUser.getPicture());
 					praise.put("gender", praiseUser.getGender());
+					praise.put("createTime", topicPraise.getCreationDate());
 				}
 				praises.add(praise);
 			}

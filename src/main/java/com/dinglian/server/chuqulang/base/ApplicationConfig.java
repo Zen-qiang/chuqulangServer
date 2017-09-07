@@ -124,6 +124,10 @@ public class ApplicationConfig {
 		return System.getProperty("wx.mp.appid", "wxc9ec7e5bf6f50c00");
 	}
 	
+	public String getWxMpOpenId () {
+		return System.getProperty("wx.mp.openid", "gh_e3ce9c0e2b0a");
+	}
+	
 	public String getWxMpAppSecret () {
 		return System.getProperty("wx.mp.appsecret", "5b5e8f910bd61cb3a9214f0443eb4230");
 	}
