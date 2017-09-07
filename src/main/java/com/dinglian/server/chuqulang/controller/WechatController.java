@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.ParseException;
@@ -43,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -149,21 +149,44 @@ public class WechatController {
 	
 	@ResponseBody
 	@PostMapping(value = "/security")
-	public String doPost(HttpServletRequest request) {
+	public String doPost(
+//			@RequestParam(name = "msg_signature", required = false) String msgSignature, 
+			@RequestParam(name = "timestamp", required = false) String timeStamp,
+			@RequestParam(name = "nonce", required = false) String nonce,
+//			String postData, 
+			HttpServletRequest request) {
 		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();     
+			WXBizMsgCrypt wxcpt = new WXBizMsgCrypt(config.getWxMpToken(), config.getWxMpEncodingAESKey(),config.getWxMpAppId());
+//			String msg = wxcpt.decryptMsg(msgSignature, timeStamp, nonce, postData);
+//	        System.out.println(msg);
+	        
+	        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document doc = db.parse(request.getInputStream());
+//			StringReader sr = new StringReader(mingwen);
+//			InputSource is = new InputSource(sr);
+			Document document = db.parse(request.getInputStream());
+
+			Element root = document.getDocumentElement();
+			NodeList nodelist1 = root.getElementsByTagName("Encrypt");
+			NodeList nodelist2 = root.getElementsByTagName("MsgSignature");
+
+			String encrypt = nodelist1.item(0).getTextContent();
+			String msgSignature = nodelist2.item(0).getTextContent();
+
+			String format = "<xml><ToUserName><![CDATA[toUser]]></ToUserName><Encrypt><![CDATA[%1$s]]></Encrypt></xml>";
+			String fromXML = String.format(format, encrypt);
+
+			//
+			// 公众平台发送消息给第三方，第三方处理
+			//
+
+			// 第三方收到公众号平台发送的消息
+			String result2 = wxcpt.decryptMsg(msgSignature, timeStamp, nonce, fromXML);
+			System.out.println("解密后明文: " + result2);
 			
-			NodeList xml = doc.getElementsByTagName("xml");
-			NodeList ToUserName = doc.getElementsByTagName("ToUserName");
-			NodeList FromUserName = doc.getElementsByTagName("FromUserName");
-			NodeList MsgType = doc.getElementsByTagName("MsgType");
-			NodeList Event = doc.getElementsByTagName("Event");
-			
-		} catch (ParserConfigurationException | SAXException | IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-		}     
+		}
 		return "success";
 	}
 
