@@ -157,34 +157,8 @@ public class WechatController {
 			HttpServletRequest request) {
 		String replyMsg = "success";
 		try {
-//			Map<String, String> map = new HashMap<String, String>();  
-//			   
-//	        // 从request中取得输入流   
-//	        InputStream inputStream = request.getInputStream();  
-//	        // 读取输入流   
-//	        SAXReader reader = new SAXReader();  
-//	        org.dom4j.Document document1 = reader.read(inputStream);  
-//	        // 得到xml根元素   
-//	        org.dom4j.Element root1 = document1.getRootElement();  
-//	        // 得到根元素的所有子节点   
-//	        List<org.dom4j.Element> elementList = root1.elements();  
-//	   
-//	        // 遍历所有子节点   
-//	        for (org.dom4j.Element e : elementList)  
-//	            map.put(e.getName(), e.getText());  
-//	   
-//	        // 释放资源   
-//	        inputStream.close();  
-//	        System.out.println(map);
-	        
-			WXBizMsgCrypt wxcpt = new WXBizMsgCrypt(config.getWxMpToken(), config.getWxMpEncodingAESKey(),config.getWxMpAppId());
-//			String msg = wxcpt.decryptMsg(msgSignature, timeStamp, nonce, postData);
-//	        System.out.println(msg);
-	        
 	        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
-//			StringReader sr = new StringReader(mingwen);
-//			InputSource is = new InputSource(sr);
 			Document document = db.parse(request.getInputStream());
 
 			// 关注事件
@@ -201,7 +175,7 @@ public class WechatController {
 					
 					String content = "欢迎关注出趣浪！";
 					replyMsg = "<xml><ToUserName><![CDATA[%s]]></ToUserName><FromUserName><![CDATA[%s]]></FromUserName><CreateTime>%d</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[%s]]></Content></xml>";
-					replyMsg = String.format(replyMsg, fromUserOpenId, config.getWxMpOpenId(), Long.toString(System.currentTimeMillis()), content);
+					replyMsg = String.format(replyMsg, fromUserOpenId, config.getWxMpOpenId(), System.currentTimeMillis(), content);
 				}
 			}
 		} catch (Exception e) {
