@@ -69,7 +69,8 @@ import com.dinglian.server.chuqulang.service.ActivityService;
 import com.dinglian.server.chuqulang.service.DiscoverService;
 import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.service.WxMpService;
-import com.dinglian.server.chuqulang.task.ActivityStatusTask;
+import com.dinglian.server.chuqulang.task.ActivityOverStatusTask;
+import com.dinglian.server.chuqulang.task.ActivityProcessStatusTask;
 import com.dinglian.server.chuqulang.utils.AliyunOSSUtil;
 import com.dinglian.server.chuqulang.utils.CodeUtils;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
@@ -235,6 +236,43 @@ public class WechatController {
 		return responseMap;
 	}
 	
+	/**
+	 * 检查用户是否关注
+	 * @param openId
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/checkSubscribe", method = RequestMethod.GET)
+	public Map<String, Object> checkSubscribe(@RequestParam("openId") String openId) {
+		logger.info("=====> Start to check subscribe <=====");
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			String accessToken = wxMpService.getWxAccessToken();
+			String url = String.format(config.getWxMpBasicUserInfoUrl(), accessToken, openId);
+			String response = WxRequestHelper.doGet(url);
+			
+			JSONObject obj = JSONObject.fromObject(response);
+			if (obj != null) {
+				int subscribe = obj.getInt("subscribe");
+				if (subscribe == 1) {
+					ResponseHelper.addResponseSuccessData(responseMap, null);
+				} else {
+					ResponseHelper.addResponseFailData(responseMap, null);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		}
+		logger.info("=====> Check subscribe end <=====");
+		return responseMap;
+	}
+	
+	/**
+	 * 获取微信Config注入信息
+	 * @param url
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/getWxConfig", method = RequestMethod.GET)
 	public Map<String, Object> getWxConfig(@RequestParam("url") String url) {
@@ -1312,6 +1350,7 @@ public class WechatController {
     		@RequestParam("serverIds") String[] serverIds,
 //    		@RequestParam("pic1") CommonsMultipartFile picture1,
     		@RequestParam("startTime") long startTimeMillisecond,
+    		@RequestParam("endTime") long endTimeMillisecond,
     		@RequestParam(name = "gps",required = false) String gps,
     		@RequestParam("address") String address,
             @RequestParam("minCount") int minCount,
@@ -1376,6 +1415,7 @@ public class WechatController {
             event.setName(name);
             
             event.setStartTime(new Date(startTimeMillisecond));
+            event.setEndTime(new Date(endTimeMillisecond));
             
             event.setMinCount(minCount);
             event.setMaxCount(maxCount);
@@ -1390,7 +1430,8 @@ public class WechatController {
             activityService.saveEvent(event);
             
             // 创建定时任务
-            ApplicationConfig.getInstance().getScheduledThreadPool().submit(new ActivityStatusTask(event, activityService));
+            config.getScheduledThreadPool().submit(new ActivityProcessStatusTask(event, activityService));
+            config.getScheduledThreadPool().submit(new ActivityOverStatusTask(event, activityService));
             
             Topic topic = new Topic();
             topic.setCreationDate(new Date());
@@ -2512,6 +2553,7 @@ public class WechatController {
 			countMap.put("currentCount", event.getEffectiveMembers().size());
 			result.put("userCount", countMap);
 			
+			// 报名成功给用户发送通知
 			String accessToken = wxMpService.getWxAccessToken();
 			if (StringUtils.isNotBlank(accessToken)) {
 				WxRequestHelper.sendActivitySignUpMsg(accessToken, event, user);
@@ -2563,6 +2605,7 @@ public class WechatController {
 			}
             activityService.saveEvent(event);
             
+            // 取消报名，给组织者发送通知
             String accessToken = wxMpService.getWxAccessToken();
 			if (StringUtils.isNotBlank(accessToken) && currentUser != null) {
 				WxRequestHelper.sendActivitySignOutMsg(accessToken, event, currentUser, hasRetinues);

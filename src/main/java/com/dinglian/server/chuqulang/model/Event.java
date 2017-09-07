@@ -33,7 +33,7 @@ public class Event implements Serializable {
 	// 已关闭
 	public static final String STATUS_OVER = "0";
 	// 进行中
-	public static final String STATUS_PROGRESS = "1";
+	public static final String STATUS_PROCESS = "1";
 	// 正在报名
 	public static final String STATUS_SIGNUP = "2";
 	// 好友参与

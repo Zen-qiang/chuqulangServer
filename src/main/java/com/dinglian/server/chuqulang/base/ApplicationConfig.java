@@ -183,4 +183,8 @@ public class ApplicationConfig {
 	public String getWxMpDownloadServerFileUrl() {
 		return System.getProperty("wx.mp.download.server.file.url", "http://file.api.weixin.qq.com/cgi-bin/media/get?access_token=%s&media_id=%s");
 	}
+	
+	public String getWxMpBasicUserInfoUrl() {
+		return System.getProperty("wx.mp.basic.user.info.url", "https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN");
+	}
 }

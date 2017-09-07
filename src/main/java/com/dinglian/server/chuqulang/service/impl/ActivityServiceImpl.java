@@ -138,7 +138,16 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Override
 	public void changeActivityStatus(int id, String status) {
-		eventDao.changeActivityStatus(id, status);
+		if (status.equalsIgnoreCase(Event.STATUS_PROCESS)) {
+			eventDao.changeActivityStatus(id, status, Event.STATUS_SIGNUP);
+		} else if (status.equalsIgnoreCase(Event.STATUS_OVER)) {
+			eventDao.changeActivityStatus(id, status, null);
+		}
+	}
+
+	@Override
+	public int getActivityUserCount(int id) {
+		return eventDao.getActivityUserCount(id);
 	}
 
 }

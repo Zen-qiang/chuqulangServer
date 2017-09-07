@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 public class ResponseHelper {
 	
 	public static final boolean RESPONSE_SUCCESS_TRUE = true;
@@ -23,9 +25,11 @@ public class ResponseHelper {
 
 	public static void addResponseFailData(Map<String, Object> resultMap, String message) {
 		resultMap.put("success", RESPONSE_SUCCESS_FALSE);
-		Map<String, Object> errorMap = new HashMap<String, Object>();
-		errorMap.put("message", message);
-		resultMap.put("error", errorMap);
+		if (StringUtils.isNotBlank(message)) {
+			Map<String, Object> errorMap = new HashMap<String, Object>();
+			errorMap.put("message", message);
+			resultMap.put("error", errorMap);
+		}
 	}
 	
 	public static void addResponseFailData(Map<String, Object> resultMap, String message, Object data) {

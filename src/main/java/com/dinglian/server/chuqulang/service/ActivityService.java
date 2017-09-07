@@ -46,4 +46,6 @@ public interface ActivityService {
 
 	void changeActivityStatus(int id, String status);
 
+	int getActivityUserCount(int id);
+
 }

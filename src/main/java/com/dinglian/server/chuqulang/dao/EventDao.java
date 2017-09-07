@@ -17,6 +17,8 @@ public interface EventDao extends GenericDao<Event> {
 
 	List<Event> getSingnUpActivitys();
 
-	void changeActivityStatus(int id, String status);
+	void changeActivityStatus(int id, String status, String originStatus);
+
+	int getActivityUserCount(int id);
 
 }
