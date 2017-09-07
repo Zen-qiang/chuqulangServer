@@ -29,6 +29,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.ParseException;
+import org.dom4j.io.SAXReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,12 +151,32 @@ public class WechatController {
 	@ResponseBody
 	@PostMapping(value = "/security")
 	public String doPost(
-//			@RequestParam(name = "msg_signature", required = false) String msgSignature, 
+			@RequestParam(name = "msg_signature", required = false) String msgSignature, 
 			@RequestParam(name = "timestamp", required = false) String timeStamp,
 			@RequestParam(name = "nonce", required = false) String nonce,
 //			String postData, 
 			HttpServletRequest request) {
 		try {
+			Map<String, String> map = new HashMap<String, String>();  
+			   
+	        // 从request中取得输入流   
+	        InputStream inputStream = request.getInputStream();  
+	        // 读取输入流   
+	        SAXReader reader = new SAXReader();  
+	        org.dom4j.Document document = reader.read(inputStream);  
+	        // 得到xml根元素   
+	        org.dom4j.Element root = document.getRootElement();  
+	        // 得到根元素的所有子节点   
+	        List<org.dom4j.Element> elementList = root.elements();  
+	   
+	        // 遍历所有子节点   
+	        for (org.dom4j.Element e : elementList)  
+	            map.put(e.getName(), e.getText());  
+	   
+	        // 释放资源   
+	        inputStream.close();  
+	        System.out.println(map);
+	        
 			WXBizMsgCrypt wxcpt = new WXBizMsgCrypt(config.getWxMpToken(), config.getWxMpEncodingAESKey(),config.getWxMpAppId());
 //			String msg = wxcpt.decryptMsg(msgSignature, timeStamp, nonce, postData);
 //	        System.out.println(msg);
@@ -168,10 +189,10 @@ public class WechatController {
 
 			Element root = document.getDocumentElement();
 			NodeList nodelist1 = root.getElementsByTagName("Encrypt");
-			NodeList nodelist2 = root.getElementsByTagName("MsgSignature");
+//			NodeList nodelist2 = root.getElementsByTagName("MsgSignature");
 
 			String encrypt = nodelist1.item(0).getTextContent();
-			String msgSignature = nodelist2.item(0).getTextContent();
+//			String msgSignature = nodelist2.item(0).getTextContent();
 
 			String format = "<xml><ToUserName><![CDATA[toUser]]></ToUserName><Encrypt><![CDATA[%1$s]]></Encrypt></xml>";
 			String fromXML = String.format(format, encrypt);
