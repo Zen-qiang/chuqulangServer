@@ -150,13 +150,15 @@ public class WechatController {
 	
 	@ResponseBody
 	@PostMapping(value = "/security")
-	public String doPost(
+	public void doPost(
 			@RequestParam(name = "msg_signature", required = false) String msgSignature, 
 			@RequestParam(name = "timestamp", required = false) String timeStamp,
 			@RequestParam(name = "nonce", required = false) String nonce,
-			HttpServletRequest request) {
+			HttpServletRequest request, HttpServletResponse response) {
+		response.setContentType("text/xml");
 		String replyMsg = "success";
 		try {
+			PrintWriter out = response.getWriter();
 	        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			Document document = db.parse(request.getInputStream());
@@ -178,10 +180,12 @@ public class WechatController {
 					replyMsg = String.format(replyMsg, fromUserOpenId, config.getWxMpOpenId(), System.currentTimeMillis(), content);
 				}
 			}
+			out.print(replyMsg);
+			out.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return replyMsg;
+//		return replyMsg;
 	}
 
 	@ResponseBody
