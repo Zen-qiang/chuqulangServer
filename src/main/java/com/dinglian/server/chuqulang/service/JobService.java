@@ -3,6 +3,7 @@ package com.dinglian.server.chuqulang.service;
 import java.util.List;
 
 import com.dinglian.server.chuqulang.model.Event;
+import com.dinglian.server.chuqulang.model.SensitiveWord;
 import com.dinglian.server.chuqulang.model.User;
 
 public interface JobService {
@@ -20,5 +21,7 @@ public interface JobService {
 	User getActivityCreator(int activityId);
 
 	List<User> getActivityMembers(int activityId);
+
+	List<SensitiveWord> loadAllSensitiveWord();
 
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.dinglian.server.chuqulang.dao.GeneralDao;
 import com.dinglian.server.chuqulang.model.Event;
+import com.dinglian.server.chuqulang.model.SensitiveWord;
 import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.model.WxAccessToken;
 import com.dinglian.server.chuqulang.service.JobService;
@@ -58,6 +59,11 @@ public class JobServiceImpl implements JobService {
 	@Override
 	public List<User> getActivityMembers(int activityId) {
 		return generalDao.getActivityMembers(activityId);
+	}
+
+	@Override
+	public List<SensitiveWord> loadAllSensitiveWord() {
+		return generalDao.loadAllSensitiveWord();
 	}
 	
 }

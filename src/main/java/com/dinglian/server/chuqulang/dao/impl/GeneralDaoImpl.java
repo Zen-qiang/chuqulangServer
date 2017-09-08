@@ -16,6 +16,7 @@ import com.dinglian.server.chuqulang.model.Contact;
 import com.dinglian.server.chuqulang.model.CoterieCarouselPicture;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.Event;
+import com.dinglian.server.chuqulang.model.SensitiveWord;
 import com.dinglian.server.chuqulang.model.Tag;
 import com.dinglian.server.chuqulang.model.TopicPraise;
 import com.dinglian.server.chuqulang.model.User;
@@ -198,6 +199,12 @@ public class GeneralDaoImpl implements GeneralDao {
 	public List<User> getActivityMembers(int activityId) {
 		String sql = "SELECT u.* FROM USER u JOIN event_user eu ON u.id = eu.fk_user_id WHERE eu.effective = 1 AND eu.fk_event_id = :id ";
 		return getCurrentSession().createSQLQuery(sql).addEntity(User.class).setInteger("id", activityId).list();
+	}
+
+	@Override
+	public List<SensitiveWord> loadAllSensitiveWord() {
+		String hql = "FROM SensitiveWord ";
+		return getCurrentSession().createQuery(hql).list();
 	}
 
 }

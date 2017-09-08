@@ -175,7 +175,7 @@ public class WechatController {
 					NodeList fromUserNode = root.getElementsByTagName("FromUserName");
 					String fromUserOpenId = fromUserNode.item(0).getTextContent();
 					
-					String content = "欢迎关注出趣浪！";
+					String content = "出趣浪，欢迎您～\n 更多玩趣，组团活动小工具，就在出趣浪～\n";
 					replyMsg = "<xml><ToUserName><![CDATA[%s]]></ToUserName><FromUserName><![CDATA[%s]]></FromUserName><CreateTime>%d</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[%s]]></Content></xml>";
 					replyMsg = String.format(replyMsg, fromUserOpenId, config.getWxMpOpenId(), System.currentTimeMillis(), content);
 				}
@@ -2249,12 +2249,17 @@ public class WechatController {
    			}
    			activityMap.put("cover", eventPicture != null ? eventPicture.getUrl() : "");
    			
-   			List<String> tagList = new ArrayList<>();
+   			List<Map> tagList = new ArrayList<>();
    			for (EventTag eventTag : event.getTags()) {
-   				Tag tag = eventTag.getTag();
-   				tagList.add(tag.getName());
-   			}
-   			activityMap.put("tags", tagList);
+				Tag tag = eventTag.getTag();
+				if (tag != null) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("id", tag.getId());
+					map.put("name", tag.getName());
+					tagList.add(map);
+				}
+			}
+			activityMap.put("tags", tagList);
    			
    			Map<String, Object> countMap = new HashMap<String, Object>();
    			countMap.put("maxCount", event.getMaxCount());

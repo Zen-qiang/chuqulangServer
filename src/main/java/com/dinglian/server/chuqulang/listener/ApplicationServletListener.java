@@ -11,6 +11,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.model.Event;
+import com.dinglian.server.chuqulang.model.SensitiveWord;
 import com.dinglian.server.chuqulang.service.JobService;
 import com.dinglian.server.chuqulang.task.ActivityOverStatusTask;
 import com.dinglian.server.chuqulang.task.ActivityProcessStatusTask;
@@ -28,6 +29,9 @@ public class ApplicationServletListener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent sce) {
 		WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(sce.getServletContext());
 		JobService jobService = webApplicationContext.getBean(JobService.class);
+		
+		// 加载敏感词汇
+		List<SensitiveWord> sensitiveWords = jobService.loadAllSensitiveWord();
 		
 		// 把所有报名中的活动，放到线程池中
 		List<Event> singnUpActivitys = jobService.getSingnUpActivitys();
