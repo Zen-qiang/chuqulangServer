@@ -175,7 +175,7 @@ public class WechatController {
 					NodeList fromUserNode = root.getElementsByTagName("FromUserName");
 					String fromUserOpenId = fromUserNode.item(0).getTextContent();
 					
-					String content = "出趣浪，欢迎您～\n 更多玩趣，组团活动小工具，就在出趣浪～\n";
+					String content = "出趣浪，欢迎您～\n更多玩趣，组团活动小工具，就在出趣浪～\n";
 					replyMsg = "<xml><ToUserName><![CDATA[%s]]></ToUserName><FromUserName><![CDATA[%s]]></FromUserName><CreateTime>%d</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[%s]]></Content></xml>";
 					replyMsg = String.format(replyMsg, fromUserOpenId, config.getWxMpOpenId(), System.currentTimeMillis(), content);
 				}
