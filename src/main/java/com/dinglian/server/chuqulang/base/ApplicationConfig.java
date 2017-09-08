@@ -160,16 +160,23 @@ public class ApplicationConfig {
 		return System.getProperty("wx.mp.jsapi.ticket.url", "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=%s&type=jsapi");
 	}
 
-	public String getWxActivitySignUpMsgUrl() {
+	public String getWxTemplateMsgUrl() {
 		return System.getProperty("wx.mp.activity.signup.msg.url", "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s");
 	}
 	
+	// 活动报名通知
 	public String getWxActivitySignUpTemplateId() {
 		return System.getProperty("wx.mp.activity.signup.template.id", "P6O8aKh7VIUYQbeO5vJOETgufIirhMNumRpIa4vPhRg");
 	}
 	
+	// 活动取消通知
 	public String getWxActivitySignOutTemplateId() {
 		return System.getProperty("wx.mp.activity.signout.template.id", "9fI5MUb9owz63iOkSBuvyeL8zdq_8Y0mJjb6B6gIPt0");
+	}
+	
+	// 活动变动通知
+	public String getWxActivityTemplateId() {
+		return System.getProperty("wx.mp.activity.template.id", "HA5OlpWvC9nfAUkmzEMaH_2_gKVvrp7895ZdfCf9V8A");
 	}
 	
 	public String getWxMpDomain() {

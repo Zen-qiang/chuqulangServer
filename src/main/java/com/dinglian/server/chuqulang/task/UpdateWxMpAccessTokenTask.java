@@ -32,7 +32,7 @@ public class UpdateWxMpAccessTokenTask {
 	/**
 	 * 每小时更新一次Access_token
 	 */
-	@Scheduled(cron="0 38 0/1 * * ?")
+	@Scheduled(cron="0 0 0/1 * * ?")
 	public void run() {
 		logger.info("Start the get WX mp acces token.");
 		

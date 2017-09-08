@@ -15,7 +15,6 @@ import com.dinglian.server.chuqulang.dao.GeneralDao;
 import com.dinglian.server.chuqulang.dao.TagDao;
 import com.dinglian.server.chuqulang.dao.UserCollectDao;
 import com.dinglian.server.chuqulang.model.Event;
-import com.dinglian.server.chuqulang.model.EventTag;
 import com.dinglian.server.chuqulang.model.EventUser;
 import com.dinglian.server.chuqulang.model.Tag;
 import com.dinglian.server.chuqulang.model.UserCollect;
@@ -129,25 +128,6 @@ public class ActivityServiceImpl implements ActivityService {
 	@Override
 	public Tag findTagByName(String tagName) {
 		return generalDao.findTagByName(tagName);
-	}
-
-	@Override
-	public List<Event> getSingnUpActivitys() {
-		return eventDao.getSingnUpActivitys();
-	}
-
-	@Override
-	public void changeActivityStatus(int id, String status) {
-		if (status.equalsIgnoreCase(Event.STATUS_PROCESS)) {
-			eventDao.changeActivityStatus(id, status, Event.STATUS_SIGNUP);
-		} else if (status.equalsIgnoreCase(Event.STATUS_OVER)) {
-			eventDao.changeActivityStatus(id, status, null);
-		}
-	}
-
-	@Override
-	public int getActivityUserCount(int id) {
-		return eventDao.getActivityUserCount(id);
 	}
 
 }

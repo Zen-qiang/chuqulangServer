@@ -11,7 +11,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.model.Event;
-import com.dinglian.server.chuqulang.service.ActivityService;
+import com.dinglian.server.chuqulang.service.JobService;
 import com.dinglian.server.chuqulang.task.ActivityOverStatusTask;
 import com.dinglian.server.chuqulang.task.ActivityProcessStatusTask;
 
@@ -27,13 +27,13 @@ public class ApplicationServletListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(sce.getServletContext());
-		ActivityService activityService = webApplicationContext.getBean(ActivityService.class);
+		JobService jobService = webApplicationContext.getBean(JobService.class);
 		
 		// 把所有报名中的活动，放到线程池中
-		List<Event> singnUpActivitys = activityService.getSingnUpActivitys();
+		List<Event> singnUpActivitys = jobService.getSingnUpActivitys();
 		for (Event event : singnUpActivitys) {
-			executorService.submit(new ActivityProcessStatusTask(event, activityService));
-			executorService.submit(new ActivityOverStatusTask(event, activityService));
+			executorService.submit(new ActivityProcessStatusTask(event, jobService));
+			executorService.submit(new ActivityOverStatusTask(event, jobService));
 		}
 	}
 

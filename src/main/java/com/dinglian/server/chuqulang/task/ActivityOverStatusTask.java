@@ -1,11 +1,14 @@
 package com.dinglian.server.chuqulang.task;
 
-import com.dinglian.server.chuqulang.model.Event;
-import com.dinglian.server.chuqulang.service.ActivityService;
+import org.springframework.stereotype.Component;
 
+import com.dinglian.server.chuqulang.model.Event;
+import com.dinglian.server.chuqulang.service.JobService;
+
+@Component
 public class ActivityOverStatusTask implements Runnable {
 
-	private ActivityService activityService;
+	private JobService jobService;
 
 	private Event event;
 
@@ -13,10 +16,10 @@ public class ActivityOverStatusTask implements Runnable {
 		// TODO Auto-generated constructor stub
 	}
 
-	public ActivityOverStatusTask(Event event, ActivityService activityService) {
+	public ActivityOverStatusTask(Event event, JobService jobService) {
 		super();
 		this.event = event;
-		this.activityService = activityService;
+		this.jobService = jobService;
 	}
 
 	@Override
@@ -28,7 +31,7 @@ public class ActivityOverStatusTask implements Runnable {
 				try {
 					Thread thread = Thread.currentThread();
 					thread.sleep(countdown);
-					activityService.changeActivityStatus(event.getId(), Event.STATUS_OVER);
+					jobService.changeActivityStatus(event.getId(), Event.STATUS_OVER);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

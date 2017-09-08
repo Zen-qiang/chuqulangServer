@@ -1,7 +1,6 @@
 package com.dinglian.server.chuqulang.controller;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -29,7 +28,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.ParseException;
-import org.dom4j.io.SAXReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +39,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
@@ -74,6 +70,7 @@ import com.dinglian.server.chuqulang.model.VerifyNo;
 import com.dinglian.server.chuqulang.model.WxOAuth2AccessToken;
 import com.dinglian.server.chuqulang.service.ActivityService;
 import com.dinglian.server.chuqulang.service.DiscoverService;
+import com.dinglian.server.chuqulang.service.JobService;
 import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.service.WxMpService;
 import com.dinglian.server.chuqulang.task.ActivityOverStatusTask;
@@ -111,6 +108,9 @@ public class WechatController {
 
 	@Autowired
 	private WxMpService wxMpService;
+	
+	@Autowired
+	private JobService jobService;
 	
 	private static ApplicationConfig config = ApplicationConfig.getInstance();
 	
@@ -1471,8 +1471,8 @@ public class WechatController {
             activityService.saveEvent(event);
             
             // 创建定时任务
-            config.getScheduledThreadPool().submit(new ActivityProcessStatusTask(event, activityService));
-            config.getScheduledThreadPool().submit(new ActivityOverStatusTask(event, activityService));
+            config.getScheduledThreadPool().submit(new ActivityProcessStatusTask(event, jobService));
+            config.getScheduledThreadPool().submit(new ActivityOverStatusTask(event, jobService));
             
             Topic topic = new Topic();
             topic.setCreationDate(new Date());
@@ -1538,6 +1538,16 @@ public class WechatController {
     			discoverService.saveCoterie(coterie);
     			event.setCoterie(coterie);
     			event.getActivityTopic().setCoterie(coterie);
+			} else {
+				// 给圈子用户发送活动通知
+				Coterie coterie = event.getCoterie();
+				Set<CoterieGuy> coterieGuys = coterie.getCoterieGuys();
+				String accessToken = wxMpService.getWxAccessToken();
+				for (CoterieGuy coterieGuy : coterieGuys) {
+					if (coterieGuy.getUser() != null) {
+						WxRequestHelper.sendCoterieActivityLauncher(accessToken, event, coterie, coterieGuy.getUser());
+					}
+				}
 			}
             
             activityService.saveEvent(event);
@@ -2549,10 +2559,11 @@ public class WechatController {
 					}
 				}
 			}
-            
+            boolean isSignFull = false;
             // 关闭允许报名
             if (event.getEffectiveMembers().size() == event.getMaxCount()) {
 				event.setAllowSignUp(false);
+				isSignFull = true;
 			}
             
             activityService.saveEvent(event);
@@ -2599,7 +2610,14 @@ public class WechatController {
 			// 报名成功给用户发送通知
 			String accessToken = wxMpService.getWxAccessToken();
 			if (StringUtils.isNotBlank(accessToken)) {
-				WxRequestHelper.sendActivitySignUpMsg(accessToken, event, user);
+				WxRequestHelper.sendActivitySignUpToUser(accessToken, event, fristeventUser);
+				WxRequestHelper.sendActivitySignUpToCreator(accessToken, event, fristeventUser);
+				
+				if (isSignFull) {
+					for (EventUser eventUser : event.getEffectiveMembers()) {
+						WxRequestHelper.sendActivitySignFull(accessToken, event, eventUser);
+					}
+				}
 			}
             
             ResponseHelper.addResponseSuccessData(resultMap, result);
@@ -2652,7 +2670,7 @@ public class WechatController {
             // 取消报名，给组织者发送通知
             String accessToken = wxMpService.getWxAccessToken();
 			if (StringUtils.isNotBlank(accessToken) && currentUser != null) {
-				WxRequestHelper.sendActivitySignOutMsg(accessToken, event, currentUser, hasRetinues);
+				WxRequestHelper.sendActivitySignOutToCreator(accessToken, event, currentUser);
 			}
             
             ResponseHelper.addResponseSuccessData(resultMap, null);

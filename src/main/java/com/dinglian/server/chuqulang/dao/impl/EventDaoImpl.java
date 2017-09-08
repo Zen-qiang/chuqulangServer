@@ -115,33 +115,4 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 		return query.list();
 	}
 
-	@Override
-	public List<Event> getSingnUpActivitys() {
-		String hql = "FROM Event WHERE status = :status AND startTime >= :date ";
-//		return getCurrentSession().createQuery(hql).setString("status", Event.STATUS_SIGNUP).setDate("date", new Date()).list();
-		return getCurrentSession().createQuery(hql).setString("status", Event.STATUS_SIGNUP).setTimestamp("date", new Date()).list();
-	}
-
-	@Override
-	public void changeActivityStatus(int id, String status, String originStatus) {
-		String sql = "UPDATE event SET status = :status WHERE id = :id ";
-		if (StringUtils.isNotBlank(originStatus)) {
-			sql += "AND status = :origin ";
-		}
-		Query query = getCurrentSession().createSQLQuery(sql);
-		query.setString("status", status).setInteger("id", id);
-		if (StringUtils.isNotBlank(originStatus)) {
-			query.setString("origin", originStatus);
-		}
-		query.executeUpdate();
-	}
-
-	@Override
-	public int getActivityUserCount(int id) {
-		String sql = "SELECT COUNT(1) FROM event_user WHERE fk_event_id = :id AND effective = 1 ";
-		Query query = getCurrentSession().createSQLQuery(sql).setInteger("id", id);
-		int count = ((Number)query.uniqueResult()).intValue();
-		return count;
-	}
-
 }
