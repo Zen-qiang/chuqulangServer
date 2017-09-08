@@ -2559,11 +2559,15 @@ public class WechatController {
 					}
 				}
 			}
-            boolean isSignFull = false;
             // 关闭允许报名
-            if (event.getEffectiveMembers().size() == event.getMaxCount()) {
+            int count = event.getEffectiveMembers().size();
+            if (count == event.getMaxCount()) {
 				event.setAllowSignUp(false);
-				isSignFull = true;
+			}
+            
+            boolean isSignFull = false;
+            if (count >= event.getMinCount()) {
+            	isSignFull = true;
 			}
             
             activityService.saveEvent(event);
