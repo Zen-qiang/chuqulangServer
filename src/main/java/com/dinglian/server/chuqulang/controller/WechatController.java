@@ -763,6 +763,20 @@ public class WechatController {
 		logger.info("=====> Start to edit coterie <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
+			if (StringUtils.isNotBlank(name)) {
+				String sensitiveWord = sensitiveWordUtil.firstLevelFilter(name);
+				if (StringUtils.isNotBlank(sensitiveWord)) {
+					throw new ApplicationServiceException(sensitiveWord);
+				}
+			}
+			
+			if (StringUtils.isNotBlank(description)) {
+				String sensitiveWord = sensitiveWordUtil.secondLevelFilter(description);
+				if (StringUtils.isNotBlank(sensitiveWord)) {
+					throw new ApplicationServiceException(sensitiveWord);
+				}
+			}
+			
 			Coterie coterie = discoverService.findCoterieById(coterieId);
 			if (coterie == null) {
 				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_EXIST);
@@ -2004,6 +2018,12 @@ public class WechatController {
    		Map<String, Object> resultMap = new HashMap<String, Object>();
    		try {
    			logger.info("=====> Start to update activity info <=====");
+   			if (StringUtils.isNotBlank(description)) {
+				String sensitiveWord = sensitiveWordUtil.secondLevelFilter(description);
+				if (StringUtils.isNotBlank(sensitiveWord)) {
+					throw new ApplicationServiceException(sensitiveWord);
+				}
+			}
    			
    			Event event = activityService.findEventById(activityId);
    			if (event == null) {
