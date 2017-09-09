@@ -1,6 +1,10 @@
 package com.dinglian.server.chuqulang.listener;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.servlet.ServletContextEvent;
@@ -15,6 +19,7 @@ import com.dinglian.server.chuqulang.model.SensitiveWord;
 import com.dinglian.server.chuqulang.service.JobService;
 import com.dinglian.server.chuqulang.task.ActivityOverStatusTask;
 import com.dinglian.server.chuqulang.task.ActivityProcessStatusTask;
+import com.dinglian.server.chuqulang.utils.SensitiveWordUtil;
 
 public class ApplicationServletListener implements ServletContextListener {
 	
@@ -32,6 +37,13 @@ public class ApplicationServletListener implements ServletContextListener {
 		
 		// 加载敏感词汇
 		List<SensitiveWord> sensitiveWords = jobService.loadAllSensitiveWord();
+		if (sensitiveWords != null) {
+			SensitiveWordUtil sensitiveWordUtil = SensitiveWordUtil.getInstance();
+			for (SensitiveWord sensitiveWord : sensitiveWords) {
+				String[] array = sensitiveWord.getSensitiveWord().split(";");
+				sensitiveWordUtil.init(sensitiveWord.getId(), new HashSet(Arrays.asList(array)));
+			}
+		}
 		
 		// 把所有报名中的活动，放到线程池中
 		List<Event> singnUpActivitys = jobService.getSingnUpActivitys();

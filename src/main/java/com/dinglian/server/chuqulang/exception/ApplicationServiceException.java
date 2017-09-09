@@ -1,5 +1,9 @@
 package com.dinglian.server.chuqulang.exception;
 
+import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+
 @SuppressWarnings("serial")
 public class ApplicationServiceException extends RuntimeException {
 
@@ -106,4 +110,7 @@ public class ApplicationServiceException extends RuntimeException {
 		this.code = code;
 	}
 
+	public ApplicationServiceException(String word) {
+		super("包含敏感词汇：" + word);
+	}
 }

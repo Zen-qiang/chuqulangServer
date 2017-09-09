@@ -39,6 +39,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -79,6 +81,7 @@ import com.dinglian.server.chuqulang.utils.AliyunOSSUtil;
 import com.dinglian.server.chuqulang.utils.CodeUtils;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
 import com.dinglian.server.chuqulang.utils.ResponseHelper;
+import com.dinglian.server.chuqulang.utils.SensitiveWordUtil;
 import com.dinglian.server.chuqulang.utils.WXBizMsgCrypt;
 import com.dinglian.server.chuqulang.utils.WxRequestHelper;
 
@@ -113,6 +116,7 @@ public class WechatController {
 	private JobService jobService;
 	
 	private static ApplicationConfig config = ApplicationConfig.getInstance();
+	private static SensitiveWordUtil sensitiveWordUtil = SensitiveWordUtil.getInstance();
 	
 	@RequestMapping("/authorization")
 	public String authorization() {
@@ -175,7 +179,7 @@ public class WechatController {
 					NodeList fromUserNode = root.getElementsByTagName("FromUserName");
 					String fromUserOpenId = fromUserNode.item(0).getTextContent();
 					
-					String content = "出趣浪，欢迎您～\n更多玩趣，组团活动小工具，就在出趣浪～\n";
+					String content = "出趣浪，欢迎您～\n更多玩趣，组团活动小工具\n就在出趣浪～\n";
 					replyMsg = "<xml><ToUserName><![CDATA[%s]]></ToUserName><FromUserName><![CDATA[%s]]></FromUserName><CreateTime>%d</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[%s]]></Content></xml>";
 					replyMsg = String.format(replyMsg, fromUserOpenId, config.getWxMpOpenId(), System.currentTimeMillis(), content);
 				}
@@ -668,6 +672,20 @@ public class WechatController {
 			
 			if (StringUtils.isBlank(name) || StringUtils.isBlank(tags)) {
 				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_PARAM_IS_EMPTY);
+			}
+			
+			if (StringUtils.isNotBlank(name)) {
+				String sensitiveWord = sensitiveWordUtil.firstLevelFilter(name);
+				if (StringUtils.isNotBlank(sensitiveWord)) {
+					throw new ApplicationServiceException(sensitiveWord);
+				}
+			}
+			
+			if (StringUtils.isNotBlank(description)) {
+				String sensitiveWord = sensitiveWordUtil.secondLevelFilter(description);
+				if (StringUtils.isNotBlank(sensitiveWord)) {
+					throw new ApplicationServiceException(sensitiveWord);
+				}
 			}
 
 			Coterie coterie = new Coterie();
@@ -1414,14 +1432,20 @@ public class WechatController {
 				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_PARAM_IS_EMPTY);
 			}
         	
-        	/*List<CommonsMultipartFile> pictures = new ArrayList<>();
-        	pictures.add(picture1);
-        	if (picture2 != null) {
-        		pictures.add(picture2);
+        	// 敏感词汇检查
+        	if (StringUtils.isNotBlank(name)) {
+				String sensitiveWord = sensitiveWordUtil.firstLevelFilter(name);
+				if (StringUtils.isNotBlank(sensitiveWord)) {
+					throw new ApplicationServiceException(sensitiveWord);
+				}
 			}
-        	if (picture3 != null) {
-        		pictures.add(picture3);
-			}*/
+			
+			if (StringUtils.isNotBlank(description)) {
+				String sensitiveWord = sensitiveWordUtil.secondLevelFilter(description);
+				if (StringUtils.isNotBlank(sensitiveWord)) {
+					throw new ApplicationServiceException(sensitiveWord);
+				}
+			}
         	
             Event event = new Event();
             event.setAllowSignUp(true);
@@ -2406,6 +2430,13 @@ public class WechatController {
 		try {
 			logger.info("=====> Start to comment topic <=====");
 			
+			if (StringUtils.isNotBlank(content)) {
+				String sensitiveWord = sensitiveWordUtil.thirdLevelFilter(content);
+				if (StringUtils.isNotBlank(sensitiveWord)) {
+					throw new ApplicationServiceException(sensitiveWord);
+				}
+			}
+			
 			User user = userService.findUserById(userId);
    			if (user == null) {
    				throw new UserException(UserException.NOT_EXISTING);
@@ -2937,6 +2968,13 @@ public class WechatController {
 		Pattern p = Pattern.compile(regex);
 		Matcher m = p.matcher(phoneNo);
 		return m.matches();
+	}
+	
+	@RequestMapping(value = "/test")
+	public void test() {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		SensitiveWordUtil sensitiveWordUtil = SensitiveWordUtil.getInstance();
+//		return  new ModelAndView(new RedirectView("http://www.baidu.com"));
 	}
 
 }
