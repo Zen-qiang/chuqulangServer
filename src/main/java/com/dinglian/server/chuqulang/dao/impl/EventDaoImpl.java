@@ -28,7 +28,7 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 		/*if (searchCriteria.getCategory() != null) {
 			sb.append("left outer join fetch e.tags tags ");
 		}*/
-		sb.append("WHERE 1=1 AND e.status != '0' AND e.startTime > :startTime ");
+		sb.append("WHERE 1=1 AND e.status != '0' AND e.endTime > :endTime ");
 		if (StringUtils.isNotBlank(searchCriteria.getKeyword())) {
 			sb.append("AND e.name like :keyword ");
 		}
@@ -43,7 +43,7 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 		sb.append(orderBy);
 		
 		Query query = getCurrentSession().createQuery(sb.toString());
-		query.setTimestamp("startTime", new Date());
+		query.setTimestamp("endTime", new Date());
 		if (StringUtils.isNotBlank(searchCriteria.getKeyword())) {
 			query.setString("keyword", "%" + searchCriteria.getKeyword() + "%");
 		}
