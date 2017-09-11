@@ -74,13 +74,13 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 	public List<Event> getUserActivityList(SearchCriteria searchCriteria) {
 		String sql = "SELECT e.* FROM EVENT e LEFT JOIN event_user eu ON e.id = eu.fk_event_id WHERE 1=1 ";
 		if (searchCriteria.getDataType().equals(Event.DATATYPE_ALL)) {
-			sql += "AND eu.fk_user_id = :userId ";
+			sql += "AND eu.fk_user_id = :userId AND eu.effective = 1 ";
 		} else if (searchCriteria.getDataType().equals(Event.DATATYPE_RELEASE)) {
-			sql += "AND e.fk_user_id = :userId ";
+			sql += "AND e.fk_user_id = :userId AND e.status != '0' ";
 		} else if (searchCriteria.getDataType().equals(Event.DATATYPE_JOIN)) {
-			sql += "AND eu.fk_user_id = :userId AND e.fk_user_id != :userId ";
+			sql += "AND eu.fk_user_id = :userId AND e.fk_user_id != :userId AND eu.effective = 1 AND e.status != '0' ";
 		} else if (searchCriteria.getDataType().equals(Event.DATATYPE_EXPIRE)) {
-			sql += "AND eu.fk_user_id = :userId AND e.status = '" + Event.STATUS_OVER + "' ";
+			sql += "AND eu.fk_user_id = :userId AND e.status = '0' ";
 		}
 		sql += "ORDER BY e.start_time DESC";
 		Query query = getCurrentSession().createSQLQuery(sql).addEntity(Event.class);
