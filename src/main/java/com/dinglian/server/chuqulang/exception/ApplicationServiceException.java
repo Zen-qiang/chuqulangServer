@@ -39,6 +39,7 @@ public class ApplicationServiceException extends RuntimeException {
 	public final static int COTERIE_NOT_CREATOR = 3002;
 	public final static int COTERIE_PARAM_IS_EMPTY = 3003;
 	public final static int COTERIE_DISMISSED = 3004;
+	public final static int COTERIE_CAN_NOT_DISMISS = 3005;
 	
 	// 话题相关
 	public final static int TOPIC_EXIST = 4001;
@@ -96,6 +97,8 @@ public class ApplicationServiceException extends RuntimeException {
 			return "参数不能为空";
 		case COTERIE_DISMISSED:
 			return "该圈子已解散";
+		case COTERIE_CAN_NOT_DISMISS:
+			return "该圈子不能解散";
 		case ACCESS_TOKEN_NOT_EXIST:
 			return "Access Token 不存在，请重新获取授权";
 		case IP_INVALID:

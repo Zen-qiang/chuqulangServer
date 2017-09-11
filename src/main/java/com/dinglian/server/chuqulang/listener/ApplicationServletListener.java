@@ -48,7 +48,11 @@ public class ApplicationServletListener implements ServletContextListener {
 		// 把所有报名中的活动，放到线程池中
 		List<Event> singnUpActivitys = jobService.getSingnUpActivitys();
 		for (Event event : singnUpActivitys) {
-			executorService.submit(new ActivityProcessStatusTask(event, jobService));
+			// 开始时间倒计时，仅报名中活动
+			if (event.getStatus().equalsIgnoreCase(Event.STATUS_SIGNUP)) {
+				executorService.submit(new ActivityProcessStatusTask(event, jobService));
+			}
+			// 结束时间倒计时
 			executorService.submit(new ActivityOverStatusTask(event, jobService));
 		}
 	}

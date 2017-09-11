@@ -144,7 +144,8 @@ public class GeneralDaoImpl implements GeneralDao {
 
 	@Override
 	public Tag findTagByName(String tagName) {
-		return (Tag) getCurrentSession().createQuery("FROM Tag WHERE name = :name").setString("name", tagName).uniqueResult();
+		return (Tag) getCurrentSession().createQuery("FROM Tag WHERE name = :name").setString("name", tagName)
+				.uniqueResult();
 	}
 
 	@Override
@@ -156,7 +157,7 @@ public class GeneralDaoImpl implements GeneralDao {
 	public void saveWxJsApiTicket(WxJsApiTicket jsApiTicket) {
 		getCurrentSession().save(jsApiTicket);
 	}
-	
+
 	@Override
 	public void changeActivityStatus(int id, String status, String originStatus) {
 		String sql = "UPDATE event SET status = :status WHERE id = :id ";
@@ -175,7 +176,7 @@ public class GeneralDaoImpl implements GeneralDao {
 	public int getActivityUserCount(int id) {
 		String sql = "SELECT COUNT(1) FROM event_user WHERE fk_event_id = :id AND effective = 1 ";
 		Query query = getCurrentSession().createSQLQuery(sql).setInteger("id", id);
-		int count = ((Number)query.uniqueResult()).intValue();
+		int count = ((Number) query.uniqueResult()).intValue();
 		return count;
 	}
 
@@ -186,8 +187,10 @@ public class GeneralDaoImpl implements GeneralDao {
 
 	@Override
 	public List<Event> getSingnUpActivitys() {
-		String hql = "FROM Event WHERE status = :status AND startTime >= :date ";
-		return getCurrentSession().createQuery(hql).setString("status", Event.STATUS_SIGNUP).setTimestamp("date", new Date()).list();
+		String hql = "FROM Event WHERE (status = :status1 OR status = :status2) AND (startTime >= :date1 OR endTime >= :date2) ";
+		return getCurrentSession().createQuery(hql).setString("status1", Event.STATUS_SIGNUP)
+				.setString("status2", Event.STATUS_PROCESS).setTimestamp("date1", new Date())
+				.setTimestamp("date2", new Date()).list();
 	}
 
 	@Override
@@ -211,13 +214,15 @@ public class GeneralDaoImpl implements GeneralDao {
 	@Override
 	public Coterie getCoterieByActivityId(int activityId) {
 		String sql = "SELECT c.* FROM coterie c JOIN EVENT e ON e.fk_coterie_id = c.id WHERE e.id = :activityId ";
-		return (Coterie) getCurrentSession().createSQLQuery(sql).addEntity(Coterie.class).setInteger("activityId", activityId).uniqueResult();
+		return (Coterie) getCurrentSession().createSQLQuery(sql).addEntity(Coterie.class)
+				.setInteger("activityId", activityId).uniqueResult();
 	}
 
 	@Override
 	public void changeCoterieStatus(int coterieId, int status) {
 		String sql = "update coterie set status = :status where id = :id ";
-		getCurrentSession().createSQLQuery(sql).setInteger("status", status).setInteger("id", coterieId).executeUpdate();
+		getCurrentSession().createSQLQuery(sql).setInteger("status", status).setInteger("id", coterieId)
+				.executeUpdate();
 	}
 
 }

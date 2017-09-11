@@ -899,6 +899,9 @@ public class WechatController {
 				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_CREATOR);
 			}
 
+			if (coterie.getStatus() != Coterie.STATUS_NORMAL) {
+				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_CAN_NOT_DISMISS);
+			}
 			// 判断是否有进行中的活动
 			boolean hasActivityProcess = discoverService.hasActivityProcess(coterieId);
 			if (hasActivityProcess) {
@@ -1464,7 +1467,6 @@ public class WechatController {
     		@RequestParam("tags") String tags,
     		@RequestParam("name") String name,
     		@RequestParam("serverIds") String[] serverIds,
-//    		@RequestParam("pic1") CommonsMultipartFile picture1,
     		@RequestParam("startTime") long startTimeMillisecond,
     		@RequestParam("endTime") long endTimeMillisecond,
     		@RequestParam(name = "gps",required = false) String gps,
