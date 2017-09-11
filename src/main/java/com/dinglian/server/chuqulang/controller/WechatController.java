@@ -914,7 +914,10 @@ public class WechatController {
 			
 			discoverService.saveCoterie(coterie);
 			
-			ResponseHelper.addResponseSuccessData(responseMap, null);
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("status", coterie.getStatus());
+			
+			ResponseHelper.addResponseSuccessData(responseMap, data);
 			logger.info("=====> Dismiss coterie end <=====");
 		} catch (ApplicationServiceException e) {
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
@@ -1102,6 +1105,7 @@ public class WechatController {
 			data.put("membersCnt", coterie.getCoterieGuys().size());
 			data.put("isJoined", coterie.isJoined(userId));
 			data.put("isCreator", coterie.isCreator(userId));
+			data.put("status", coterie.getStatus());
 			
 			List<Map> tagList = new ArrayList<>();
 			for (CoterieTag coterieTag : coterie.getTags()) {
