@@ -133,4 +133,17 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 		return (Coterie) getCurrentSession().createSQLQuery(sql).addEntity(Coterie.class).setInteger("userId", userId).uniqueResult();
 	}
 
+	@Override
+	public boolean hasActivityProcess(int coterieId) {
+		Query query = getCurrentSession().createSQLQuery("SELECT COUNT(1) FROM event e WHERE e.fk_coterie_id = :coterieId AND (e.status = :status1 OR e.status = :status2) ");
+		query.setInteger("coterieId", coterieId);
+		query.setString("status1", Event.STATUS_PROCESS);
+		query.setString("status2", Event.STATUS_SIGNUP);
+		int count = ((Number)query.uniqueResult()).intValue();
+		if (count > 0) {
+			return true;
+		}
+		return false;
+	}
+
 }

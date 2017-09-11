@@ -38,4 +38,6 @@ public interface DiscoverService {
 
 	List<CoterieCarouselPicture> getCoterieCarouselPictures();
 
+	boolean hasActivityProcess(int coterieId);
+
 }

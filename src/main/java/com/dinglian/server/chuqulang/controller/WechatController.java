@@ -680,7 +680,7 @@ public class WechatController {
 				throw new ApplicationServiceException(ApplicationServiceException.USER_NOT_EXIST);
 			}
 			
-			if (StringUtils.isBlank(name) || StringUtils.isBlank(tags)) {
+			if (StringUtils.isBlank(name) || StringUtils.isBlank(tags) || StringUtils.isBlank(serverId)) {
 				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_PARAM_IS_EMPTY);
 			}
 			
@@ -704,6 +704,7 @@ public class WechatController {
 			coterie.setCreationDate(new Date());
 			coterie.setCreator(user);
 			coterie.setHot(0);
+			coterie.setStatus(Coterie.STATUS_NORMAL);
 			
 			if (StringUtils.isNotBlank(tags)) {
 				String[] tagsSplit = tags.split(",");
@@ -761,6 +762,16 @@ public class WechatController {
 		return responseMap;
 	}
 	
+	/**
+	 * 编辑圈子
+	 * @param userId
+	 * @param coterieId
+	 * @param name
+	 * @param tags
+	 * @param description
+	 * @param serverId
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/editCoterie", method = RequestMethod.POST)
 	public Map<String, Object> editCoterie(@RequestParam("userId") int userId, 
@@ -768,11 +779,25 @@ public class WechatController {
 			@RequestParam(name = "name", required = false) String name, 
 			@RequestParam(name = "tags", required = false) String tags, 
 			@RequestParam(name = "description", required = false) String description,
-//			@RequestParam(name = "file", required = false) CommonsMultipartFile picture
 			@RequestParam(name = "serverId", required = false) String serverId) {
 		logger.info("=====> Start to edit coterie <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
+			Coterie coterie = discoverService.findCoterieById(coterieId);
+			if (coterie == null) {
+				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_EXIST);
+			}
+			// 非创建者不可编辑
+			if (coterie.getCreator() != null && coterie.getCreator().getId() != userId) {
+				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_CREATOR);
+			}
+			
+			// 解散中/已解散圈子不能修改
+			if (coterie.getStatus() == Coterie.STATUS_DISMISSING || coterie.getStatus() == Coterie.STATUS_DISMISSED) {
+				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_DISMISSED);
+			}
+			
+			// 敏感词汇检查
 			if (StringUtils.isNotBlank(name)) {
 				String sensitiveWord = sensitiveWordUtil.firstLevelFilter(name);
 				if (StringUtils.isNotBlank(sensitiveWord)) {
@@ -785,15 +810,6 @@ public class WechatController {
 				if (StringUtils.isNotBlank(sensitiveWord)) {
 					throw new ApplicationServiceException(sensitiveWord);
 				}
-			}
-			
-			Coterie coterie = discoverService.findCoterieById(coterieId);
-			if (coterie == null) {
-				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_EXIST);
-			}
-
-			if (coterie.getCreator() != null && coterie.getCreator().getId() != userId) {
-				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_CREATOR);
 			}
 			
 			User user = userService.findUserById(userId);
@@ -883,7 +899,16 @@ public class WechatController {
 				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_CREATOR);
 			}
 
-			coterie.setDismissed(true);
+			// 判断是否有进行中的活动
+			boolean hasActivityProcess = discoverService.hasActivityProcess(coterieId);
+			if (hasActivityProcess) {
+				// 如果有，状态改成解散中
+				coterie.setStatus(Coterie.STATUS_DISMISSING);
+			} else {
+				// 如果没有，状态改成已解散
+				coterie.setStatus(Coterie.STATUS_DISMISSED);
+			}
+			
 			discoverService.saveCoterie(coterie);
 			
 			ResponseHelper.addResponseSuccessData(responseMap, null);
@@ -1029,7 +1054,6 @@ public class WechatController {
 					data.put("description", coterie.getDescription());
 					data.put("membersCnt", coterie.getCoterieGuys().size());
 					data.put("activityCnt", coterie.getEvents().size());
-					data.put("isDismissed", coterie.isDismissed());
 					
 					List<String> tagList = new ArrayList<>();
 					for (CoterieTag coterieTag : coterie.getTags()) {
@@ -1075,7 +1099,6 @@ public class WechatController {
 			data.put("membersCnt", coterie.getCoterieGuys().size());
 			data.put("isJoined", coterie.isJoined(userId));
 			data.put("isCreator", coterie.isCreator(userId));
-			data.put("isDismissed", coterie.isDismissed());
 			
 			List<Map> tagList = new ArrayList<>();
 			for (CoterieTag coterieTag : coterie.getTags()) {
@@ -1456,13 +1479,24 @@ public class WechatController {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         try {
         	logger.info("=====> Start to launch activity <=====");
+        	Coterie coterie = null;
+        	if (coterieId != null) {
+            	coterie = discoverService.findCoterieById(coterieId);
+            	if (coterie == null) {
+            		throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_EXIST);
+            	}
+            	// 已解散的圈子不能创建新活动
+            	if (coterie.getStatus() == Coterie.STATUS_DISMISSING || coterie.getStatus() == Coterie.STATUS_DISMISSED) {
+    				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_DISMISSED);
+    			}
+			}
         	
         	User user = userService.findUserById(userId);
         	if (user == null) {
 				throw new ApplicationServiceException(ApplicationServiceException.USER_NOT_EXIST);
 			}
         	
-        	if (StringUtils.isBlank(name) || StringUtils.isBlank(tags) || StringUtils.isBlank(address) /*|| StringUtils.isBlank(gps)*/ || StringUtils.isBlank(charge)) {
+        	if (StringUtils.isBlank(name) || StringUtils.isBlank(tags) || StringUtils.isBlank(address) || serverIds == null /*|| StringUtils.isBlank(gps)*/ || StringUtils.isBlank(charge)) {
 				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_PARAM_IS_EMPTY);
 			}
         	
@@ -1485,11 +1519,7 @@ public class WechatController {
             event.setAllowSignUp(true);
             event.setCharge(charge);
             
-            if (coterieId != null) {
-            	Coterie coterie = discoverService.findCoterieById(coterieId);
-            	if (coterie == null) {
-            		throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_EXIST);
-            	}
+            if (coterie != null) {
             	event.setCoterie(coterie);
 			}
             
@@ -1563,7 +1593,7 @@ public class WechatController {
             
             if (event.getCoterie() == null) {
 				// 创建圈子
-            	Coterie coterie = new Coterie();
+            	coterie = new Coterie();
     			coterie.setName(name);
     			coterie.setDescription(description);
     			coterie.setCreationDate(new Date());
@@ -1598,7 +1628,7 @@ public class WechatController {
     			event.getActivityTopic().setCoterie(coterie);
 			} else {
 				// 给圈子用户发送活动通知
-				Coterie coterie = event.getCoterie();
+				coterie = event.getCoterie();
 				Set<CoterieGuy> coterieGuys = coterie.getCoterieGuys();
 				String accessToken = wxMpService.getWxAccessToken();
 				for (CoterieGuy coterieGuy : coterieGuys) {
@@ -1611,7 +1641,7 @@ public class WechatController {
             activityService.saveEvent(event);
             
             Map<String, Object> result = new HashMap<String, Object>();
-            Coterie coterie = event.getCoterie();
+            coterie = event.getCoterie();
 			result.put("activityId", event.getId());
 			result.put("coterieId", coterie.getId());
 			result.put("coterieName", coterie.getName());
@@ -2100,7 +2130,18 @@ public class WechatController {
    			}
    			event.setStatus(Event.STATUS_OVER);
    			event.setAllowSignUp(false);
+   			
    			activityService.saveEvent(event);
+   			
+   			// 判断是否还有进行中的活动，没有的话把解散中的圈子改成已解散
+   			Coterie coterie = event.getCoterie();
+   			if (coterie.getStatus() == Coterie.STATUS_DISMISSING) {
+   				boolean hasActivityProcess = discoverService.hasActivityProcess(coterie.getId());
+   				if (!hasActivityProcess) {
+   					coterie.setStatus(coterie.STATUS_DISMISSED);
+				}
+   			}
+   			discoverService.saveCoterie(coterie);
    			
    			logger.info("=====> Close activity end <=====");
    			ResponseHelper.addResponseSuccessData(resultMap, null);
@@ -2472,21 +2513,32 @@ public class WechatController {
 		try {
 			logger.info("=====> Start to comment topic <=====");
 			
-			if (StringUtils.isNotBlank(content)) {
-				String sensitiveWord = sensitiveWordUtil.thirdLevelFilter(content);
-				if (StringUtils.isNotBlank(sensitiveWord)) {
-					throw new ApplicationServiceException(sensitiveWord);
-				}
-			}
-			
 			User user = userService.findUserById(userId);
-   			if (user == null) {
-   				throw new UserException(UserException.NOT_EXISTING);
+			if (user == null) {
+				throw new UserException(UserException.NOT_EXISTING);
 			}
 			
 			Topic topic = discoverService.findTopicById(topicId);
 			if (topic == null) {
 				throw new ActivityException(ActivityException.TOPIC_NOT_EXISTING);
+			}
+			
+			// 已解散的圈子不能评论活动
+			if (topic.getEvent() != null) {
+				Coterie coterie = topic.getEvent().getCoterie();
+				if (coterie != null) {
+					if (coterie.getStatus() == Coterie.STATUS_DISMISSED) {
+						throw new ApplicationServiceException(ApplicationServiceException.COTERIE_DISMISSED);
+					}
+				}
+			}
+			
+			// 敏感词汇检查
+			if (StringUtils.isNotBlank(content)) {
+				String sensitiveWord = sensitiveWordUtil.thirdLevelFilter(content);
+				if (StringUtils.isNotBlank(sensitiveWord)) {
+					throw new ApplicationServiceException(sensitiveWord);
+				}
 			}
 			
 			TopicComment topicComment = new TopicComment(topic, user, content);

@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.dinglian.server.chuqulang.dao.CoterieDao;
 import com.dinglian.server.chuqulang.dao.GeneralDao;
+import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.SensitiveWord;
 import com.dinglian.server.chuqulang.model.User;
@@ -17,6 +19,9 @@ public class JobServiceImpl implements JobService {
 
 	@Autowired
 	private GeneralDao generalDao;
+	
+	@Autowired
+	private CoterieDao coterieDao;
 
 	@Override
 	public void changeActivityStatus(int id, String status) {
@@ -64,6 +69,21 @@ public class JobServiceImpl implements JobService {
 	@Override
 	public List<SensitiveWord> loadAllSensitiveWord() {
 		return generalDao.loadAllSensitiveWord();
+	}
+
+	@Override
+	public Coterie getCoterieByActivityId(int activityId) {
+		return generalDao.getCoterieByActivityId(activityId);
+	}
+
+	@Override
+	public boolean hasActivityProcess(int coterieId) {
+		return coterieDao.hasActivityProcess(coterieId);
+	}
+
+	@Override
+	public void changeCoterieStatus(int coterieId, int status) {
+		generalDao.changeCoterieStatus(coterieId, status);
 	}
 	
 }

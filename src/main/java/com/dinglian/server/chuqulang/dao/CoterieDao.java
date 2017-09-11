@@ -24,4 +24,6 @@ public interface CoterieDao extends GenericDao<Coterie> {
 
 	Coterie getLastCoterie(int userId);
 
+	boolean hasActivityProcess(int coterieId);
+
 }

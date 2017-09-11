@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.model.Contact;
+import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.CoterieCarouselPicture;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.Event;
@@ -67,4 +68,7 @@ public interface GeneralDao {
 
 	List<SensitiveWord> loadAllSensitiveWord();
 
+	Coterie getCoterieByActivityId(int activityId);
+
+	void changeCoterieStatus(int coterieId, int status);
 }

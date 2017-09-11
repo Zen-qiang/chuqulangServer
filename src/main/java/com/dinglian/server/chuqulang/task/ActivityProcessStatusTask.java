@@ -31,32 +31,34 @@ public class ActivityProcessStatusTask implements Runnable {
 		if (event.getStartTime() != null) {
 			long countdown = event.getStartTime().getTime() - System.currentTimeMillis();
 			System.out.println("start time countdown:" + countdown);
-			try {
-				Thread thread = Thread.currentThread();
-				thread.sleep(countdown);
-				int count = jobService.getActivityUserCount(event.getId());
-				if (count < event.getMinCount()) {
-					// 人数不足最低人数时，活动发起失败
-					jobService.changeActivityStatus(event.getId(), Event.STATUS_OVER);
-					// 向组织者推送通知
-					User creator = jobService.getActivityCreator(event.getId());
-					List<User> activityMembers = jobService.getActivityMembers(event.getId());
-					String accessToken = jobService.getWxAccessToken();
-					WxRequestHelper.sendActivityLaunchFailureToCreator(accessToken, event, creator);
-					if (activityMembers != null) {
-						for (User user : activityMembers) {
-							if (creator.getId() != user.getId()) {
-								WxRequestHelper.sendActivityLaunchFailureToUser(accessToken, event, user);
+			if (countdown > 0) {
+				try {
+					Thread thread = Thread.currentThread();
+					thread.sleep(countdown);
+					int count = jobService.getActivityUserCount(event.getId());
+					if (count < event.getMinCount()) {
+						// 人数不足最低人数时，活动发起失败
+						jobService.changeActivityStatus(event.getId(), Event.STATUS_OVER);
+						// 向组织者推送通知
+						User creator = jobService.getActivityCreator(event.getId());
+						List<User> activityMembers = jobService.getActivityMembers(event.getId());
+						String accessToken = jobService.getWxAccessToken();
+						WxRequestHelper.sendActivityLaunchFailureToCreator(accessToken, event, creator);
+						if (activityMembers != null) {
+							for (User user : activityMembers) {
+								if (creator.getId() != user.getId()) {
+									WxRequestHelper.sendActivityLaunchFailureToUser(accessToken, event, user);
+								}
 							}
 						}
+					} else {
+						jobService.changeActivityStatus(event.getId(), Event.STATUS_PROCESS);
 					}
-				} else {
-					jobService.changeActivityStatus(event.getId(), Event.STATUS_PROCESS);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
 		}
 	}

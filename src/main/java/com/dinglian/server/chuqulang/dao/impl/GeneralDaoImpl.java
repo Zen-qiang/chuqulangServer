@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.dao.GeneralDao;
 import com.dinglian.server.chuqulang.model.Contact;
+import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.CoterieCarouselPicture;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.Event;
@@ -205,6 +206,18 @@ public class GeneralDaoImpl implements GeneralDao {
 	public List<SensitiveWord> loadAllSensitiveWord() {
 		String hql = "FROM SensitiveWord ";
 		return getCurrentSession().createQuery(hql).list();
+	}
+
+	@Override
+	public Coterie getCoterieByActivityId(int activityId) {
+		String sql = "SELECT c.* FROM coterie c JOIN EVENT e ON e.fk_coterie_id = c.id WHERE e.id = :activityId ";
+		return (Coterie) getCurrentSession().createSQLQuery(sql).addEntity(Coterie.class).setInteger("activityId", activityId).uniqueResult();
+	}
+
+	@Override
+	public void changeCoterieStatus(int coterieId, int status) {
+		String sql = "update coterie set status = :status where id = :id ";
+		getCurrentSession().createSQLQuery(sql).setInteger("status", status).setInteger("id", coterieId).executeUpdate();
 	}
 
 }

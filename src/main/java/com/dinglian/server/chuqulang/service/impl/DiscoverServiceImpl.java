@@ -110,4 +110,9 @@ public class DiscoverServiceImpl implements DiscoverService {
 		return generalDao.getCoterieCarouselPictures();
 	}
 
+	@Override
+	public boolean hasActivityProcess(int coterieId) {
+		return coterieDao.hasActivityProcess(coterieId);
+	}
+
 }

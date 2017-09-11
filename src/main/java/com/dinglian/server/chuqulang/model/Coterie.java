@@ -31,9 +31,14 @@ public class Coterie implements Serializable {
 	public static final String TYPE_HOT = "hot";
 	public static final String TYPE_NEW = "new";
 
+	// 我的圈子分类
 	public static final String DATATYPE_ALL = "1";
 	public static final String DATATYPE_CREATED = "2";
 	public static final String DATATYPE_ATTENTION = "3";
+	
+	public static final int STATUS_NORMAL = 1;
+	public static final int STATUS_DISMISSING = 2;
+	public static final int STATUS_DISMISSED = 3;
 
 	private int id;
 
@@ -51,13 +56,13 @@ public class Coterie implements Serializable {
 
 	private CoteriePicture coteriePicture; // 圈子图片
 	
-	private boolean dismissed;
-
 	private Set<CoterieGuy> coterieGuys = new HashSet<CoterieGuy>(); // 圈子成员
 
 	private Set<Topic> topics = new HashSet<Topic>(); // 圈子话题
 	
 	private List<Event> events = new ArrayList<Event>(); //圈子活动
+	
+	private int status;
 
 	@GeneratedValue
 	@Id
@@ -165,12 +170,13 @@ public class Coterie implements Serializable {
 		this.events = events;
 	}
 	
-	public boolean isDismissed() {
-		return dismissed;
+	@Column(length = 1, nullable = false)
+	public int getStatus() {
+		return status;
 	}
 
-	public void setDismissed(boolean dismissed) {
-		this.dismissed = dismissed;
+	public void setStatus(int status) {
+		this.status = status;
 	}
 
 	@Transient

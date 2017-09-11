@@ -38,6 +38,7 @@ public class ApplicationServiceException extends RuntimeException {
 	public final static int COTERIE_NOT_EXIST = 3001;
 	public final static int COTERIE_NOT_CREATOR = 3002;
 	public final static int COTERIE_PARAM_IS_EMPTY = 3003;
+	public final static int COTERIE_DISMISSED = 3004;
 	
 	// 话题相关
 	public final static int TOPIC_EXIST = 4001;
@@ -45,6 +46,7 @@ public class ApplicationServiceException extends RuntimeException {
 	
 	// 百度接口
 	public final static int IP_INVALID = 5001;
+	
 	
 	private int code;
 
@@ -92,6 +94,8 @@ public class ApplicationServiceException extends RuntimeException {
 			return "您不是圈子创建者";
 		case COTERIE_PARAM_IS_EMPTY:
 			return "参数不能为空";
+		case COTERIE_DISMISSED:
+			return "该圈子已解散";
 		case ACCESS_TOKEN_NOT_EXIST:
 			return "Access Token 不存在，请重新获取授权";
 		case IP_INVALID:
