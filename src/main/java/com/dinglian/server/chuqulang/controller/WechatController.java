@@ -1387,6 +1387,16 @@ public class WechatController {
 			List<Map> resultList = new ArrayList<Map>();
 			Map<String, Object> map = null;
 			if (secondLevelTags != null) {
+				Collections.sort(secondLevelTags, new Comparator<Tag>() {
+					@Override
+					public int compare(Tag o1, Tag o2) {
+						if (o1.getName().equalsIgnoreCase(Tag.TAG_UNLIMITED)) {
+							return -1;
+						}
+						return 0;
+					}
+				});
+				
 				for (Tag tag : secondLevelTags) {
 					map = new HashMap<String, Object>();
 					map.put("id", tag.getId());
