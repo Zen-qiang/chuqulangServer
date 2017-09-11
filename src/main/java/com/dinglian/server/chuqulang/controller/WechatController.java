@@ -39,8 +39,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.RedirectView;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -152,6 +150,14 @@ public class WechatController {
 		return null;
 	}
 	
+	/**
+	 * 接收微信推送的消息
+	 * @param msgSignature
+	 * @param timeStamp
+	 * @param nonce
+	 * @param request
+	 * @param response
+	 */
 	@ResponseBody
 	@PostMapping(value = "/security")
 	public void doPost(
@@ -167,7 +173,7 @@ public class WechatController {
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			Document document = db.parse(request.getInputStream());
 
-			// 关注事件
+			// 事件推送
 			Element root = document.getDocumentElement();
 			NodeList typeNode = root.getElementsByTagName("MsgType");
 			String msgType = typeNode.item(0).getTextContent();
@@ -175,6 +181,7 @@ public class WechatController {
 			if (msgType.equalsIgnoreCase("event")) {
 				NodeList eventNode = root.getElementsByTagName("Event");
 				String event = eventNode.item(0).getTextContent();
+				// 关注事件
 				if (event.equalsIgnoreCase("subscribe")) {
 					NodeList fromUserNode = root.getElementsByTagName("FromUserName");
 					String fromUserOpenId = fromUserNode.item(0).getTextContent();
@@ -192,6 +199,10 @@ public class WechatController {
 //		return replyMsg;
 	}
 
+	/**
+	 * 跳转用户授权
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/userAuthorization", method = RequestMethod.GET)
 	public String userAuthorization(/*@RequestParam("callbackUrl") String callbackUrl*/) {
@@ -225,7 +236,6 @@ public class WechatController {
 		Map<String, Object> dataMap = new HashMap<String, Object>();
 		try {
 			String response = "";
-			// 通过code换取网页授权access_token
 			ApplicationConfig config = ApplicationConfig.getInstance();
 			String url = String.format(config.getWxMpOAuth2AccessTokenUrl(), config.getWxMpAppId(),
 					config.getWxMpAppSecret(), code);
@@ -253,9 +263,9 @@ public class WechatController {
 				wxMpService.updateWxOAuth2AccessToken(wxOAuth2AccessToken);
 
 				dataMap.put("openId", openid);
-				dataMap.put("accessToken", accessToken);
-				dataMap.put("refreshToken", refreshToken);
-				dataMap.put("scope", scope);
+//				dataMap.put("accessToken", accessToken);
+//				dataMap.put("refreshToken", refreshToken);
+//				dataMap.put("scope", scope);
 				
 				/*User user = userService.getUserByOpenId(openid);
 				if (user == null) {
@@ -1959,6 +1969,8 @@ public class WechatController {
 //			List<EventUser> eventUsers = new ArrayList<EventUser>(event.getEventUsers());
 //			Collections.sort(eventUsers, new EventUserComparator());
 			List<EventUser> eventUsers = event.getEffectiveMembers();
+			
+			result.put("isSignUp", event.isSignUp(userId));
 			
 			List<Map> eventUserList = new ArrayList<>();
 			for (EventUser eventUser : eventUsers) {
