@@ -1891,9 +1891,17 @@ public class WechatController {
 					result.put("charge", event.getCharge());
 					
 					List<String> tagList = new ArrayList<>();
-					for (EventTag eventTag : event.getTags()) {
+					List<EventTag> eventTags = event.getTags();
+					for (EventTag eventTag : eventTags) {
 						Tag tag = eventTag.getTag();
 						tagList.add(tag.getName());
+					}
+					// 当只有一个一级标签时，自动添加二级标签不限
+					if (eventTags.size() == 1) {
+						Tag et = eventTags.get(0).getTag();
+						if (et != null && et.getType().equalsIgnoreCase(Tag.TYPE_FIRST_LEVEL)) {
+							tagList.add(Tag.TAG_UNLIMITED);
+						}
 					}
 					// 标签
 					result.put("tags", tagList);
