@@ -2631,8 +2631,8 @@ public class WechatController {
     @RequestMapping(value = "/signUp", method = RequestMethod.POST)
     public Map<String, Object> signUp(@RequestParam(name = "activityId") int activityId,
     		@RequestParam("userId") int userId,
-    		@RequestParam(name="realName",required = false) String realName,
-    		@RequestParam(name="phoneNo",required = false) String phoneNo,
+    		@RequestParam("realName") String realName,
+    		@RequestParam("phoneNo") String phoneNo,
     		@RequestParam("gender") int gender,
     		@RequestParam(name = "friends", required = false) String friends,
 //    		@RequestParam(name="password",required = false) String password,
@@ -2651,6 +2651,10 @@ public class WechatController {
             /*if (!event.isOpen() && !password.equals(event.getPassword())) {
 				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_INCORRECT_CREDENTIALS);
 			}*/
+            
+            if (StringUtils.isBlank(realName) || StringUtils.isBlank(phoneNo)) {
+				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_PARAM_IS_EMPTY);
+			}
             
             if (!event.isAllowSignUp()) {
             	throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_DONT_ALLOW_SINGNUP);
