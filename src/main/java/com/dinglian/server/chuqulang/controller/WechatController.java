@@ -1043,7 +1043,7 @@ public class WechatController {
 			searchCriteria.setStartRow(startRow);
 			searchCriteria.setPageSize(pageSize);
 			// 默认最热排序
-			searchCriteria.setOrderBy(Coterie.TYPE_HOT);
+			searchCriteria.setOrderBy(Coterie.TYPE_NEW);
 			if (StringUtils.isNotBlank(keyword)) {
 				searchCriteria.setKeyword(keyword);
 			}
