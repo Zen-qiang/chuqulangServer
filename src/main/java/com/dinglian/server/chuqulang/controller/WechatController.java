@@ -1102,6 +1102,7 @@ public class WechatController {
 			data.put("cover", coterie.getCoteriePicture() != null ? coterie.getCoteriePicture().getUrl() : "");
 			data.put("name", coterie.getName());
 			data.put("description", coterie.getDescription());
+			data.put("activityCnt", coterie.getEvents().size());
 			data.put("membersCnt", coterie.getCoterieGuys().size());
 			data.put("isJoined", coterie.isJoined(userId));
 			data.put("isCreator", coterie.isCreator(userId));
