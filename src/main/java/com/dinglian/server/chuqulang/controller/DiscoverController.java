@@ -642,7 +642,7 @@ public class DiscoverController {
 			Subject currentUser = SecurityUtils.getSubject();
         	User user = (User) currentUser.getSession().getAttribute(User.CURRENT_USER);
         	
-        	List<Coterie> coteries = discoverService.getMyCoteries(dataType, user.getId());
+        	List<Coterie> coteries = discoverService.getMyCoteries(dataType, user.getId(), "");
         	List<Map> resultList = new ArrayList<Map>();
         	if (coteries != null) {
 				for (Coterie coterie : coteries) {
