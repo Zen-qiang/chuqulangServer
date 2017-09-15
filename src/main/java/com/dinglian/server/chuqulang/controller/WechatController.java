@@ -2890,7 +2890,7 @@ public class WechatController {
 					Map<String, Object> data = new HashMap<String, Object>();
 					data.put("userId", user.getId());
 					data.put("gender", eventUser.getGender());
-					data.put("phoneNo", eventUser.getPhoneNo());
+//					data.put("phoneNo", eventUser.getPhoneNo());
 					data.put("signUpTime", eventUser.getCreationDate());
 					data.put("name", eventUser.getRealName());
 					data.put("picture", user.getPicture());
