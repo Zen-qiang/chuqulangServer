@@ -1312,13 +1312,14 @@ public class WechatController {
 	@ResponseBody
 	@RequestMapping(value = "/getMyCoteries", method = RequestMethod.GET)
 	public Map<String, Object> getMyCoteries(@RequestParam("userId") int userId,
+			@RequestParam(name = "keyword", required = false) String keyword,
 			@RequestParam(name = "dataType", required = false) String dataType,
 			@RequestParam(name = "showLastCoterie", required = false) Boolean showLastCoterie) {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
 			logger.info("=====> Start to get my coteries <=====");
 
-			List<Coterie> coteries = discoverService.getMyCoteries(dataType, userId);
+			List<Coterie> coteries = discoverService.getMyCoteries(dataType, userId, keyword);
 			
 			// 显示最近参与
 			Coterie lastCoterie = null;

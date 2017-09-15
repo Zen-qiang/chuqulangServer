@@ -20,7 +20,7 @@ public interface CoterieDao extends GenericDao<Coterie> {
 
 	List<Coterie> getCoteriesByName(String keyword);
 
-	List<Coterie> getMyCoteries(String dataType, int userId);
+	List<Coterie> getMyCoteries(String dataType, int userId, String keyword);
 
 	Coterie getLastCoterie(int userId);
 

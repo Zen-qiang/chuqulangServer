@@ -96,8 +96,8 @@ public class DiscoverServiceImpl implements DiscoverService {
 	}
 
 	@Override
-	public List<Coterie> getMyCoteries(String dataType, int userId) {
-		return coterieDao.getMyCoteries(dataType, userId);
+	public List<Coterie> getMyCoteries(String dataType, int userId, String keyword) {
+		return coterieDao.getMyCoteries(dataType, userId, keyword);
 	}
 
 	@Override

@@ -32,7 +32,7 @@ public interface DiscoverService {
 
 	void saveCoterie(Coterie coterie) throws Exception;
 
-	List<Coterie> getMyCoteries(String dataType, int userId);
+	List<Coterie> getMyCoteries(String dataType, int userId, String keyword);
 
 	Coterie getLastCoterie(int userId);
 

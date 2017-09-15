@@ -111,7 +111,7 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 	}
 
 	@Override
-	public List<Coterie> getMyCoteries(String dataType, int userId) {
+	public List<Coterie> getMyCoteries(String dataType, int userId, String keyword) {
 		String hql = "SELECT distinct c FROM Coterie c LEFT JOIN FETCH c.coterieGuys guy WHERE 1=1 AND c.status = :status ";
 		if (StringUtils.isNotBlank(dataType)) {
 			if (dataType.equalsIgnoreCase(Coterie.DATATYPE_CREATED)) {
@@ -124,8 +124,17 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 		} else {
 			hql += "AND guy.user.id = :userId ";
 		}
+		if (StringUtils.isNotBlank(keyword)) {
+			hql += "AND c.name like :keyword ";
+		}
 		hql += "ORDER BY guy.creationDate DESC ";
-		return getCurrentSession().createQuery(hql).setInteger("status", Coterie.STATUS_NORMAL).setInteger("userId", userId).list();
+		Query query = getCurrentSession().createQuery(hql);
+		query.setInteger("status", Coterie.STATUS_NORMAL);
+		query.setInteger("userId", userId);
+		if (StringUtils.isNotBlank(keyword)) {
+			query.setString("keyword", "%" + keyword + "%");
+		}
+		return query.list();
 	}
 
 	@Override
