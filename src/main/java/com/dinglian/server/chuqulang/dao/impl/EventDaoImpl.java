@@ -74,7 +74,8 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 	public List<Event> getUserActivityList(SearchCriteria searchCriteria) {
 		String sql = "SELECT e.* FROM EVENT e LEFT JOIN event_user eu ON e.id = eu.fk_event_id WHERE 1=1 ";
 		if (searchCriteria.getDataType().equals(Event.DATATYPE_ALL)) {
-			sql += "AND eu.fk_user_id = :userId AND eu.effective = 1 ";
+//			sql += "AND eu.fk_user_id = :userId AND eu.effective = 1 ";
+			sql += "AND eu.fk_user_id = :userId ";
 		} else if (searchCriteria.getDataType().equals(Event.DATATYPE_RELEASE)) {
 			sql += "AND e.fk_user_id = :userId AND e.status != '0' ";
 		} else if (searchCriteria.getDataType().equals(Event.DATATYPE_JOIN)) {
