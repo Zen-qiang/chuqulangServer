@@ -1623,6 +1623,7 @@ public class WechatController {
     			coterie.setCreationDate(new Date());
     			coterie.setCreator(user);
     			coterie.setHot(0);
+    			coterie.setStatus(Coterie.STATUS_NORMAL);
     			
     			List<EventPicture> eventPictures = new ArrayList<EventPicture>(event.getEventPictures());
     			if (eventPictures.size() > 0) {
