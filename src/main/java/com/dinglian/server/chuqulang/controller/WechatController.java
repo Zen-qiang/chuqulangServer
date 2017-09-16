@@ -77,6 +77,7 @@ import com.dinglian.server.chuqulang.task.ActivityOverStatusTask;
 import com.dinglian.server.chuqulang.task.ActivityProcessStatusTask;
 import com.dinglian.server.chuqulang.utils.AliyunOSSUtil;
 import com.dinglian.server.chuqulang.utils.CodeUtils;
+import com.dinglian.server.chuqulang.utils.DateUtils;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
 import com.dinglian.server.chuqulang.utils.ResponseHelper;
 import com.dinglian.server.chuqulang.utils.SensitiveWordUtil;
@@ -1486,8 +1487,10 @@ public class WechatController {
     		@RequestParam("tags") String tags,
     		@RequestParam("name") String name,
     		@RequestParam("serverIds") String[] serverIds,
-    		@RequestParam("startTime") long startTimeMillisecond,
-    		@RequestParam("endTime") long endTimeMillisecond,
+//    		@RequestParam("startTime") long startTimeMillisecond,
+//    		@RequestParam("endTime") long endTimeMillisecond,
+    		@RequestParam("startTime") String startTimeStr,
+    		@RequestParam("endTime") String endTimeStr,
     		@RequestParam(name = "gps",required = false) String gps,
     		@RequestParam("address") String address,
             @RequestParam("minCount") int minCount,
@@ -1564,8 +1567,8 @@ public class WechatController {
             
             event.setName(name);
             
-            event.setStartTime(new Date(startTimeMillisecond));
-            event.setEndTime(new Date(endTimeMillisecond));
+            event.setStartTime(DateUtils.parse(startTimeStr, DateUtils.yMdHm));
+            event.setEndTime(DateUtils.parse(endTimeStr, DateUtils.yMdHm));
             
             event.setMinCount(minCount);
             event.setMaxCount(maxCount);
