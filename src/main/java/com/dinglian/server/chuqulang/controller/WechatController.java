@@ -1977,6 +1977,7 @@ public class WechatController {
 			result.put("name", event.getName());
 			result.put("status", event.getStatus());
 			result.put("startTime", event.getStartTime());
+			result.put("endTime", event.getEndTime());
 			result.put("gps", event.getGps());
 			result.put("address", event.getAddress());
 			result.put("isOpen", event.isOpen());
