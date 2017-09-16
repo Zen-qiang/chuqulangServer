@@ -2788,7 +2788,7 @@ public class WechatController {
 			String accessToken = wxMpService.getWxAccessToken();
 			if (StringUtils.isNotBlank(accessToken)) {
 				WxRequestHelper.sendActivitySignUpToUser(accessToken, event, fristeventUser);
-				WxRequestHelper.sendActivitySignUpToCreator(accessToken, event, fristeventUser);
+//				WxRequestHelper.sendActivitySignUpToCreator(accessToken, event, fristeventUser);
 				
 				if (isSignFull) {
 					// 当活动报名前低于最小人数，报名后大于最小人数时触发
