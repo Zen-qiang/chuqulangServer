@@ -2672,6 +2672,10 @@ public class WechatController {
             if (eventUsers.size() == event.getMaxCount()) {
             	throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_USER_FULL);
 			}
+            
+            // 活动报名前人数
+            int beforeCount = eventUsers.size();
+            
             JSONArray friendArray = null;
             if (StringUtils.isNotBlank(friends)) {
             	friendArray = JSONArray.fromObject(friends);
@@ -2722,14 +2726,16 @@ public class WechatController {
 					}
 				}
 			}
-            // 关闭允许报名
-            int count = event.getEffectiveMembers().size();
-            if (count == event.getMaxCount()) {
+            // 报名后人数
+            int afterCount = event.getEffectiveMembers().size();
+            if (afterCount == event.getMaxCount()) {
+            	// 关闭允许报名
 				event.setAllowSignUp(false);
 			}
             
+            // 当活动报名前低于最小人数，报名后大于最小人数时触发
             boolean isSignFull = false;
-            if (count >= event.getMinCount()) {
+            if (afterCount >= event.getMinCount() && beforeCount < event.getMinCount()) {
             	isSignFull = true;
 			}
             
@@ -2781,6 +2787,7 @@ public class WechatController {
 				WxRequestHelper.sendActivitySignUpToCreator(accessToken, event, fristeventUser);
 				
 				if (isSignFull) {
+					// 当活动报名前低于最小人数，报名后大于最小人数时触发
 					for (EventUser eventUser : event.getEffectiveMembers()) {
 						if (eventUser.getUser() != null) {
 							WxRequestHelper.sendActivitySignFull(accessToken, event, eventUser);
