@@ -58,6 +58,7 @@ public class TopicComment implements Serializable{
 		this.user = user;
 	}
 
+	@Column(length = 1000)
 	public String getContent() {
 		return content;
 	}

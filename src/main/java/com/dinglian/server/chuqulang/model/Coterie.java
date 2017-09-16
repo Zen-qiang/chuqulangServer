@@ -82,6 +82,7 @@ public class Coterie implements Serializable {
 		this.name = name;
 	}
 
+	@Column(length = 1000)
 	public String getDescription() {
 		return description;
 	}

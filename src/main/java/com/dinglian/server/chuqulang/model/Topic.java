@@ -86,6 +86,7 @@ public class Topic implements Serializable {
 		this.creator = creator;
 	}
 
+	@Column(length = 1000)
 	public String getDescription() {
 		return description;
 	}

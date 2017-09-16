@@ -164,6 +164,7 @@ public class Event implements Serializable {
 		this.maxCount = maxCount;
 	}
 
+	@Column(length = 1000)
 	public String getDescription() {
 		return description;
 	}
