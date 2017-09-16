@@ -1651,7 +1651,7 @@ public class WechatController {
     			discoverService.saveCoterie(coterie);
     			event.setCoterie(coterie);
     			event.getActivityTopic().setCoterie(coterie);
-			} else {
+			}/* else {
 				// 给圈子用户发送活动通知
 				coterie = event.getCoterie();
 				Set<CoterieGuy> coterieGuys = coterie.getCoterieGuys();
@@ -1661,7 +1661,7 @@ public class WechatController {
 						WxRequestHelper.sendCoterieActivityLauncher(accessToken, event, coterie, coterieGuy.getUser());
 					}
 				}
-			}
+			}*/
             
             activityService.saveEvent(event);
             
