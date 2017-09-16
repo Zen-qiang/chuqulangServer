@@ -113,6 +113,9 @@ public class WechatController {
 	@Autowired
 	private JobService jobService;
 	
+	@Autowired
+	private HttpServletRequest request;
+	
 	private static ApplicationConfig config = ApplicationConfig.getInstance();
 	private static SensitiveWordUtil sensitiveWordUtil = SensitiveWordUtil.getInstance();
 	
@@ -436,6 +439,8 @@ public class WechatController {
 			userMap.put("nickName", user.getNickName());
 			userMap.put("picture", user.getPicture());
 			userMap.put("gender", user.getGender());
+			
+			request.getSession().setAttribute(User.CURRENT_USER, user);
 
 			ResponseHelper.addResponseSuccessData(responseMap, userMap);
 			logger.info("=====> Get user end <=====");
@@ -3094,11 +3099,12 @@ public class WechatController {
 		return m.matches();
 	}
 	
-	@RequestMapping(value = "/test")
+	@ResponseBody
+	@GetMapping(value = "/test")
 	public void test() {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		SensitiveWordUtil sensitiveWordUtil = SensitiveWordUtil.getInstance();
-//		return  new ModelAndView(new RedirectView("http://www.baidu.com"));
+		User user = (User) request.getSession().getAttribute(User.CURRENT_USER);
+		System.out.println(user.getId());
+		System.out.println(user.getNickName());
 	}
 
 }
