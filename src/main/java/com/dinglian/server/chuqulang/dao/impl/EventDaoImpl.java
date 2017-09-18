@@ -72,7 +72,7 @@ public class EventDaoImpl extends AbstractHibernateDao<Event> implements EventDa
 
 	@Override
 	public List<Event> getUserActivityList(SearchCriteria searchCriteria) {
-		String sql = "SELECT e.* FROM EVENT e LEFT JOIN event_user eu ON e.id = eu.fk_event_id WHERE 1=1 ";
+		String sql = "SELECT DISTINCT e.* FROM EVENT e LEFT JOIN event_user eu ON e.id = eu.fk_event_id WHERE 1=1 ";
 		if (searchCriteria.getDataType().equals(Event.DATATYPE_ALL)) {
 //			sql += "AND eu.fk_user_id = :userId AND eu.effective = 1 ";
 			sql += "AND eu.fk_user_id = :userId ";
