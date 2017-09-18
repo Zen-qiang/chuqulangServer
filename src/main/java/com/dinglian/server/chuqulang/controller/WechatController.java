@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.httpclient.util.DateUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.ParseException;
 import org.slf4j.Logger;
@@ -1347,6 +1348,7 @@ public class WechatController {
 					map.put("id", coterie.getId());
 					map.put("name", coterie.getName());
 					map.put("cover", coterie.getCoteriePicture() != null ? coterie.getCoteriePicture().getUrl() : "");
+					map.put("isCreator", coterie.isCreator(userId));
 					if (lastCoterie != null) {
 						if (coterie.getId() == lastCoterie.getId()) {
 							map.put("isLastCoterie", true);
@@ -1524,6 +1526,12 @@ public class WechatController {
 				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_PARAM_IS_EMPTY);
 			}
         	
+        	Date startTime = DateUtils.parse(startTimeStr, DateUtils.yMdHm);
+        	Date endTime = DateUtils.parse(endTimeStr, DateUtils.yMdHm);
+        	if (startTime.getTime() > endTime.getTime()) {
+        		throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_TIME_ERROR);
+			}
+        	
         	// 敏感词汇检查
         	if (StringUtils.isNotBlank(name)) {
 				String sensitiveWord = sensitiveWordUtil.firstLevelFilter(name);
@@ -1567,8 +1575,8 @@ public class WechatController {
             
             event.setName(name);
             
-            event.setStartTime(DateUtils.parse(startTimeStr, DateUtils.yMdHm));
-            event.setEndTime(DateUtils.parse(endTimeStr, DateUtils.yMdHm));
+            event.setStartTime(startTime);
+            event.setEndTime(endTime);
             
             event.setMinCount(minCount);
             event.setMaxCount(maxCount);
@@ -3010,6 +3018,58 @@ public class WechatController {
 				sendhRes = CodeUtils.sendSms(newVerifyNo, prop);
 			}
 			logger.info(sendhRes);
+			ResponseHelper.addResponseSuccessData(resultMap, null);
+		} catch (ApplicationServiceException e) {
+        	ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+		}
+		logger.info("=====> Send verify no end <=====");
+		return resultMap;
+	}
+    
+    /**
+     * 发送活动短信通知
+     * @param activityId
+     * @param userId
+     * @return
+     */
+    @ResponseBody
+	@RequestMapping(value = "/sendActivityNotification", method = RequestMethod.GET)
+	public Map<String, Object> sendActivityNotification(@RequestParam("activityId") int activityId, @RequestParam("userId") int userId) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		logger.info("=====> Start to send activity notification <=====");
+		try {
+			Event event = activityService.findEventById(activityId);
+            if (event == null) {
+            	throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_EXIST);
+			}
+            
+            if (event.getCreator() != null && event.getCreator().getId() != userId) {
+        		throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_NOT_CREATOR);
+			}
+            
+            List<EventUser> sendToList = new ArrayList<EventUser>();
+            for (EventUser eventUser : event.getEffectiveMembers()) {
+            	// 不是创建者，并且有手机号
+				if (eventUser.getUser() != null && eventUser.getUser().getId() != userId && StringUtils.isNotBlank(eventUser.getPhoneNo()) && isMobile(eventUser.getPhoneNo())) {
+					sendToList.add(eventUser);
+				}
+			}
+            
+            if (!sendToList.isEmpty()) {
+            	// 读取短信接口配置文件
+            	Properties prop =  new Properties();
+            	logger.info("loading sms.properties...");
+            	InputStream in = getClass().getClassLoader().getResourceAsStream("sms.properties");
+            	prop.load(in);
+            	in.close();
+            	
+            	String sendhRes = CodeUtils.batchSubmit(prop, event, sendToList);
+				logger.info(sendhRes);
+			}
+            
 			ResponseHelper.addResponseSuccessData(resultMap, null);
 		} catch (ApplicationServiceException e) {
         	ResponseHelper.addResponseFailData(resultMap, e.getMessage());

@@ -30,6 +30,7 @@ public class ApplicationServiceException extends RuntimeException {
 	public final static int ACTIVITY_HAS_SIGNUPED = 2006;
 	public final static int ACTIVITY_NOT_CREATOR = 2007;
 	public final static int ACTIVITY_PARAM_IS_EMPTY = 2008;
+	public final static int ACTIVITY_TIME_ERROR = 2009;
 	
 	public final static int ACTIVITY_TOPIC_EXIST = 2101;
 	public final static int ACTIVITY_TOPIC_NOT_EXIST = 2102;
@@ -89,6 +90,8 @@ public class ApplicationServiceException extends RuntimeException {
 			return "活动留言不存在";
 		case ACTIVITY_PARAM_IS_EMPTY:
 			return "参数不能为空";
+		case ACTIVITY_TIME_ERROR:
+			return "结束时间必须大于开始时间";
 		case COTERIE_NOT_EXIST:
 			return "圈子不存在";
 		case COTERIE_NOT_CREATOR:
