@@ -2942,8 +2942,12 @@ public class WechatController {
 					resultList.add(data);
 				}
 			}
+            
+            Map<String, Object> dataMap = new HashMap<String, Object>();
+            dataMap.put("notified", event.isNotified());
+            dataMap.put("members", resultList);
 
-            ResponseHelper.addResponseSuccessData(resultMap, resultList);
+            ResponseHelper.addResponseSuccessData(resultMap, dataMap);
             logger.info("=====> Event signup end <=====");
         } catch (ApplicationServiceException e) {
         	ResponseHelper.addResponseFailData(resultMap, e.getMessage());
@@ -3058,7 +3062,7 @@ public class WechatController {
 				}
 			}
             
-            if (!sendToList.isEmpty()) {
+            if (!sendToList.isEmpty() && !event.isNotified()) {
             	// 读取短信接口配置文件
             	Properties prop =  new Properties();
             	logger.info("loading sms.properties...");
@@ -3068,16 +3072,19 @@ public class WechatController {
             	
             	String sendhRes = CodeUtils.batchSubmit(prop, event, sendToList);
 				logger.info(sendhRes);
+				
+				event.setNotified(true);
+				activityService.saveEvent(event);
 			}
             
-			ResponseHelper.addResponseSuccessData(resultMap, null);
+            ResponseHelper.addResponseSuccessData(resultMap, null);
 		} catch (ApplicationServiceException e) {
         	ResponseHelper.addResponseFailData(resultMap, e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseHelper.addResponseFailData(resultMap, e.getMessage());
 		}
-		logger.info("=====> Send verify no end <=====");
+		logger.info("=====> Send activity notification end <=====");
 		return resultMap;
 	}
     

@@ -112,6 +112,8 @@ public class Event implements Serializable {
 	//微信端独有
 	private Topic activityTopic;
 	
+	private boolean notified;
+	
 	@GeneratedValue
 	@Id
 	public int getId() {
@@ -342,6 +344,14 @@ public class Event implements Serializable {
 		this.activityTopic = activityTopic;
 	}
 	
+	public boolean isNotified() {
+		return notified;
+	}
+
+	public void setNotified(boolean notified) {
+		this.notified = notified;
+	}
+
 	@Transient
 	public List<EventUser> getEffectiveMembers () {
 		List<EventUser> data = new ArrayList<>();
