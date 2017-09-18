@@ -275,4 +275,32 @@ public class WxRequestHelper {
 		String remark = "";
 		sendTemplateMsg(uri, templateId, eventUser.getUser().getOpenId(), url, first, keywordList, remark);
 	}
+
+	/**
+	 * 关闭活动通知
+	 * @param accessToken
+	 * @param event 
+	 * @param effectiveMembers
+	 * @throws IOException 
+	 * @throws ParseException 
+	 */
+	public static void sendActivityClose(String accessToken, Event event) throws ParseException, IOException {
+		String uri = getTemplateMsgUrl(accessToken);
+		String templateId = config.getWxActivityTemplateId();
+		String url = getActivityRedirectUrl(event.getId());
+
+		String first = "您参与的活动已被组织者解散";
+
+		List<String> keywordList = new ArrayList<String>();
+		keywordList.add(event.getName());
+		keywordList.add(DateUtils.format(event.getStartTime(), DateUtils.yMdHm) + " - "
+				+ DateUtils.format(event.getEndTime(), DateUtils.yMdHm));
+		keywordList.add(event.getAddress());
+
+		String remark = "";
+		
+		for (EventUser eventUser : event.getEffectiveMembers()) {
+			sendTemplateMsg(uri, templateId, eventUser.getUser().getOpenId(), url, first, keywordList, remark);
+		}
+	}
 }

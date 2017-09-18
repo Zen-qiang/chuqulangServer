@@ -2176,6 +2176,12 @@ public class WechatController {
    			
    			activityService.saveEvent(event);
    			
+   			// 关闭活动时给所有人发送通知
+   			String accessToken = wxMpService.getWxAccessToken();
+			if (StringUtils.isNotBlank(accessToken)) {
+				WxRequestHelper.sendActivityClose(accessToken, event);
+			}
+   			
    			// 判断是否还有进行中的活动，没有的话把解散中的圈子改成已解散
    			Coterie coterie = event.getCoterie();
    			if (coterie.getStatus() == Coterie.STATUS_DISMISSING) {
