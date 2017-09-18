@@ -1550,6 +1550,7 @@ public class WechatController {
             Event event = new Event();
             event.setAllowSignUp(true);
             event.setCharge(charge);
+            event.setNotified(false);
             
             if (coterie != null) {
             	event.setCoterie(coterie);
@@ -2241,6 +2242,7 @@ public class WechatController {
 					result.put("gps", event.getGps());
 					result.put("address", event.getAddress());
 					result.put("isOpen", event.isOpen());
+					result.put("isCreator", event.isCreator(userId));
 					
 					// 封面
 					List<EventPicture> eventPictures = new ArrayList<EventPicture>(event.getEventPictures());
