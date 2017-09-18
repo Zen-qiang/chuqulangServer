@@ -1557,7 +1557,7 @@ public class WechatController {
             
             // 如果活动不公开，设置密码
             event.setOpen(isOpen);
-            if (isOpen) {
+            if (!isOpen) {
 				event.setPassword(password);
 			}
             
