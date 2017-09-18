@@ -2952,6 +2952,7 @@ public class WechatController {
 			}
             
             Map<String, Object> dataMap = new HashMap<String, Object>();
+            dataMap.put("isCreator", event.isCreator(userId));
             dataMap.put("notified", event.isNotified());
             dataMap.put("members", resultList);
 
