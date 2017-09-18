@@ -72,7 +72,7 @@ public class CodeUtils {
 		String sign = prop.getProperty("sms.sign");
 		String subcode = prop.getProperty("sms.subcode");
 		String notification = prop.getProperty("sms.template.notification");
-		String url = prop.getProperty("sms.batch.submit.uri");
+		String url = prop.getProperty("sms.url");
 		
     	String sendtime = "";
     	List<SmsData> list = new ArrayList<SmsData>();
