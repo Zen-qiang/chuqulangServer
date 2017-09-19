@@ -2955,6 +2955,7 @@ public class WechatController {
             dataMap.put("isCreator", event.isCreator(userId));
             dataMap.put("notified", event.isNotified());
             dataMap.put("members", resultList);
+            dataMap.put("activityMembersCnt", event.getEffectiveMembers().size());
 
             ResponseHelper.addResponseSuccessData(resultMap, dataMap);
             logger.info("=====> Event signup end <=====");
