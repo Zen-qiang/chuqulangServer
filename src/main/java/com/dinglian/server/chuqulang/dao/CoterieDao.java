@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.model.Coterie;
+import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.Topic;
 
 public interface CoterieDao extends GenericDao<Coterie> {
@@ -25,5 +26,7 @@ public interface CoterieDao extends GenericDao<Coterie> {
 	Coterie getLastCoterie(int userId);
 
 	boolean hasActivityProcess(int coterieId);
+
+	List<CoterieGuy> getCoterieMembers(int coterieId, int start, int limit);
 
 }

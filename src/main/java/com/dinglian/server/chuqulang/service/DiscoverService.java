@@ -40,4 +40,6 @@ public interface DiscoverService {
 
 	boolean hasActivityProcess(int coterieId);
 
+	List<CoterieGuy> getCoterieMembers(int coterieId, int start, int limit);
+
 }

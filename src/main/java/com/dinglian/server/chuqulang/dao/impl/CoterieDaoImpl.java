@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.dao.CoterieDao;
 import com.dinglian.server.chuqulang.model.Coterie;
+import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.Topic;
 
@@ -155,6 +156,20 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public List<CoterieGuy> getCoterieMembers(int coterieId, int start, int limit) {
+		String sql = "SELECT * FROM coterie_guy WHERE fk_coterie_id = :coterieId ORDER BY order_no DESC ";
+		Query query = getCurrentSession().createSQLQuery(sql).addEntity(CoterieGuy.class);
+		query.setInteger("coterieId", coterieId);
+		
+		if (limit != 0) {
+			query.setFirstResult(start);
+			query.setMaxResults(limit);
+		}
+		
+		return query.list();
 	}
 
 }

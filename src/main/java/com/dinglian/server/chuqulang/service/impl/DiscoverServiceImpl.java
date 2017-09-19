@@ -115,4 +115,9 @@ public class DiscoverServiceImpl implements DiscoverService {
 		return coterieDao.hasActivityProcess(coterieId);
 	}
 
+	@Override
+	public List<CoterieGuy> getCoterieMembers(int coterieId, int start, int limit) {
+		return coterieDao.getCoterieMembers(coterieId, start, limit);
+	}
+
 }

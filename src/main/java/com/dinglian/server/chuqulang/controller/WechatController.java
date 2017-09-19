@@ -1167,7 +1167,9 @@ public class WechatController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/getCoterieMembers", method = RequestMethod.GET)
-	public Map<String, Object> getCoterieMembers(@RequestParam("coterieId") int coterieId) {
+	public Map<String, Object> getCoterieMembers(@RequestParam("coterieId") int coterieId, 
+			@RequestParam(name = "start", required = false) int start, 
+			@RequestParam(name = "pageSize", required = false) int pageSize) {
 		logger.info("=====> Start to get coterie members <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
@@ -1177,29 +1179,26 @@ public class WechatController {
 			}
 			
 			Map<String, Object> data = new HashMap<String, Object>();
+			// 创建者
+			User creator = coterie.getCreator();
+			Map<String, Object> managerMap = new HashMap<String, Object>();
+			managerMap.put("userId", creator.getId());
+			managerMap.put("nickName", creator.getNickName());
+			managerMap.put("picture", creator.getPicture());
+			managerMap.put("gender", creator.getGender());
+			data.put("manager", managerMap);
 			
-			List<CoterieGuy> coterieGuys = new ArrayList<CoterieGuy>(coterie.getCoterieGuys());
-			Collections.sort(coterieGuys, new Comparator<CoterieGuy>() {
-				@Override
-				public int compare(CoterieGuy o1, CoterieGuy o2) {
-					if (coterie.isCreator(o1.getUser().getId())) {
-						return Integer.MIN_VALUE;
-					} else {
-						return o2.getOrderNo() - o1.getOrderNo();
-					}
-				}
-			});
+			List<CoterieGuy> coterieMembers = discoverService.getCoterieMembers(coterieId, start, pageSize);
 			
-			List<Map> resultList = new ArrayList<>();
-			for (CoterieGuy coterieGuy : coterieGuys) {
+			List<Map> resultList = new ArrayList<Map>();
+			for (CoterieGuy coterieGuy : coterieMembers) {
 				User user = coterieGuy.getUser();
-				if (user != null) {
+				if (user != null && user.getId() != creator.getId()) {
 					Map map = new HashMap<>();
 					map.put("userId", user.getId());
 					map.put("nickName", user.getNickName());
 					map.put("picture", user.getPicture());
 					map.put("gender", user.getGender());
-					map.put("isCreator", coterie.isCreator(user.getId()));
 					resultList.add(map);
 				}
 			}
