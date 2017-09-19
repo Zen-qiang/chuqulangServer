@@ -712,6 +712,7 @@ public class WechatController {
 			coterie.setCreator(user);
 			coterie.setHot(0);
 			coterie.setStatus(Coterie.STATUS_NORMAL);
+			coterie.setAllowPush(true);
 			
 			if (StringUtils.isNotBlank(tags)) {
 				String[] tagsSplit = tags.split(",");
@@ -1128,6 +1129,26 @@ public class WechatController {
 			// 标签
 			data.put("tags", tagList);
 			
+			List<CoterieGuy> coterieGuys = new ArrayList<CoterieGuy>(coterie.getCoterieGuys());
+			Collections.sort(coterieGuys, new Comparator<CoterieGuy>() {
+				@Override
+				public int compare(CoterieGuy o1, CoterieGuy o2) {
+					return o2.getOrderNo() - o1.getOrderNo();
+				}
+			});
+			
+			int i = 1;
+			List<String> resultList = new ArrayList<String>();
+			for (CoterieGuy coterieGuy : coterieGuys) {
+				if (i <= 3 && coterieGuy.getUser() != null && coterieGuy.getUser().getId() != coterie.getCreator().getId()) {
+					resultList.add(coterieGuy.getUser().getPicture());
+					i++;
+				}
+			}
+			data.put("members", resultList);
+			data.put("coterieMembersCnt", coterieGuys.size());
+			data.put("allowPush", coterie.isAllowPush());
+			
 			ResponseHelper.addResponseSuccessData(responseMap, data);
 			logger.info("=====> Get coterie info end <=====");
 		} catch (ApplicationServiceException e) {
@@ -1139,6 +1160,11 @@ public class WechatController {
 		return responseMap;
 	}
 	
+	/**
+	 * 获取圈子成员列表
+	 * @param coterieId
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/getCoterieMembers", method = RequestMethod.GET)
 	public Map<String, Object> getCoterieMembers(@RequestParam("coterieId") int coterieId) {
@@ -1170,7 +1196,7 @@ public class WechatController {
 				if (user != null) {
 					Map map = new HashMap<>();
 					map.put("userId", user.getId());
-					map.put("name", user.getNickName());
+					map.put("nickName", user.getNickName());
 					map.put("picture", user.getPicture());
 					map.put("gender", user.getGender());
 					map.put("isCreator", coterie.isCreator(user.getId()));
@@ -1183,6 +1209,43 @@ public class WechatController {
 			
 			ResponseHelper.addResponseSuccessData(responseMap, data);
 			logger.info("=====> Get coterie members end <=====");
+		} catch (ApplicationServiceException e) {
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		}
+		return responseMap;
+	}
+	
+	/**
+	 * 切换消息免打扰
+	 * @param coterieId
+	 * @param userId
+	 * @param allowPush
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/changeCoteriePush", method = RequestMethod.GET)
+	public Map<String, Object> changeCoteriePush(@RequestParam("coterieId") int coterieId, 
+			@RequestParam("userId") int userId, @RequestParam("allowPush") boolean allowPush) {
+		logger.info("=====> Start to change coterie push setting <=====");
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			Coterie coterie = discoverService.findCoterieById(coterieId);
+			if (coterie == null) {
+				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_EXIST);
+			}
+			
+			if (coterie.getCreator() != null && coterie.getCreator().getId() != userId) {
+				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_CREATOR);
+			}
+			
+			coterie.setAllowPush(allowPush);
+			discoverService.saveCoterie(coterie);
+			
+			ResponseHelper.addResponseSuccessData(responseMap, null);
+			logger.info("=====> Change coterie push setting end <=====");
 		} catch (ApplicationServiceException e) {
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
 		} catch (Exception e) {
@@ -1713,17 +1776,19 @@ public class WechatController {
     			discoverService.saveCoterie(coterie);
     			event.setCoterie(coterie);
     			event.getActivityTopic().setCoterie(coterie);
-			}/* else {
+			} else {
 				// 给圈子用户发送活动通知
 				coterie = event.getCoterie();
-				Set<CoterieGuy> coterieGuys = coterie.getCoterieGuys();
-				String accessToken = wxMpService.getWxAccessToken();
-				for (CoterieGuy coterieGuy : coterieGuys) {
-					if (coterieGuy.getUser() != null) {
-						WxRequestHelper.sendCoterieActivityLauncher(accessToken, event, coterie, coterieGuy.getUser());
+				if (coterie.isAllowPush()) {
+					Set<CoterieGuy> coterieGuys = coterie.getCoterieGuys();
+					String accessToken = wxMpService.getWxAccessToken();
+					for (CoterieGuy coterieGuy : coterieGuys) {
+						if (coterieGuy.getUser() != null) {
+							WxRequestHelper.sendCoterieActivityLauncher(accessToken, event, coterie, coterieGuy.getUser());
+						}
 					}
 				}
-			}*/
+			}
             
             activityService.saveEvent(event);
             

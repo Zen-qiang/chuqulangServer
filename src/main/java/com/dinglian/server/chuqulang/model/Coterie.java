@@ -63,6 +63,8 @@ public class Coterie implements Serializable {
 	private List<Event> events = new ArrayList<Event>(); //圈子活动
 	
 	private int status;
+	
+	private boolean allowPush;
 
 	@GeneratedValue
 	@Id
@@ -178,6 +180,15 @@ public class Coterie implements Serializable {
 
 	public void setStatus(int status) {
 		this.status = status;
+	}
+	
+	@Column(name = "allow_push")
+	public boolean isAllowPush() {
+		return allowPush;
+	}
+
+	public void setAllowPush(boolean allowPush) {
+		this.allowPush = allowPush;
 	}
 
 	@Transient
