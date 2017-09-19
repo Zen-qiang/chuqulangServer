@@ -1139,6 +1139,59 @@ public class WechatController {
 		return responseMap;
 	}
 	
+	@ResponseBody
+	@RequestMapping(value = "/getCoterieMembers", method = RequestMethod.GET)
+	public Map<String, Object> getCoterieMembers(@RequestParam("coterieId") int coterieId) {
+		logger.info("=====> Start to get coterie members <=====");
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		try {
+			Coterie coterie = discoverService.findCoterieById(coterieId);
+			if (coterie == null) {
+				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_EXIST);
+			}
+			
+			Map<String, Object> data = new HashMap<String, Object>();
+			
+			List<CoterieGuy> coterieGuys = new ArrayList<CoterieGuy>(coterie.getCoterieGuys());
+			Collections.sort(coterieGuys, new Comparator<CoterieGuy>() {
+				@Override
+				public int compare(CoterieGuy o1, CoterieGuy o2) {
+					if (coterie.isCreator(o1.getUser().getId())) {
+						return Integer.MIN_VALUE;
+					} else {
+						return o2.getOrderNo() - o1.getOrderNo();
+					}
+				}
+			});
+			
+			List<Map> resultList = new ArrayList<>();
+			for (CoterieGuy coterieGuy : coterieGuys) {
+				User user = coterieGuy.getUser();
+				if (user != null) {
+					Map map = new HashMap<>();
+					map.put("userId", user.getId());
+					map.put("name", user.getNickName());
+					map.put("picture", user.getPicture());
+					map.put("gender", user.getGender());
+					map.put("isCreator", coterie.isCreator(user.getId()));
+					resultList.add(map);
+				}
+			}
+			
+			data.put("members", resultList);
+			data.put("coterieMembersCnt", resultList.size());
+			
+			ResponseHelper.addResponseSuccessData(responseMap, data);
+			logger.info("=====> Get coterie members end <=====");
+		} catch (ApplicationServiceException e) {
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
+		}
+		return responseMap;
+	}
+	
 	/**
 	 * 获取话题列表
 	 * @param coterieId
