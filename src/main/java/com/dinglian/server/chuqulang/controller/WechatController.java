@@ -1195,7 +1195,7 @@ public class WechatController {
 			managerMap.put("gender", creator.getGender());
 			data.put("manager", managerMap);
 			
-			List<CoterieGuy> coterieMembers = discoverService.getCoterieMembers(coterieId, start, pageSize);
+			List<CoterieGuy> coterieMembers = discoverService.getCoterieMembers(coterieId, startRow, pageSize);
 			
 			List<Map> resultList = new ArrayList<Map>();
 			for (CoterieGuy coterieGuy : coterieMembers) {
