@@ -1124,6 +1124,7 @@ public class WechatController {
 			data.put("isJoined", coterie.isJoined(userId));
 			data.put("isCreator", coterie.isCreator(userId));
 			data.put("status", coterie.getStatus());
+			data.put("creationDate", DateUtils.format(coterie.getCreationDate(), DateUtils.yMdHm));
 			
 			List<Map> tagList = new ArrayList<>();
 			for (CoterieTag coterieTag : coterie.getTags()) {
