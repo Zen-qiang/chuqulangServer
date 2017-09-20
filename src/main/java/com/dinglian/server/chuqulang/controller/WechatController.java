@@ -977,12 +977,16 @@ public class WechatController {
 		try {
 			User user = userService.findUserById(userId);
 			if (user == null) {
-				throw new UserException(UserException.NOT_EXISTING);
+				throw new ApplicationServiceException(ApplicationServiceException.USER_NOT_EXIST);
 			}
 
 			Coterie coterie = discoverService.findCoterieById(coterieId);
 			if (coterie == null) {
-				throw new NullPointerException("圈子ID：" + coterie + " 不存在");
+				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_EXIST);
+			}
+			
+			if (coterie.getStatus() == Coterie.STATUS_DISMISSED) {
+				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_DISMISSED);
 			}
 
 			if (isJoin) {
