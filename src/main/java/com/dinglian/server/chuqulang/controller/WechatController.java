@@ -8,6 +8,7 @@ import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -1041,7 +1042,8 @@ public class WechatController {
 			List<Integer> tags = new ArrayList<Integer>();
 			if (StringUtils.isNotBlank(secondLevelTagIds)) {
 				Tag unlimitedTag = activityService.findTagByName(Tag.TAG_UNLIMITED);
-				if (unlimitedTag != null && secondLevelTagIds.indexOf(String.valueOf(unlimitedTag.getId())) == -1) {
+				List<String> secTagList = new ArrayList<String>(Arrays.asList(secondLevelTagIds.split(",")));
+				if (unlimitedTag != null && !secTagList.contains(String.valueOf(unlimitedTag.getId()))) {
 					String[] tag2Ids = secondLevelTagIds.split(",");
 					for (String tagId : tag2Ids) {
 						tags.add(Integer.parseInt(tagId));
@@ -1662,6 +1664,9 @@ public class WechatController {
         	Date endTime = DateUtils.parse(endTimeStr, DateUtils.yMdHm);
         	if (startTime.getTime() > endTime.getTime()) {
         		throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_TIME_ERROR);
+			}
+        	if (startTime.getTime() <= new Date().getTime()) {
+				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_STARTTIME_MUST_BE_AFTER_CURRENT);
 			}
         	
         	// 敏感词汇检查
@@ -2982,7 +2987,7 @@ public class WechatController {
 			}
             
             EventUser currentUser = null;
-            boolean hasRetinues = false;
+//            boolean hasRetinues = false;
             for (EventUser eventUser : event.getEventUsers()) {
             	User eu = eventUser.getUser();
             	User inviter = eventUser.getInviter();
@@ -2991,7 +2996,7 @@ public class WechatController {
 					eventUser.setEffective(false);
 				}
 				if (inviter != null && inviter.getId() == userId) {
-					hasRetinues = true;
+//					hasRetinues = true;
 					eventUser.setEffective(false);
 				}
 			}
