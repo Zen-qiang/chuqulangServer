@@ -1168,14 +1168,21 @@ public class WechatController {
 	@ResponseBody
 	@RequestMapping(value = "/getCoterieMembers", method = RequestMethod.GET)
 	public Map<String, Object> getCoterieMembers(@RequestParam("coterieId") int coterieId, 
-			@RequestParam(name = "start", required = false) int start, 
-			@RequestParam(name = "pageSize", required = false) int pageSize) {
+			@RequestParam(name = "start", required = false) Integer startRow, 
+			@RequestParam(name = "pageSize", required = false) Integer pageSize) {
 		logger.info("=====> Start to get coterie members <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
 			Coterie coterie = discoverService.findCoterieById(coterieId);
 			if (coterie == null) {
 				throw new ApplicationServiceException(ApplicationServiceException.COTERIE_NOT_EXIST);
+			}
+			
+			if (startRow == null) {
+				startRow = 0;
+			}
+			if (pageSize == null) {
+				pageSize = ApplicationConfig.getInstance().getDefaultPageSize();
 			}
 			
 			Map<String, Object> data = new HashMap<String, Object>();
