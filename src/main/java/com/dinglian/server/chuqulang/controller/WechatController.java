@@ -1003,7 +1003,7 @@ public class WechatController {
 			}
 			ResponseHelper.addResponseSuccessData(responseMap, null);
 			logger.info("=====> Join coterie end <=====");
-		} catch (UserException e) {
+		} catch (ApplicationServiceException e) {
 			ResponseHelper.addResponseFailData(responseMap, e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
