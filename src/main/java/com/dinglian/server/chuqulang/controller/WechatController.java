@@ -989,6 +989,11 @@ public class WechatController {
 				int nextOrderNo = coterie.getCoterieGuyNextOrderNo();
 				CoterieGuy coterieGuy = new CoterieGuy(coterie, nextOrderNo, user, new Date(), false, true);
 				discoverService.saveCoterieGuy(coterieGuy);
+				
+				String accessToken = wxMpService.getWxAccessToken();
+				if (StringUtils.isNotBlank(accessToken)) {
+					WxRequestHelper.sendCoterieJoinMsg(accessToken, coterie, user);
+				}
 			} else {
 				discoverService.exitCoterie(coterieId, user.getId());
 			}

@@ -21,6 +21,7 @@ import org.apache.http.util.EntityUtils;
 
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.model.Coterie;
+import com.dinglian.server.chuqulang.model.CoterieTag;
 import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.EventUser;
 import com.dinglian.server.chuqulang.model.User;
@@ -302,5 +303,39 @@ public class WxRequestHelper {
 		for (EventUser eventUser : event.getEffectiveMembers()) {
 			sendTemplateMsg(uri, templateId, eventUser.getUser().getOpenId(), url, first, keywordList, remark);
 		}
+	}
+
+	/**
+	 * 加入圈子通知
+	 * @param accessToken
+	 * @param coterie
+	 * @param user
+	 * @throws IOException 
+	 * @throws ParseException 
+	 */
+	public static void sendCoterieJoinMsg(String accessToken, Coterie coterie, User user) throws ParseException, IOException {
+		String uri = getTemplateMsgUrl(accessToken);
+		String templateId = config.getWxCoterieJoinTemplateId();
+		String url = getCoterieRedirectUrl(coterie.getId());
+
+		String first = "加入圈子成功";
+
+		List<String> keywordList = new ArrayList<String>();
+		keywordList.add(coterie.getName());
+		
+		String category = "";
+		for (CoterieTag tag : coterie.getTags()) {
+			if (tag.getTag() != null) {
+				category += tag.getTag().getName() + "/";
+			}
+		}
+		if (StringUtils.isNotBlank(category)) {
+			category = category.substring(0, category.length() - 1);
+		}
+		keywordList.add(category);
+
+		String remark = "圈子关注成功，圈子新活动会消息提醒。如不希望接受消息，可在圈子右上角中设置“消息免打扰”。";
+		
+		sendTemplateMsg(uri, templateId, user.getOpenId(), url, first, keywordList, remark);
 	}
 }

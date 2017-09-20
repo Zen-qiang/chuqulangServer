@@ -179,6 +179,11 @@ public class ApplicationConfig {
 		return System.getProperty("wx.mp.activity.template.id", "HA5OlpWvC9nfAUkmzEMaH_2_gKVvrp7895ZdfCf9V8A");
 	}
 	
+	// 加入圈子通知
+	public String getWxCoterieJoinTemplateId() {
+		return System.getProperty("wx.mp.coterie.join.template.id", "xvl-18koMMuIVgUww02Lkvjaq_txBY45KbGOKX81cNM");
+	}
+	
 	public String getWxMpDomain() {
 		return System.getProperty("wx.mp.domain", "http://mp.dingliantech.com");
 	}
