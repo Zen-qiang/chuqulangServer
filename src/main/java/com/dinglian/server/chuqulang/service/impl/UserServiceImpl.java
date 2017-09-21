@@ -8,14 +8,18 @@ import java.util.Map;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.dao.GeneralDao;
 import com.dinglian.server.chuqulang.dao.UserDao;
 import com.dinglian.server.chuqulang.dao.VerifyNoDao;
 import com.dinglian.server.chuqulang.model.Contact;
+import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.model.UserAttention;
+import com.dinglian.server.chuqulang.model.UserCoterieSetting;
 import com.dinglian.server.chuqulang.model.VerifyNo;
 import com.dinglian.server.chuqulang.service.UserService;
 
@@ -134,6 +138,31 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User getUserByOpenId(String openId) {
 		return userDao.getUserByOpenId(openId);
+	}
+
+	@Override
+	public UserCoterieSetting loadUserCoterieSetting(int userId, int coterieId) {
+		UserCoterieSetting userCoterieSetting = userDao.findUserCoterieSetting(userId, coterieId);
+		if (userCoterieSetting == null) {
+			userCoterieSetting = new UserCoterieSetting();
+			
+			User user = new User();
+			user.setId(userId);
+			userCoterieSetting.setUser(user);
+			
+			Coterie coterie = new Coterie();
+			coterie.setId(coterieId);
+			userCoterieSetting.setCoterie(coterie);
+			
+			userCoterieSetting.setAllowPush(true);
+			userDao.saveUserCoterieSetting(userCoterieSetting);
+		}
+		return userCoterieSetting;
+	}
+
+	@Override
+	public void saveUserCoterieSetting(UserCoterieSetting userCoterieSetting) {
+		userDao.saveUserCoterieSetting(userCoterieSetting);
 	}
 
 

@@ -7,6 +7,7 @@ import com.dinglian.server.chuqulang.base.SearchCriteria;
 import com.dinglian.server.chuqulang.model.Contact;
 import com.dinglian.server.chuqulang.model.User;
 import com.dinglian.server.chuqulang.model.UserAttention;
+import com.dinglian.server.chuqulang.model.UserCoterieSetting;
 import com.dinglian.server.chuqulang.model.VerifyNo;
 
 public interface UserService {
@@ -48,5 +49,9 @@ public interface UserService {
 	public int getUserAttentionsTotalCount(SearchCriteria searchCriteria);
 
 	public User getUserByOpenId(String openId);
+
+	public UserCoterieSetting loadUserCoterieSetting(int userId, int coterieId);
+
+	public void saveUserCoterieSetting(UserCoterieSetting userCoterieSetting);
 
 }
