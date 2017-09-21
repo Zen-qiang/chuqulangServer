@@ -2563,6 +2563,7 @@ public class WechatController {
    				Map<String, Object> coterieMap = new HashMap<String, Object>();
    				coterieMap.put("id", event.getCoterie().getId());
    				coterieMap.put("name", event.getCoterie().getName());
+   				coterieMap.put("status", event.getCoterie().getStatus());
    				activityMap.put("coterie", coterieMap);
 			}
    			
