@@ -1654,6 +1654,10 @@ public class WechatController {
 				throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_PARAM_IS_EMPTY);
 			}
         	
+        	if (minCount < 0 || maxCount < 0 || minCount > maxCount) {
+        		throw new ApplicationServiceException(ApplicationServiceException.ACTIVITY_USER_COUNT_INPUT_ERROR);
+			}
+        	
         	Date startTime = DateUtils.parse(startTimeStr, DateUtils.yMdHm);
         	Date endTime = DateUtils.parse(endTimeStr, DateUtils.yMdHm);
         	if (startTime.getTime() > endTime.getTime()) {
