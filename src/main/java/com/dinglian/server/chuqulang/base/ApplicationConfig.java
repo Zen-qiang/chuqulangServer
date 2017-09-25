@@ -205,7 +205,7 @@ public class ApplicationConfig {
 	}
 	
 	public boolean enableActivityStatusTask() {
-		String value = System.getProperty("activity.status.task.enable", "false");
+		String value = System.getProperty("activity.status.task.enable", "true");
 		return Boolean.parseBoolean(value);
 	}
 }
