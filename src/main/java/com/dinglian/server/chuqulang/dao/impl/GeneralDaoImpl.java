@@ -1,5 +1,6 @@
 package com.dinglian.server.chuqulang.dao.impl;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -223,6 +224,13 @@ public class GeneralDaoImpl implements GeneralDao {
 		String sql = "update coterie set status = :status where id = :id ";
 		getCurrentSession().createSQLQuery(sql).setInteger("status", status).setInteger("id", coterieId)
 				.executeUpdate();
+	}
+
+	@Override
+	public List<Event> getTodayAllActivitys() {
+		String sql = "SELECT * FROM event WHERE (status = :status1 OR status = :status2) AND ((start_time >= DATE_ADD(NOW(),INTERVAL -5 MINUTE) AND start_time < DATE_ADD(NOW(),INTERVAL 5 MINUTE)) OR (end_time >= DATE_ADD(NOW(),INTERVAL -5 MINUTE) AND end_time < DATE_ADD(NOW(),INTERVAL 5 MINUTE))) ";
+		return getCurrentSession().createSQLQuery(sql).addEntity(Event.class).setString("status1", Event.STATUS_SIGNUP)
+				.setString("status2", Event.STATUS_PROCESS).list();
 	}
 
 }

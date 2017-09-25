@@ -31,4 +31,6 @@ public interface JobService {
 
 	void changeCoterieStatus(int coterieId, int status);
 
+	List<Event> getTodayAllActivitys();
+
 }

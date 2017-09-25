@@ -85,5 +85,10 @@ public class JobServiceImpl implements JobService {
 	public void changeCoterieStatus(int coterieId, int status) {
 		generalDao.changeCoterieStatus(coterieId, status);
 	}
+
+	@Override
+	public List<Event> getTodayAllActivitys() {
+		return generalDao.getTodayAllActivitys();
+	}
 	
 }

@@ -1,10 +1,8 @@
 package com.dinglian.server.chuqulang.listener;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.servlet.ServletContextEvent;
@@ -46,7 +44,7 @@ public class ApplicationServletListener implements ServletContextListener {
 		}
 		
 		// 把所有报名中的活动，放到线程池中
-		List<Event> singnUpActivitys = jobService.getSingnUpActivitys();
+		/*List<Event> singnUpActivitys = jobService.getSingnUpActivitys();
 		for (Event event : singnUpActivitys) {
 			// 开始时间倒计时，仅报名中活动
 			if (event.getStatus().equalsIgnoreCase(Event.STATUS_SIGNUP)) {
@@ -54,7 +52,7 @@ public class ApplicationServletListener implements ServletContextListener {
 			}
 			// 结束时间倒计时
 			executorService.submit(new ActivityOverStatusTask(event, jobService));
-		}
+		}*/
 	}
 
 }

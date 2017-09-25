@@ -71,4 +71,6 @@ public interface GeneralDao {
 	Coterie getCoterieByActivityId(int activityId);
 
 	void changeCoterieStatus(int coterieId, int status);
+
+	List<Event> getTodayAllActivitys();
 }

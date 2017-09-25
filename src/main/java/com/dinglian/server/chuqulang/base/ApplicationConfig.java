@@ -203,4 +203,9 @@ public class ApplicationConfig {
 	public String getWxMpBasicUserInfoUrl() {
 		return System.getProperty("wx.mp.basic.user.info.url", "https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN");
 	}
+	
+	public boolean enableActivityStatusTask() {
+		String value = System.getProperty("activity.status.task.enable", "false");
+		return Boolean.parseBoolean(value);
+	}
 }

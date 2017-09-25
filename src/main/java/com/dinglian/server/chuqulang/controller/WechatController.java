@@ -113,8 +113,8 @@ public class WechatController {
 	@Autowired
 	private WxMpService wxMpService;
 	
-	@Autowired
-	private JobService jobService;
+//	@Autowired
+//	private JobService jobService;
 	
 	@Autowired
 	private HttpServletRequest request;
@@ -1727,8 +1727,8 @@ public class WechatController {
             activityService.saveEvent(event);
             
             // 创建定时任务
-            config.getScheduledThreadPool().submit(new ActivityProcessStatusTask(event, jobService));
-            config.getScheduledThreadPool().submit(new ActivityOverStatusTask(event, jobService));
+//            config.getScheduledThreadPool().submit(new ActivityProcessStatusTask(event, jobService));
+//            config.getScheduledThreadPool().submit(new ActivityOverStatusTask(event, jobService));
             
             Topic topic = new Topic();
             topic.setCreationDate(new Date());
