@@ -1,6 +1,7 @@
 package com.dinglian.server.chuqulang.controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -33,13 +34,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -72,15 +78,13 @@ import com.dinglian.server.chuqulang.model.VerifyNo;
 import com.dinglian.server.chuqulang.model.WxOAuth2AccessToken;
 import com.dinglian.server.chuqulang.service.ActivityService;
 import com.dinglian.server.chuqulang.service.DiscoverService;
-import com.dinglian.server.chuqulang.service.JobService;
 import com.dinglian.server.chuqulang.service.UserService;
 import com.dinglian.server.chuqulang.service.WxMpService;
-import com.dinglian.server.chuqulang.task.ActivityOverStatusTask;
-import com.dinglian.server.chuqulang.task.ActivityProcessStatusTask;
 import com.dinglian.server.chuqulang.utils.AliyunOSSUtil;
 import com.dinglian.server.chuqulang.utils.CodeUtils;
 import com.dinglian.server.chuqulang.utils.DateUtils;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
+import com.dinglian.server.chuqulang.utils.JsonString;
 import com.dinglian.server.chuqulang.utils.ResponseHelper;
 import com.dinglian.server.chuqulang.utils.SensitiveWordUtil;
 import com.dinglian.server.chuqulang.utils.WXBizMsgCrypt;
@@ -187,14 +191,36 @@ public class WechatController {
 			if (msgType.equalsIgnoreCase("event")) {
 				NodeList eventNode = root.getElementsByTagName("Event");
 				String event = eventNode.item(0).getTextContent();
+				
+				NodeList eventKeyNode = root.getElementsByTagName("EventKey");
+				String eventKey = eventKeyNode.item(0).getTextContent();
 				// 关注事件
+				NodeList fromUserNode = root.getElementsByTagName("FromUserName");
+				String fromUserOpenId = fromUserNode.item(0).getTextContent();
+				
 				if (event.equalsIgnoreCase("subscribe")) {
-					NodeList fromUserNode = root.getElementsByTagName("FromUserName");
-					String fromUserOpenId = fromUserNode.item(0).getTextContent();
 					
 					String content = "出趣浪，欢迎您～\n更多玩趣，组团活动小工具\n就在出趣浪～\n";
 					replyMsg = "<xml><ToUserName><![CDATA[%s]]></ToUserName><FromUserName><![CDATA[%s]]></FromUserName><CreateTime>%d</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[%s]]></Content></xml>";
 					replyMsg = String.format(replyMsg, fromUserOpenId, config.getWxMpOpenId(), System.currentTimeMillis(), content);
+				} else if (event.equalsIgnoreCase("click")) {
+					if (eventKey.equalsIgnoreCase("CLASS_ROOM")) {
+						replyMsg = "<xml><ToUserName><![CDATA[%s]]></ToUserName><FromUserName><![CDATA[%s]]></FromUserName><CreateTime>%d</CreateTime><MsgType><![CDATA[news]]></MsgType><ArticleCount>1</ArticleCount><Articles><item><Title><![CDATA[%s]]></Title> <Description><![CDATA[%s]]></Description><PicUrl><![CDATA[%s]]></PicUrl><Url><![CDATA[%s]]></Url></item></Articles></xml>";
+						
+						String title = "中秋国庆，谁的鸡儿也别想放假！";
+						String description = "长假与小伙伴们的趣浪神器";
+						String picUrl = "http://mmbiz.qpic.cn/mmbiz_jpg/lTicf4cPiaoSdyvDFsTwnaOwjqgEphFianfhXQriaF1DibItg4PUZkyCmr8eEW0VWnMAzkfOzEJpyf0r1PSbZ42cichw/0?wx_fmt=jpeg";
+						String url = "http://mp.weixin.qq.com/s?__biz=MzIzNTg4NjQwOA==&mid=100000017&idx=1&sn=5f31de8fedd1e9483bcfc5744e61c54b&chksm=68e103365f968a20d4870ff1f125b498608aba0ee0bd5189e7f16bb76f6432ee7eeaad5826e3#rd";
+						replyMsg = String.format(replyMsg, fromUserOpenId, config.getWxMpOpenId(), System.currentTimeMillis(), title, description, picUrl, url);
+					} else if (eventKey.equalsIgnoreCase("CONTACT_US")) {
+						replyMsg = "<xml><ToUserName><![CDATA[%s]]></ToUserName><FromUserName><![CDATA[%s]]></FromUserName><CreateTime>%d</CreateTime><MsgType><![CDATA[news]]></MsgType><ArticleCount>1</ArticleCount><Articles><item><Title><![CDATA[%s]]></Title> <Description><![CDATA[%s]]></Description><PicUrl><![CDATA[%s]]></PicUrl><Url><![CDATA[%s]]></Url></item></Articles></xml>";
+						
+						String title = "中秋国庆，谁的鸡儿也别想放假！";
+						String description = "长假与小伙伴们的趣浪神器";
+						String picUrl = "http://mmbiz.qpic.cn/mmbiz_jpg/lTicf4cPiaoSdyvDFsTwnaOwjqgEphFianfyVoiaCCQWStmfKzKzvrKchBP7MrlMTSyoziaS7jmyswlbNDEGkDRSuvA/0?wx_fmt=jpeg";
+						String url = "http://mp.weixin.qq.com/s?__biz=MzIzNTg4NjQwOA==&mid=100000018&idx=1&sn=0eb277bc7ca140cc292e32541de625e7&chksm=68e103355f968a239507caa8cc4c95f53beab7758f856f42df2e6b9d9aa32acd23fa18c1c635#rd";
+						replyMsg = String.format(replyMsg, fromUserOpenId, config.getWxMpOpenId(), System.currentTimeMillis(), title, description, picUrl, url);
+					}
 				}
 			}
 			out.print(replyMsg);
@@ -3330,7 +3356,7 @@ public class WechatController {
 	
 	@ResponseBody
 	@GetMapping(value = "/test")
-	public void test() {
+	public void test(@RequestParam("id") int id) {
 		User user = (User) request.getSession().getAttribute(User.CURRENT_USER);
 		System.out.println(user.getId());
 		System.out.println(user.getNickName());
