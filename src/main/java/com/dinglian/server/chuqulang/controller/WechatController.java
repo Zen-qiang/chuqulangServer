@@ -215,8 +215,8 @@ public class WechatController {
 					} else if (eventKey.equalsIgnoreCase("CONTACT_US")) {
 						replyMsg = "<xml><ToUserName><![CDATA[%s]]></ToUserName><FromUserName><![CDATA[%s]]></FromUserName><CreateTime>%d</CreateTime><MsgType><![CDATA[news]]></MsgType><ArticleCount>1</ArticleCount><Articles><item><Title><![CDATA[%s]]></Title> <Description><![CDATA[%s]]></Description><PicUrl><![CDATA[%s]]></PicUrl><Url><![CDATA[%s]]></Url></item></Articles></xml>";
 						
-						String title = "中秋国庆，谁的鸡儿也别想放假！";
-						String description = "长假与小伙伴们的趣浪神器";
+						String title = "联系我们";
+						String description = "很正经的联系方式";
 						String picUrl = "http://mmbiz.qpic.cn/mmbiz_jpg/lTicf4cPiaoSdyvDFsTwnaOwjqgEphFianfyVoiaCCQWStmfKzKzvrKchBP7MrlMTSyoziaS7jmyswlbNDEGkDRSuvA/0?wx_fmt=jpeg";
 						String url = "http://mp.weixin.qq.com/s?__biz=MzIzNTg4NjQwOA==&mid=100000018&idx=1&sn=0eb277bc7ca140cc292e32541de625e7&chksm=68e103355f968a239507caa8cc4c95f53beab7758f856f42df2e6b9d9aa32acd23fa18c1c635#rd";
 						replyMsg = String.format(replyMsg, fromUserOpenId, config.getWxMpOpenId(), System.currentTimeMillis(), title, description, picUrl, url);
