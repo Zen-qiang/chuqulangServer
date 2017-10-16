@@ -38,6 +38,7 @@ import com.dinglian.server.chuqulang.model.UserCollect;
 import com.dinglian.server.chuqulang.service.ActivityService;
 import com.dinglian.server.chuqulang.service.DiscoverService;
 import com.dinglian.server.chuqulang.service.UserService;
+import com.dinglian.server.chuqulang.utils.DateUtils;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
 import com.dinglian.server.chuqulang.utils.RequestHelper;
 import com.dinglian.server.chuqulang.utils.ResponseHelper;
@@ -491,7 +492,7 @@ public class ActivityController {
 	 * @return
 	 */
 	@ResponseBody
-	@RequestMapping(value = "/getActivityInfo", method = RequestMethod.POST)
+	@RequestMapping(value = "/getActivityInfo", method = RequestMethod.GET)
 	public Map<String, Object> getActivityInfo(@RequestParam(name = "eventId") String eventId) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
@@ -525,7 +526,8 @@ public class ActivityController {
 				result.put("organizer", organizerMap);
 			}
 			
-			result.put("startTime", event.getStartTime());
+			result.put("startTime", DateUtils.format(event.getStartTime(), DateUtils.yMdHm));
+			result.put("endTime", DateUtils.format(event.getEndTime(), DateUtils.yMdHm));
 			result.put("gps", event.getGps());
 			result.put("address", event.getAddress());
 			result.put("isOpen", event.isOpen());
