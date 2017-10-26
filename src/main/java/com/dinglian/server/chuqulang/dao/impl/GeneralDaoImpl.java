@@ -18,6 +18,7 @@ import com.dinglian.server.chuqulang.model.Coterie;
 import com.dinglian.server.chuqulang.model.CoterieCarouselPicture;
 import com.dinglian.server.chuqulang.model.CoterieGuy;
 import com.dinglian.server.chuqulang.model.Event;
+import com.dinglian.server.chuqulang.model.NewsMaterial;
 import com.dinglian.server.chuqulang.model.SensitiveWord;
 import com.dinglian.server.chuqulang.model.Tag;
 import com.dinglian.server.chuqulang.model.TopicPraise;
@@ -231,6 +232,34 @@ public class GeneralDaoImpl implements GeneralDao {
 		String sql = "SELECT * FROM event WHERE (status = :status1 OR status = :status2) AND ((start_time >= DATE_ADD(NOW(),INTERVAL -5 MINUTE) AND start_time < DATE_ADD(NOW(),INTERVAL 5 MINUTE)) OR (end_time >= DATE_ADD(NOW(),INTERVAL -5 MINUTE) AND end_time < DATE_ADD(NOW(),INTERVAL 5 MINUTE))) ";
 		return getCurrentSession().createSQLQuery(sql).addEntity(Event.class).setString("status1", Event.STATUS_SIGNUP)
 				.setString("status2", Event.STATUS_PROCESS).list();
+	}
+
+	@Override
+	public void removeAllNewsMaterial() {
+		String sql = "TRUNCATE TABLE `news_material`";
+		getCurrentSession().createSQLQuery(sql).executeUpdate();
+	}
+
+	@Override
+	public void updateNewsMaterial(List<NewsMaterial> materialList) {
+		StringBuffer sb = new StringBuffer("INSERT INTO `news_material` (`media_id`, `digest`, `thumb_url`, `title`, `url`) VALUES ");
+		
+		for (int i = 0; i < materialList.size(); i++) {
+			NewsMaterial newsMaterial = materialList.get(i);
+			sb.append("(");
+			sb.append("'" + newsMaterial.getMediaId() + "', ");
+			sb.append("'" + newsMaterial.getDigest() + "', ");
+			sb.append("'" + newsMaterial.getThumbUrl() + "', ");
+			sb.append("'" + newsMaterial.getTitle() + "', ");
+			sb.append("'" + newsMaterial.getUrl() + "'");
+			sb.append(")");
+			if (i != materialList.size() - 1) {
+				sb.append(", ");
+			}
+		}
+		
+		getCurrentSession().createSQLQuery(sb.toString()).executeUpdate();
+		
 	}
 
 }

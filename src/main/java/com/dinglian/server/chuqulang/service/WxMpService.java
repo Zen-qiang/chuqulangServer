@@ -1,5 +1,8 @@
 package com.dinglian.server.chuqulang.service;
 
+import java.util.List;
+
+import com.dinglian.server.chuqulang.model.NewsMaterial;
 import com.dinglian.server.chuqulang.model.WxOAuth2AccessToken;
 
 public interface WxMpService {
@@ -15,5 +18,7 @@ public interface WxMpService {
 	void updateJsApiTicket(String ticket);
 
 	String getWxJsApiTicket();
+
+	void updateNewsMaterial(List<NewsMaterial> materialList);
 
 }

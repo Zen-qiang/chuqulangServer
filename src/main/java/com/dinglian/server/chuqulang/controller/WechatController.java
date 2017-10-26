@@ -1,7 +1,6 @@
 package com.dinglian.server.chuqulang.controller;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -34,18 +33,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -68,6 +63,7 @@ import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.EventPicture;
 import com.dinglian.server.chuqulang.model.EventTag;
 import com.dinglian.server.chuqulang.model.EventUser;
+import com.dinglian.server.chuqulang.model.NewsMaterial;
 import com.dinglian.server.chuqulang.model.Tag;
 import com.dinglian.server.chuqulang.model.Topic;
 import com.dinglian.server.chuqulang.model.TopicComment;
@@ -84,12 +80,13 @@ import com.dinglian.server.chuqulang.utils.AliyunOSSUtil;
 import com.dinglian.server.chuqulang.utils.CodeUtils;
 import com.dinglian.server.chuqulang.utils.DateUtils;
 import com.dinglian.server.chuqulang.utils.FileUploadHelper;
-import com.dinglian.server.chuqulang.utils.JsonString;
 import com.dinglian.server.chuqulang.utils.ResponseHelper;
 import com.dinglian.server.chuqulang.utils.SensitiveWordUtil;
 import com.dinglian.server.chuqulang.utils.WXBizMsgCrypt;
 import com.dinglian.server.chuqulang.utils.WxRequestHelper;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -99,6 +96,7 @@ import net.sf.json.JSONObject;
  * @author Mr.xu
  *
  */
+@Api(value = "/api", description = "微信服务号相关接口", tags = "微信服务号API")
 @Controller
 @RequestMapping("/api")
 public class WechatController {
@@ -3352,6 +3350,112 @@ public class WechatController {
 		Pattern p = Pattern.compile(regex);
 		Matcher m = p.matcher(phoneNo);
 		return m.matches();
+	}
+	
+	@ApiOperation(value = "更新图文素材", httpMethod = "PUT", notes = "更新图文素材")
+	@ResponseBody
+	@PutMapping(value = "/updateNewsMaterial")
+	public Map<String, Object> updateNewsMaterial() {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			logger.info("=====> update news material start <=====");
+			String accessToken = wxMpService.getWxAccessToken();
+			
+			// 获取素材数量
+			String responseJson = "";
+			JSONObject responseObj = null;
+			int page = 1;
+			int offset = 0;
+			
+			String uri = String.format(config.getWxMaterialListUrl(), accessToken);
+			JSONObject json = new JSONObject();
+			
+			List<NewsMaterial> materialList = new ArrayList<NewsMaterial>();
+			while (true) {
+				json = new JSONObject();
+				json.accumulate("type", "news").accumulate("offset", offset).accumulate("count", 20);
+				
+				responseJson = WxRequestHelper.doJsonPost(uri, json);
+				responseObj = JSONObject.fromObject(responseJson);
+				
+				if (responseObj != null) {
+					JSONArray itemArr = responseObj.getJSONArray("item");
+					int itemCount = responseObj.getInt("item_count");
+					if (itemCount == 0) {
+						break;
+					}
+					for (int i = 0; i < itemArr.size(); i++) {
+						JSONObject materialObj = itemArr.getJSONObject(i);
+						if (materialObj != null) {
+							String mediaId = materialObj.getString("media_id");
+							JSONObject content = materialObj.getJSONObject("content");
+							JSONArray newsItem = content.getJSONArray("news_item");
+							// 单个图文素材
+							JSONObject item = newsItem.getJSONObject(0);
+							String title = item.getString("title");
+							String digest = item.getString("digest");
+							String url = item.getString("url");
+							String thumb_url = item.getString("thumb_url");
+							
+							NewsMaterial material = new NewsMaterial(mediaId, title, digest, url, thumb_url);
+							materialList.add(material);
+						}
+					}
+				}
+				
+				page++;
+				offset = (page * 20) - 1;
+			}
+			
+			if (!materialList.isEmpty()) {
+				wxMpService.updateNewsMaterial(materialList);
+			}
+
+			ResponseHelper.addResponseSuccessData(resultMap, null);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+		}
+		logger.info("=====> update news material end <=====");
+		return resultMap;
+	}
+	
+	@ApiOperation(value = "群发图文消息", httpMethod = "POST", notes = "群发图文消息")
+	@ResponseBody
+	@PostMapping(value = "/sendAllNews")
+	public Map<String, Object> sendAllNews(@RequestParam("mediaId") String mediaId) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			logger.info("=====> send all news start <=====");
+			String accessToken = wxMpService.getWxAccessToken();
+			String url = String.format(config.getWxSendAllNewsUrl(), accessToken);
+			
+			JSONObject json = new JSONObject();
+			Map<String, Object> filterMap = new HashMap<String, Object>();
+			filterMap.put("is_to_all", true);
+			json.accumulate("filter", filterMap);
+			
+			Map<String, Object> mpnews = new HashMap<String, Object>();
+			mpnews.put("media_id", mediaId);
+
+			json.accumulate("mpnews", mpnews);
+			json.accumulate("msgtype", "mpnews");
+			json.accumulate("send_ignore_reprint", 1);
+			
+			logger.info(json.toString());
+			
+			String response = WxRequestHelper.doJsonPost(url, json);
+			logger.info(response);
+
+			ResponseHelper.addResponseSuccessData(resultMap, null);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+			ResponseHelper.addResponseFailData(resultMap, e.getMessage());
+		}
+		logger.info("=====> send all news end <=====");
+		return resultMap;
 	}
 	
 	@ResponseBody

@@ -338,4 +338,17 @@ public class WxRequestHelper {
 		
 		sendTemplateMsg(uri, templateId, user.getOpenId(), url, first, keywordList, remark);
 	}
+	
+	public static void deleteMenu(String accessToken) throws ParseException, IOException {
+		String url = String.format(config.getDeleteMenuUrl(), accessToken);
+		doGet(url);
+	}
+	
+	public static void createMenu(String accessToken, List<Map> menuList) throws ParseException, IOException {
+		String url = String.format(config.getCreateMenuUrl(), accessToken);
+		
+		JSONObject params = new JSONObject();
+		params.accumulate("button", menuList);
+		doJsonPost(url, params);
+	}
 }

@@ -1,11 +1,13 @@
 package com.dinglian.server.chuqulang.service.impl;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dinglian.server.chuqulang.dao.GeneralDao;
+import com.dinglian.server.chuqulang.model.NewsMaterial;
 import com.dinglian.server.chuqulang.model.WxAccessToken;
 import com.dinglian.server.chuqulang.model.WxJsApiTicket;
 import com.dinglian.server.chuqulang.model.WxOAuth2AccessToken;
@@ -81,6 +83,13 @@ public class WxMpServiceImpl implements WxMpService {
 			return ticket.getTicket();
 		}
 		return null;
+	}
+
+	@Override
+	public void updateNewsMaterial(List<NewsMaterial> materialList) {
+		generalDao.removeAllNewsMaterial();
+		
+		generalDao.updateNewsMaterial(materialList);
 	}
 
 }

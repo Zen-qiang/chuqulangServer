@@ -208,4 +208,24 @@ public class ApplicationConfig {
 		String value = System.getProperty("activity.status.task.enable", "true");
 		return Boolean.parseBoolean(value);
 	}
+
+	public String getDeleteMenuUrl() {
+		return System.getProperty("wx.mp.delete.menu.url", "https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=%s");
+	}
+
+	public String getCreateMenuUrl() {
+		return System.getProperty("wx.mp.create.menu.url", "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=%s");
+	}
+
+	public String getWxMaterialListUrl() {
+		return System.getProperty("wx.mp.materia.list.url", "https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=%s");
+	}
+	
+	public String getWxSendAllNewsUrl() {
+		return System.getProperty("wx.mp.send.all.news.url", "https://api.weixin.qq.com/cgi-bin/message/mass/sendall?access_token=%s");
+	}
+	
+	public String getWxNewsPreviewUrl() {
+		return System.getProperty("wx.mp.news.preview.url", "https://api.weixin.qq.com/cgi-bin/message/mass/preview?access_token=%s");
+	}
 }
