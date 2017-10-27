@@ -42,4 +42,6 @@ public interface DiscoverService {
 
 	List<CoterieGuy> getCoterieMembers(int coterieId, int start, int limit);
 
+	boolean checkExistCoterieGuy(int coterieId, int userId);
+
 }

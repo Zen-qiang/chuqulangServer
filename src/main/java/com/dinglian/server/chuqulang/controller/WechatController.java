@@ -33,14 +33,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -86,6 +85,8 @@ import com.dinglian.server.chuqulang.utils.WXBizMsgCrypt;
 import com.dinglian.server.chuqulang.utils.WxRequestHelper;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -97,7 +98,7 @@ import net.sf.json.JSONObject;
  *
  */
 @Api(value = "/api", description = "微信服务号相关接口", tags = "微信服务号API")
-@Controller
+@RestController
 @RequestMapping("/api")
 public class WechatController {
 
@@ -124,7 +125,8 @@ public class WechatController {
 	private static ApplicationConfig config = ApplicationConfig.getInstance();
 	private static SensitiveWordUtil sensitiveWordUtil = SensitiveWordUtil.getInstance();
 	
-	@RequestMapping("/authorization")
+	@ApiOperation(value = "跳转授权页面", httpMethod = "GET", notes = "跳转授权页面")
+	@GetMapping("/authorization")
 	public String authorization() {
 		return "authorization";
 	}
@@ -142,7 +144,7 @@ public class WechatController {
 	 *            随机字符串
 	 * @return
 	 */
-	@ResponseBody
+	@ApiOperation(value = "微信服务器验证", httpMethod = "GET", notes = "微信服务器验证")
 	@GetMapping(value = "/security")
 	public String checkSignature(String signature, String timestamp, String nonce, String echostr,
 			HttpServletRequest request, HttpServletResponse response) {
@@ -158,15 +160,7 @@ public class WechatController {
 		return null;
 	}
 	
-	/**
-	 * 接收微信推送的消息
-	 * @param msgSignature
-	 * @param timeStamp
-	 * @param nonce
-	 * @param request
-	 * @param response
-	 */
-	@ResponseBody
+	@ApiOperation(value = "接收微信推送的消息", httpMethod = "POST", notes = "接收微信推送的消息")
 	@PostMapping(value = "/security")
 	public void doPost(
 			@RequestParam(name = "msg_signature", required = false) String msgSignature, 
@@ -229,12 +223,8 @@ public class WechatController {
 //		return replyMsg;
 	}
 
-	/**
-	 * 跳转用户授权
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/userAuthorization", method = RequestMethod.GET)
+	@ApiOperation(value = "跳转用户授权", httpMethod = "GET", notes = "跳转用户授权")
+	@GetMapping(value = "/userAuthorization")
 	public String userAuthorization(/*@RequestParam("callbackUrl") String callbackUrl*/) {
 		logger.info("=====> Start to user authorization <=====");
 		String url = "";
@@ -251,15 +241,8 @@ public class WechatController {
 		return url;
 	}
 
-	/**
-	 * 通过code换取网页授权access_token
-	 * 
-	 * @param code
-	 *            换取access_token的票据
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/getAccessToken", method = RequestMethod.GET)
+	@ApiOperation(value = "获取网页授权", httpMethod = "GET", notes = "通过code换取网页授权access_token")
+	@GetMapping(value = "/getAccessToken")
 	public Map<String, Object> getAccessToken(@RequestParam("code") String code, @RequestParam("state") String state) {
 		logger.info("=====> Start to get OAuth2 access token <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -321,13 +304,8 @@ public class WechatController {
 		return responseMap;
 	}
 	
-	/**
-	 * 检查用户是否关注
-	 * @param openId
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/checkSubscribe", method = RequestMethod.GET)
+	@ApiOperation(value = "检查用户是否关注", httpMethod = "GET", notes = "检查用户是否关注")
+	@GetMapping(value = "/checkSubscribe")
 	public Map<String, Object> checkSubscribe(@RequestParam("openId") String openId) {
 		logger.info("=====> Start to check subscribe <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -353,13 +331,8 @@ public class WechatController {
 		return responseMap;
 	}
 	
-	/**
-	 * 获取微信Config注入信息
-	 * @param url
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/getWxConfig", method = RequestMethod.GET)
+	@ApiOperation(value = "获取微信Config", httpMethod = "GET", notes = "获取微信Config")
+	@GetMapping(value = "/getWxConfig")
 	public Map<String, Object> getWxConfig(@RequestParam("url") String url) {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		logger.info("=====> Start to get wx config <=====");
@@ -412,13 +385,8 @@ public class WechatController {
 
     }
 	
-	/**
-	 * 获取用户信息，自动注册
-	 * @param openId
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/getUser", method = RequestMethod.GET)
+	@ApiOperation(value = "获取用户信息", httpMethod = "GET", notes = "获取用户信息，用户不存在自动注册")
+	@GetMapping(value = "/getUser")
 	public Map<String, Object> getUser(@RequestParam("openId") String openId) {
 		logger.info("=====> Start to get user <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -480,15 +448,8 @@ public class WechatController {
 		return responseMap;
 	}
 
-	/**
-	 * 绑定手机号
-	 * @param userId
-	 * @param phoneNo
-	 * @param verifyNo
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/bindPhoneNo", method = RequestMethod.GET)
+	@ApiOperation(value = "绑定手机号", httpMethod = "GET", notes = "绑定手机号")
+	@GetMapping(value = "/bindPhoneNo")
 	public Map<String, Object> bindPhoneNo(@RequestParam("userId") int userId, @RequestParam("phoneNo") String phoneNo, 
 			@RequestParam("verifyNo") String verifyNo) {
 		logger.info("=====> Start to get user <=====");
@@ -541,14 +502,8 @@ public class WechatController {
 		return responseMap;
 	}
 	
-	/**
-	 * 刷新网页授权AccessToken
-	 * 
-	 * @param openId
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/refreshAuthAccessToken", method = RequestMethod.GET)
+	@ApiOperation(value = "刷新网页授权", httpMethod = "GET", notes = "刷新网页授权AccessToken")
+	@GetMapping(value = "/refreshAuthAccessToken")
 	public String refreshAuthAccessToken(@RequestParam("openId") String openId) {
 		logger.info("=====> Start to refresh OAuth2 access token <=====");
 		logger.info("openId : " + openId);
@@ -595,7 +550,7 @@ public class WechatController {
 	 * @param birthday
 	 * @return
 	 */
-	/*@ResponseBody
+	/*
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
 	public Map<String, Object> register(@RequestParam("openId") String openId, @RequestParam("phoneNo") String phoneNo,
 			@RequestParam("verifyNo") String verifyNo) {
@@ -684,19 +639,8 @@ public class WechatController {
 		return responseMap;
 	}*/
 
-	/**
-	 * 创建圈子
-	 * 
-	 * @param userId
-	 * @param name
-	 * @param typeNameId
-	 * @param tags
-	 * @param description
-	 * @param picture
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/createCoterie", method = RequestMethod.POST)
+	@ApiOperation(value = "创建圈子", httpMethod = "POST", notes = "创建圈子")
+	@PostMapping(value = "/createCoterie")
 	public Map<String, Object> createCoterie(@RequestParam("userId") int userId, 
 			@RequestParam("name") String name,
 			@RequestParam("tags") String tags, 
@@ -794,18 +738,8 @@ public class WechatController {
 		return responseMap;
 	}
 	
-	/**
-	 * 编辑圈子
-	 * @param userId
-	 * @param coterieId
-	 * @param name
-	 * @param tags
-	 * @param description
-	 * @param serverId
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/editCoterie", method = RequestMethod.POST)
+	@ApiOperation(value = "编辑圈子", httpMethod = "POST", notes = "编辑圈子")
+	@PostMapping(value = "/editCoterie")
 	public Map<String, Object> editCoterie(@RequestParam("userId") int userId, 
 			@RequestParam("coterieId") int coterieId,
 			@RequestParam(name = "name", required = false) String name, 
@@ -916,8 +850,8 @@ public class WechatController {
 		return responseMap;
 	}
 	
-	@ResponseBody
-	@RequestMapping(value = "/dismissCoterie", method = RequestMethod.GET)
+	@ApiOperation(value = "解散圈子", httpMethod = "GET", notes = "解散圈子")
+	@GetMapping(value = "/dismissCoterie")
 	public Map<String, Object> dismissCoterie(@RequestParam("userId") int userId, @RequestParam("coterieId") int coterieId) {
 		logger.info("=====> Start to dismiss coterie <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -960,8 +894,8 @@ public class WechatController {
 		return responseMap;
 	}
 	
-	@ResponseBody
-	@RequestMapping(value = "/getCoterieCarouselPictures", method = RequestMethod.GET)
+	@ApiOperation(value = "解散圈子", httpMethod = "GET", notes = "解散圈子")
+	@GetMapping(value = "/getCoterieCarouselPictures")
 	public Map<String, Object> getCoterieCarouselPictures() {
 		logger.info("=====> Start to get coterie carousel pictures <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -984,16 +918,8 @@ public class WechatController {
 		return responseMap;
 	}
 
-	/**
-	 * 加入/退出圈子
-	 * 
-	 * @param userId
-	 * @param coterieId
-	 * @param isJoin
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/joinCoterie", method = RequestMethod.POST)
+	@ApiOperation(value = "加入/退出圈子", httpMethod = "POST", notes = "加入/退出圈子")
+	@PostMapping(value = "/joinCoterie")
 	public Map<String, Object> joinCoterie(@RequestParam("userId") int userId, @RequestParam("coterieId") int coterieId,
 			@RequestParam("isJoin") boolean isJoin) {
 		logger.info("=====> Start to join coterie <=====");
@@ -1036,17 +962,8 @@ public class WechatController {
 		return responseMap;
 	}
 
-	/**
-	 * 获取圈子列表
-	 * 
-	 * @param tags
-	 * @param pageSize
-	 * @param startRow
-	 * @param orderBy
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/getCoterieList", method = RequestMethod.GET)
+	@ApiOperation(value = "获取圈子列表", httpMethod = "GET", notes = "获取圈子列表")
+	@GetMapping(value = "/getCoterieList")
 	public Map<String, Object> getCoterieList(
 			@RequestParam(name = "firstLevelTagId", required = false) Integer firstLevelTagId,
 			@RequestParam(name = "secondLevelTagIds", required = false) String secondLevelTagIds,
@@ -1123,13 +1040,8 @@ public class WechatController {
 		return responseMap;
 	}
 	
-	/**
-	 * 获取圈子详情
-	 * @param coterieId
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/getCoterieInfo", method = RequestMethod.GET)
+	@ApiOperation(value = "获取圈子详情", httpMethod = "GET", notes = "获取圈子详情")
+	@GetMapping(value = "/getCoterieInfo")
 	public Map<String, Object> getCoterieInfo(@RequestParam("userId") int userId, @RequestParam("coterieId") int coterieId) {
 		logger.info("=====> Start to get coterie info <=====");
 		Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -1197,13 +1109,8 @@ public class WechatController {
 		return responseMap;
 	}
 	
-	/**
-	 * 获取圈子成员列表
-	 * @param coterieId
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/getCoterieMembers", method = RequestMethod.GET)
+	@ApiOperation(value = "获取圈子成员列表", httpMethod = "GET", notes = "获取圈子成员列表")
+	@GetMapping(value = "/getCoterieMembers")
 	public Map<String, Object> getCoterieMembers(@RequestParam("coterieId") int coterieId, 
 			@RequestParam(name = "start", required = false) Integer startRow, 
 			@RequestParam(name = "pageSize", required = false) Integer pageSize) {
@@ -1261,15 +1168,8 @@ public class WechatController {
 		return responseMap;
 	}
 	
-	/**
-	 * 切换消息免打扰
-	 * @param coterieId
-	 * @param userId
-	 * @param allowPush
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/changeCoteriePush", method = RequestMethod.GET)
+	@ApiOperation(value = "切换消息免打扰", httpMethod = "GET", notes = "切换消息免打扰")
+	@GetMapping(value = "/changeCoteriePush")
 	public Map<String, Object> changeCoteriePush(@RequestParam("coterieId") int coterieId, 
 			@RequestParam("userId") int userId, @RequestParam("allowPush") boolean allowPush) {
 		logger.info("=====> Start to change user coterie push setting <=====");
@@ -1291,15 +1191,8 @@ public class WechatController {
 		return responseMap;
 	}
 	
-	/**
-	 * 获取话题列表
-	 * @param coterieId
-	 * @param pageSize
-	 * @param startRow
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/getTopicList", method = RequestMethod.GET)
+	@ApiOperation(value = "获取话题列表", httpMethod = "GET", notes = "获取话题列表")
+	@GetMapping(value = "/getTopicList")
 	public Map<String, Object> getTopicList(@RequestParam("coterieId") int coterieId,
 			@RequestParam("userId") int userId,
 			@RequestParam(name = "pageSize", required = false) Integer pageSize,
@@ -1401,14 +1294,8 @@ public class WechatController {
 		return responseMap;
 	}
 
-	/**
-	 * 搜索圈子/话题
-	 * 
-	 * @param keyword
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/searchActivityOrTopic", method = RequestMethod.GET)
+	@ApiOperation(value = "搜索圈子/话题", httpMethod = "GET", notes = "搜索圈子/话题")
+	@GetMapping(value = "/searchActivityOrTopic")
 	public Map<String, Object> searchActivityOrTopic(@RequestParam("keyword") String keyword) {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try {
@@ -1462,15 +1349,11 @@ public class WechatController {
 		return responseMap;
 	}
 
-	/**
-	 * 我的圈子
-	 * 
-	 * @param dataType
-	 *            1：我创建的 2：我参与的
-	 * @return
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/getMyCoteries", method = RequestMethod.GET)
+	@ApiOperation(value = "我的圈子", httpMethod = "GET", notes = "我的圈子")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "dataType", value = "'1'：我创建的 '2'：我参与的", required = false, paramType = "query", dataType = "String")
+	})
+	@GetMapping(value = "/getMyCoteries")
 	public Map<String, Object> getMyCoteries(@RequestParam("userId") int userId,
 			@RequestParam(name = "keyword", required = false) String keyword,
 			@RequestParam(name = "dataType", required = false) String dataType,
@@ -1522,12 +1405,8 @@ public class WechatController {
 		return responseMap;
 	}
 	
-	 /**
-     * 获取活动类型（一级标签）
-     * @return
-     */
-    @ResponseBody
-	@RequestMapping(value = "/getActivityType")
+	@ApiOperation(value = "获取活动类型（一级标签）", httpMethod = "GET", notes = "获取活动类型（一级标签）")
+	@GetMapping(value = "/getActivityType")
 	public Map<String, Object> getActivityType(@RequestParam(name = "fixed", required = false) Boolean fixed) {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try{
@@ -1571,13 +1450,8 @@ public class WechatController {
 		return responseMap;
 	}
     
-	/**
-     * 获取标签列表
-     * @param parentId
-     * @return
-     */
-    @ResponseBody
-	@RequestMapping(value = "/getTagList")
+	@ApiOperation(value = "获取标签列表", httpMethod = "GET", notes = "获取标签列表")
+	@GetMapping(value = "/getTagList")
 	public Map<String, Object> getTagList(@RequestParam(name = "parentId", required = false) Integer parentId) {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try{
@@ -1633,8 +1507,8 @@ public class WechatController {
      * @param phoneNo				手机号
      * @return
      */
-    @ResponseBody
-    @RequestMapping(value = "/launchActivity", method = RequestMethod.POST)
+	@ApiOperation(value = "发起活动", httpMethod = "POST", notes = "发起活动")
+	@PostMapping(value = "/launchActivity")
     public Map<String, Object> launchActivity(
     		@RequestParam("userId") int userId,
     		@RequestParam(name = "coterieId",required = false) Integer coterieId,
@@ -1875,8 +1749,8 @@ public class WechatController {
      * @param phoneNo
      * @return
      */
-    @ResponseBody
-    @RequestMapping(value = "/editActivity", method = RequestMethod.POST)
+	@ApiOperation(value = "编辑活动", httpMethod = "POST", notes = "编辑活动")
+	@PostMapping(value = "/editActivity")
     public Map<String, Object> editActivity(
     		@RequestParam("userId") int userId,
     		@RequestParam("activityId") int activityId,
@@ -2022,15 +1896,8 @@ public class WechatController {
         return resultMap;
     }
     
-    /**
-     * 获取活动列表，可分页，搜索
-     * @param startRow
-     * @param keyword
-     * @param pageSize
-     * @return
-     */
-    @ResponseBody
-	@RequestMapping(value = "/getActivityList", method = RequestMethod.GET)
+	@ApiOperation(value = "获取活动列表", httpMethod = "GET", notes = "获取活动列表")
+	@GetMapping(value = "/getActivityList")
 	public Map<String, Object> getActivityList(
 			@RequestParam(name = "keyword", required = false) String keyword,
 			@RequestParam(name = "start", required = false) Integer startRow,
@@ -2128,13 +1995,8 @@ public class WechatController {
 		return responseMap;
 	}
     
-    /**
-     * 获取活动详情
-     * @param activityId
-     * @return
-     */
-    @ResponseBody
-	@RequestMapping(value = "/getActivityInfo", method = RequestMethod.GET)
+	@ApiOperation(value = "获取活动详情", httpMethod = "GET", notes = "获取活动详情")
+	@GetMapping(value = "/getActivityInfo")
 	public Map<String, Object> getActivityInfo(@RequestParam(name = "userId") int userId, @RequestParam(name = "activityId") int activityId) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
@@ -2256,16 +2118,8 @@ public class WechatController {
 		return resultMap;
 	}
     
-    /**
-     * 修改活动信息
-     * @param activityId
-     * @param minCount
-     * @param maxCount
-     * @param allowSignUp
-     * @return
-     */
-    @ResponseBody
-   	@RequestMapping(value = "/updateActivityInfo", method = RequestMethod.POST)
+	@ApiOperation(value = "修改活动信息", httpMethod = "POST", notes = "修改活动信息")
+	@PostMapping(value = "/updateActivityInfo")
    	public Map<String, Object> updateActivityInfo(@RequestParam("activityId") int activityId, 
    			@RequestParam(name = "minCount", required = false) Integer minCount, 
    			@RequestParam(name = "maxCount", required = false) Integer maxCount,
@@ -2318,13 +2172,8 @@ public class WechatController {
    		return resultMap;
    	}
     
-    /**
-     * 关闭活动
-     * @param activityId
-     * @return
-     */
-    @ResponseBody
-   	@RequestMapping(value = "/closeActivity", method = RequestMethod.GET)
+	@ApiOperation(value = "关闭活动", httpMethod = "GET", notes = "关闭活动")
+	@GetMapping(value = "/closeActivity")
    	public Map<String, Object> closeActivity(@RequestParam("activityId") int activityId) {
    		Map<String, Object> resultMap = new HashMap<String, Object>();
    		try {
@@ -2367,8 +2216,8 @@ public class WechatController {
    		return resultMap;
    	}
     
-    @ResponseBody
-	@RequestMapping(value = "/getMyActivityList", method = RequestMethod.GET)
+	@ApiOperation(value = "我的活动列表", httpMethod = "GET", notes = "我的活动列表")
+	@GetMapping(value = "/getMyActivityList")
 	public Map<String, Object> getMyActivityList(
 			@RequestParam("userId") int userId, 
 			@RequestParam(name = "dataType", required = false) String dataType, 
@@ -2469,8 +2318,8 @@ public class WechatController {
      * @param content
      * @return
      */
-    @ResponseBody
-	@RequestMapping(value = "/createActivityTopic", method = RequestMethod.POST)
+	@ApiOperation(value = "创建活动群聊", httpMethod = "POST", notes = "创建活动群聊")
+	@PostMapping(value = "/createActivityTopic")
 	public Map<String, Object> createActivityTopic(@RequestParam("userId") int userId, @RequestParam("activityId") int activityId,
 			@RequestParam("description") String description) {
 		logger.info("=====> Start to create activity topic <=====");
@@ -2514,13 +2363,8 @@ public class WechatController {
 		return responseMap;
 	}
     
-    /**
-     * 1.9	获取活动留言详情
-     * @param topicId
-     * @return
-     */
-    @ResponseBody
-   	@RequestMapping(value = "/getActivityTopic", method = RequestMethod.GET)
+	@ApiOperation(value = "获取活动群聊详情", httpMethod = "GET", notes = "获取活动群聊详情")
+	@GetMapping(value = "/getActivityTopic")
    	public Map<String, Object> getActivityTopic(@RequestParam("topicId") int topicId, @RequestParam("userId") int userId) {
    		logger.info("=====> Start to get activity topic <=====");
    		Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -2626,13 +2470,8 @@ public class WechatController {
    		return responseMap;
    	}
     
-    /**
-     * 获取留言评论列表
-     * @param topicId
-     * @return
-     */
-    @ResponseBody
-   	@RequestMapping(value = "/getTopicCommentList", method = RequestMethod.GET)
+	@ApiOperation(value = "获取话题评论", httpMethod = "GET", notes = "获取话题评论")
+	@GetMapping(value = "/getTopicCommentList")
    	public Map<String, Object> getTopicCommentList(@RequestParam("topicId") int topicId) {
    		logger.info("=====> Start to get topic comment list <=====");
    		Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -2672,8 +2511,8 @@ public class WechatController {
    		return responseMap;
    	}
     
-    @ResponseBody
-   	@RequestMapping(value = "/getTopicPraiseList", method = RequestMethod.GET)
+	@ApiOperation(value = "获取点赞列表", httpMethod = "GET", notes = "获取点赞列表")
+	@GetMapping(value = "/getTopicPraiseList")
    	public Map<String, Object> getTopicPraiseList(@RequestParam("topicId") int topicId) {
    		logger.info("=====> Start to get topic parise list <=====");
    		Map<String, Object> responseMap = new HashMap<String, Object>();
@@ -2711,15 +2550,8 @@ public class WechatController {
    		return responseMap;
    	}
     
-    /**
-     * 话题评论
-     * @param userId
-     * @param topicId
-     * @param content
-     * @return
-     */
-    @ResponseBody
-	@RequestMapping(value = "/commentTopic", method = RequestMethod.POST)
+	@ApiOperation(value = "话题评论", httpMethod = "POST", notes = "话题评论")
+	@PostMapping(value = "/commentTopic")
 	public Map<String, Object> commentTopic(@RequestParam(name = "userId") int userId,
 			@RequestParam(name = "topicId") int topicId,
 			@RequestParam(name = "comment") String content) {
@@ -2772,14 +2604,8 @@ public class WechatController {
 		return responseMap;
 	}
     
-    /**
-     * 话题点赞
-     * @param userId
-     * @param topicId
-     * @return
-     */
-    @ResponseBody
-	@RequestMapping(value = "/praiseTopic")
+	@ApiOperation(value = "话题点赞", httpMethod = "GET", notes = "话题点赞")
+	@PostMapping(value = "/praiseTopic")
 	public Map<String, Object> praiseTopic(@RequestParam("userId")int userId, @RequestParam("topicId")int topicId) {
 		Map<String, Object> responseMap = new HashMap<String, Object>();
 		try{
@@ -2819,8 +2645,8 @@ public class WechatController {
      * @param 
      * @return
      */
-    @ResponseBody
-    @RequestMapping(value = "/signUp", method = RequestMethod.POST)
+	@ApiOperation(value = "活动报名", httpMethod = "POST", notes = "活动报名")
+	@PostMapping(value = "/signUp")
     public Map<String, Object> signUp(@RequestParam(name = "activityId") int activityId,
     		@RequestParam("userId") int userId,
     		@RequestParam("realName") String realName,
@@ -2927,6 +2753,22 @@ public class WechatController {
             activityService.saveEvent(event);
             activityService.refresh(event);
             
+            Coterie coterie = event.getCoterie();
+            String accessToken = wxMpService.getWxAccessToken();
+            // 活动报名成功，自动关注圈子
+            
+            // 判断是否加入圈子
+            boolean hasJoin = discoverService.checkExistCoterieGuy(coterie.getId(), user.getId());
+            if (!hasJoin) {
+            	int nextOrderNo = coterie.getCoterieGuyNextOrderNo();
+    			CoterieGuy coterieGuy = new CoterieGuy(coterie, nextOrderNo, user, new Date(), false, true);
+    			discoverService.saveCoterieGuy(coterieGuy);
+    			
+    			if (StringUtils.isNotBlank(accessToken)) {
+    				WxRequestHelper.sendCoterieJoinMsg(accessToken, coterie, user);
+    			}
+			}
+            
             Map<String, Object> result = new HashMap<String, Object>();
             result.put("activityId", activityId);
             
@@ -2950,7 +2792,6 @@ public class WechatController {
 			}
             result.put("activityMembers", activityMembers);
             
-            Coterie coterie = event.getCoterie();
             if (coterie != null) {
             	Map<String, Object> coterieMap = new HashMap<String, Object>();
             	coterieMap.put("id", coterie.getId());
@@ -2966,7 +2807,7 @@ public class WechatController {
 			result.put("userCount", countMap);
 			
 			// 报名成功给用户发送通知
-			String accessToken = wxMpService.getWxAccessToken();
+//			String accessToken = wxMpService.getWxAccessToken();
 			if (StringUtils.isNotBlank(accessToken)) {
 				WxRequestHelper.sendActivitySignUpToUser(accessToken, event, fristeventUser);
 //				WxRequestHelper.sendActivitySignUpToCreator(accessToken, event, fristeventUser);
@@ -2992,14 +2833,8 @@ public class WechatController {
         return resultMap;
     }
     
-    /**
-     * 取消报名
-     * @param activityId
-     * @param userId
-     * @return
-     */
-    @ResponseBody
-    @RequestMapping(value = "/signOut", method = RequestMethod.POST)
+	@ApiOperation(value = "取消报名", httpMethod = "POST", notes = "取消报名")
+	@PostMapping(value = "/signOut")
     public Map<String, Object> signOut(@RequestParam(name = "activityId") int activityId,
     		@RequestParam("userId") int userId) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -3045,13 +2880,8 @@ public class WechatController {
         return resultMap;
     }
     
-    /**
-     * 获取活动成员信息
-     * @param activityId
-     * @return
-     */
-    @ResponseBody
-    @RequestMapping(value = "/getActivityMembers", method = RequestMethod.GET)
+	@ApiOperation(value = "获取活动成员信息", httpMethod = "GET", notes = "获取活动成员信息")
+	@GetMapping(value = "/getActivityMembers")
     public Map<String, Object> getActivityMembers(@RequestParam(name = "userId") int userId, @RequestParam(name = "activityId") int activityId) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         try {
@@ -3132,8 +2962,8 @@ public class WechatController {
         return resultMap;
     }
     
-    @ResponseBody
-	@RequestMapping(value = "/sendCode", method = RequestMethod.GET)
+	@ApiOperation(value = "发送验证码", httpMethod = "GET", notes = "发送验证码")
+	@GetMapping(value = "/sendCode")
 	public Map<String, Object> sendCode(@RequestParam(name = "phoneno") String phoneNo) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		logger.info("=====> Start to send verify no <=====");
@@ -3207,14 +3037,8 @@ public class WechatController {
 		return resultMap;
 	}
     
-    /**
-     * 发送活动短信通知
-     * @param activityId
-     * @param userId
-     * @return
-     */
-    @ResponseBody
-	@RequestMapping(value = "/sendActivityNotification", method = RequestMethod.GET)
+	@ApiOperation(value = "发送活动短信通知", httpMethod = "GET", notes = "发送活动短信通知")
+	@GetMapping(value = "/sendActivityNotification")
 	public Map<String, Object> sendActivityNotification(@RequestParam("activityId") int activityId, @RequestParam("userId") int userId) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		logger.info("=====> Start to send activity notification <=====");
@@ -3262,8 +3086,8 @@ public class WechatController {
 		return resultMap;
 	}
     
-    @ResponseBody
-    @RequestMapping(value = "/getSignInfo", method = RequestMethod.GET)
+	@ApiOperation(value = "获取报名信息", httpMethod = "GET", notes = "获取报名信息")
+	@GetMapping(value = "/getSignInfo")
     public Map<String, Object> getSignInfo(@RequestParam(name = "userId") int userId, @RequestParam(name = "activityId") int activityId) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         try {
@@ -3312,14 +3136,9 @@ public class WechatController {
         }
         return resultMap;
     }
-    /**
-     * 活动密码校验
-     * @param activityId
-     * @param password
-     * @return
-     */
-    @ResponseBody
-   	@RequestMapping(value = "/validActivityPassword", method = RequestMethod.GET)
+
+	@ApiOperation(value = "活动密码校验", httpMethod = "GET", notes = "活动密码校验")
+	@GetMapping(value = "/validActivityPassword")
    	public Map<String, Object> validActivityPassword(@RequestParam("activityId") int activityId,
    			@RequestParam(name = "password") String password) {
    		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -3353,7 +3172,6 @@ public class WechatController {
 	}
 	
 	@ApiOperation(value = "更新图文素材", httpMethod = "PUT", notes = "更新图文素材")
-	@ResponseBody
 	@PutMapping(value = "/updateNewsMaterial")
 	public Map<String, Object> updateNewsMaterial() {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -3422,7 +3240,6 @@ public class WechatController {
 	}
 	
 	@ApiOperation(value = "群发图文消息", httpMethod = "POST", notes = "群发图文消息")
-	@ResponseBody
 	@PostMapping(value = "/sendAllNews")
 	public Map<String, Object> sendAllNews(@RequestParam("mediaId") String mediaId) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -3458,7 +3275,6 @@ public class WechatController {
 		return resultMap;
 	}
 	
-	@ResponseBody
 	@GetMapping(value = "/test")
 	public void test(@RequestParam("id") int id) {
 		User user = (User) request.getSession().getAttribute(User.CURRENT_USER);

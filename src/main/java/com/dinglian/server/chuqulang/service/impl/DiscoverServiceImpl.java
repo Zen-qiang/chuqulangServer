@@ -120,4 +120,14 @@ public class DiscoverServiceImpl implements DiscoverService {
 		return coterieDao.getCoterieMembers(coterieId, start, limit);
 	}
 
+	@Override
+	public boolean checkExistCoterieGuy(int coterieId, int userId) {
+		// TODO Auto-generated method stub
+		CoterieGuy coterieGuy = coterieDao.getCoterieGuy(coterieId, userId);
+		if (coterieGuy == null) {
+			return false;
+		}
+		return true;
+	}
+
 }

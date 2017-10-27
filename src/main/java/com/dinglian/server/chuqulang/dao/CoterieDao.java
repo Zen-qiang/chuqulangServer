@@ -29,4 +29,6 @@ public interface CoterieDao extends GenericDao<Coterie> {
 
 	List<CoterieGuy> getCoterieMembers(int coterieId, int start, int limit);
 
+	CoterieGuy getCoterieGuy(int coterieId, int userId);
+
 }

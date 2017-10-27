@@ -172,4 +172,11 @@ public class CoterieDaoImpl extends AbstractHibernateDao<Coterie> implements Cot
 		return query.list();
 	}
 
+	@Override
+	public CoterieGuy getCoterieGuy(int coterieId, int userId) {
+		String sql = "SELECT * FROM coterie_guy WHERE fk_coterie_id = :coterieId AND fk_user_id = :userId ";
+		return  (CoterieGuy) getCurrentSession().createSQLQuery(sql).addEntity(CoterieGuy.class)
+				.setInteger("coterieId", coterieId).setInteger("userId", userId).uniqueResult();
+	}
+
 }
