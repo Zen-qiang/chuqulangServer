@@ -16,14 +16,15 @@ public class RequestInterceptor implements HandlerInterceptor{
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-//		logger.info("=======> Access-Control-Allow-Origin <======= ");
-		response.setHeader("Access-Control-Allow-Origin", "*");
-//		response.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1:8080");
+		/*response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
-//		response.setHeader("Access-Control-Max-Age", "1000");
 		response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//		response.setHeader("Content-Type", "application/json");
-		response.setHeader("Access-Control-Allow-Credentials","true");
+		response.setHeader("Access-Control-Allow-Credentials","true");*/
+
+		response.setHeader("Access-Control-Allow-Headers", "X-Requested-With, accept, content-type, xxxx");
+		response.setHeader("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, DELETE, TRACE, OPTIONS, PATCH");
+		response.setHeader("Access-Control-Allow-Origin", request.getHeader("origin"));
+		response.setHeader("Access-Control-Allow-Credentials", "true");
 
 		// 解决字符乱码
 		response.setCharacterEncoding("utf-8");

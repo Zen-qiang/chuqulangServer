@@ -1,35 +1,14 @@
 package com.dinglian.server.chuqulang.utils;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Random;
-import java.util.UUID;
-
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.http.Consts;
-import org.apache.http.HttpEntity;
-import org.apache.http.ParseException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-
-import com.dahantc.api.commons.EncryptUtil;
 import com.dahantc.api.sms.json.JSONHttpClient;
 import com.dahantc.api.sms.json.SmsData;
 import com.dinglian.server.chuqulang.base.ApplicationConfig;
 import com.dinglian.server.chuqulang.model.Event;
 import com.dinglian.server.chuqulang.model.EventUser;
 import com.dinglian.server.chuqulang.model.VerifyNo;
+import org.apache.commons.httpclient.URIException;
 
-import net.sf.json.JSONObject;
+import java.util.*;
 
 public class CodeUtils {
 	
